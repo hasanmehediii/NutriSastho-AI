@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 export type LandingLanguage = "en" | "bn";
 export type LandingTheme = "light" | "dark";
@@ -62,9 +63,11 @@ export function LandingNavbar({
     <header className="fixed left-0 right-0 top-4 z-50 px-4">
       <nav className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-[color:var(--border)] bg-[color:var(--surface)]/88 px-4 py-3 shadow-[var(--shadow)] backdrop-blur-xl sm:px-5">
         <a href="#" className="flex items-center gap-3" aria-label={copy.product}>
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--primary)] text-sm font-black text-white">
-            NS
-          </span>
+          <img
+              src="/icon.png"
+              alt="NutriSastho AI"
+              className="h-10 w-10 rounded-full object-cover"
+            />
           <span className="text-base font-bold text-[color:var(--foreground)] sm:text-lg">
             {copy.product}
           </span>

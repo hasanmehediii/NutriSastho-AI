@@ -3,6 +3,9 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "NutriSastho AI",
+  icons: {
+    icon: "icon.png",
+  },
   description:
     "A Bangladesh-focused AI health and nutrition companion for budget-aware care.",
 };
