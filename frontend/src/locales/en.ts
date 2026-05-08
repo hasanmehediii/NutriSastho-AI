@@ -10,7 +10,7 @@ export const en: Translations = {
       { label: "Demo", href: "#demo" },
     ],
     login: "Sign in",
-    cta: "Start demo",
+    cta: "Get Started",
     languageToggle: "বাং",
     openMenu: "Open menu",
     closeMenu: "Close menu",

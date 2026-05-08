@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 
 export type Theme = "light" | "dark";
 
@@ -16,6 +23,9 @@ const ThemeContext = createContext<ThemeContextValue>({
   toggleTheme: () => {},
 });
 
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 export function applyTheme(theme: Theme) {
   const root = document.documentElement;
   if (theme === "dark") {
@@ -27,17 +37,24 @@ export function applyTheme(theme: Theme) {
 }
 
 function readStoredTheme(): Theme {
-  if (typeof window === "undefined") return "light";
   const stored = localStorage.getItem("sb-theme");
   if (stored === "dark" || stored === "light") return stored;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(readStoredTheme);
+  const [theme, setThemeState] = useState<Theme>("light");
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setThemeState(readStoredTheme());
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   // Keep the DOM in sync with the current state, including after hydration.
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     applyTheme(theme);
   }, [theme]);
 

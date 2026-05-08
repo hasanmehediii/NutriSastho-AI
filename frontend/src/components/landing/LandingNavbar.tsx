@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Languages, Menu, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
@@ -11,10 +14,13 @@ export function LandingNavbar() {
   const [scrolled, setScrolled] = useState(false);
 
   const { language, setLanguage } = useLanguage();
+  const pathname = usePathname();
   const t = useTranslation();
   const nav = t.nav;
   const nextLanguage = language === "en" ? "bn" : "en";
   const languageButtonLabel = language === "en" ? "বাং" : "EN";
+
+  const getSectionHref = (href: string) => (pathname === "/" ? href : `/${href}`);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -24,7 +30,6 @@ export function LandingNavbar() {
 
   const handleLanguageChange = () => {
     setLanguage(nextLanguage);
-    window.location.reload();
   };
 
   return (
@@ -37,22 +42,24 @@ export function LandingNavbar() {
             : "border-[color:var(--border)]/50 bg-[color:var(--surface)]/75 shadow-[0_2px_12px_rgba(0,0,0,0.06)]",
         ].join(" ")}
       >
-        <a href="#" className="group flex items-center gap-2.5">
-          <img
+        <Link href="/" className="group flex items-center gap-2.5">
+          <Image
             src="/icon.png"
             alt="NutriShastho AI"
+            width={32}
+            height={32}
             className="h-8 w-8 rounded-xl object-cover shadow-sm transition-transform duration-150 group-hover:scale-105"
           />
           <span className="hidden text-sm font-bold text-[color:var(--foreground)] sm:block">
             {nav.product}
           </span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main">
           {nav.links.map((link) => (
             <a
               key={link.href}
-              href={link.href}
+              href={getSectionHref(link.href)}
               className="rounded-xl px-3.5 py-2 text-sm font-medium text-[color:var(--muted)] transition-colors duration-150 hover:bg-[color:var(--surface-soft)] hover:text-[color:var(--foreground)]"
             >
               {link.label}
@@ -74,12 +81,6 @@ export function LandingNavbar() {
 
           <a
             href="/login"
-            className="rounded-xl border border-[color:var(--border)] px-3.5 py-2 text-sm font-semibold text-[color:var(--foreground)] transition-colors duration-150 hover:bg-[color:var(--surface-soft)]"
-          >
-            {nav.login}
-          </a>
-          <a
-            href="#demo"
             className="rounded-xl bg-[color:var(--primary)] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all duration-150 hover:bg-[color:var(--primary-strong)] hover:-translate-y-px active:translate-y-0"
           >
             {nav.cta}
@@ -116,7 +117,7 @@ export function LandingNavbar() {
             {nav.links.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
+                href={getSectionHref(link.href)}
                 onClick={() => setMenuOpen(false)}
                 className="rounded-xl px-4 py-2.5 text-sm font-semibold text-[color:var(--foreground)] transition-colors hover:bg-[color:var(--surface-soft)]"
               >
@@ -124,18 +125,11 @@ export function LandingNavbar() {
               </a>
             ))}
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[color:var(--border)] pt-3">
+          <div className="mt-3 border-t border-[color:var(--border)] pt-3">
             <a
               href="/login"
               onClick={() => setMenuOpen(false)}
-              className="rounded-xl border border-[color:var(--border)] px-4 py-2.5 text-center text-sm font-bold text-[color:var(--foreground)] transition-colors hover:bg-[color:var(--surface-soft)]"
-            >
-              {nav.login}
-            </a>
-            <a
-              href="#demo"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-xl bg-[color:var(--primary)] px-4 py-2.5 text-center text-sm font-bold text-white transition-all hover:bg-[color:var(--primary-strong)]"
+              className="block rounded-xl bg-[color:var(--primary)] px-4 py-2.5 text-center text-sm font-bold text-white transition-all hover:bg-[color:var(--primary-strong)]"
             >
               {nav.cta}
             </a>

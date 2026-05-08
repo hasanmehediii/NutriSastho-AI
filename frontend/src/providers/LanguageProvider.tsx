@@ -28,13 +28,20 @@ function applyLanguage(lang: Language) {
 }
 
 function readStoredLanguage(): Language {
-  if (typeof window === "undefined") return "en";
   const stored = localStorage.getItem("sb-language");
   return stored === "bn" ? "bn" : "en";
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(readStoredLanguage);
+  const [language, setLanguageState] = useState<Language>("en");
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setLanguageState(readStoredLanguage());
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   // Keep html[lang] in sync with the active locale.
   useEffect(() => {

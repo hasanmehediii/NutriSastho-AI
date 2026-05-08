@@ -14,6 +14,43 @@
   --muted: #5d6f66;
   --danger: #b42318;
   --shadow: 0 24px 80px rgb(22 55 38 / 12%);
+  --login-panel-bg: linear-gradient(
+    145deg,
+    #f4fbf6,
+    #e6f5eb 46%,
+    #fff4e4
+  );
+  --login-panel-grid: linear-gradient(
+      color-mix(in srgb, var(--primary) 22%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--primary) 22%, transparent) 1px,
+      transparent 1px
+    );
+  --login-panel-orb-primary: color-mix(
+    in srgb,
+    var(--accent-soft) 76%,
+    transparent
+  );
+  --login-panel-orb-secondary: color-mix(
+    in srgb,
+    var(--surface) 74%,
+    transparent
+  );
+  --login-panel-bottom: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--primary) 10%, transparent),
+    transparent
+  );
+  --login-panel-icon-bg: color-mix(in srgb, var(--surface) 76%, transparent);
+  --login-panel-icon-border: color-mix(
+    in srgb,
+    var(--primary) 25%,
+    transparent
+  );
+  --login-panel-icon-shadow: 0 8px 24px rgb(8 127 91 / 12%);
   color-scheme: light;
 }
 
@@ -32,6 +69,35 @@
   --muted: #a9bdb3;
   --danger: #ffb4a8;
   --shadow: 0 24px 80px rgb(0 0 0 / 36%);
+  --login-panel-bg: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--primary) 82%, #03120d),
+    #062015 48%,
+    #0f3325
+  );
+  --login-panel-grid: linear-gradient(
+      color-mix(in srgb, white 16%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, white 16%, transparent) 1px,
+      transparent 1px
+    );
+  --login-panel-orb-primary: color-mix(
+    in srgb,
+    var(--accent) 18%,
+    transparent
+  );
+  --login-panel-orb-secondary: rgb(255 255 255 / 8%);
+  --login-panel-bottom: linear-gradient(
+    to top,
+    rgb(0 0 0 / 28%),
+    transparent
+  );
+  --login-panel-icon-bg: rgb(255 255 255 / 12%);
+  --login-panel-icon-border: rgb(255 255 255 / 16%);
+  --login-panel-icon-shadow: 0 8px 24px rgb(0 0 0 / 18%);
   color-scheme: dark;
 }
 
