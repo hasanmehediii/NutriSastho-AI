@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7fbf8;
+  --foreground: #12221b;
+  --surface: #ffffff;
+  --surface-soft: #edf7f0;
+  --surface-muted: #e1eee5;
+  --border: #c9ddd0;
+  --primary: #087f5b;
+  --primary-strong: #056447;
+  --accent: #d98126;
+  --accent-soft: #fff0dd;
+  --muted: #5d6f66;
+  --danger: #b42318;
+  --shadow: 0 24px 80px rgb(22 55 38 / 12%);
+  color-scheme: light;
+}
+
+:root.dark,
+:root[data-theme="dark"] {
+  --background: #08110d;
+  --foreground: #effaf3;
+  --surface: #101d17;
+  --surface-soft: #142a21;
+  --surface-muted: #1c372c;
+  --border: #254a3b;
+  --primary: #6ee7b7;
+  --primary-strong: #a7f3d0;
+  --accent: #f7b267;
+  --accent-soft: #2b2116;
+  --muted: #a9bdb3;
+  --danger: #ffb4a8;
+  --shadow: 0 24px 80px rgb(0 0 0 / 36%);
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: "Inter", "Noto Sans Bengali", "Hind Siliguri", "Segoe UI",
+    Arial, Helvetica, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", "Noto Sans Bengali", "Hind Siliguri", "Segoe UI",
+    Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
