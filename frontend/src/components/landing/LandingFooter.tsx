@@ -58,9 +58,11 @@ export function LandingFooter({ language }: LandingFooterProps) {
         <div className="grid gap-10 lg:grid-cols-[1.2fr_2fr]">
           <div>
             <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-full bg-[color:var(--primary)] text-sm font-black text-white">
-                NS
-              </span>
+              <img
+                src="/icon.png"
+                alt="NutriSastho AI"
+                className="h-10 w-10 rounded-full object-cover"
+              />
               <span className="text-lg font-bold text-[color:var(--foreground)]">
                 NutriSastho AI
               </span>
