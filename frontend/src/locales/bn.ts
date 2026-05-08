@@ -10,7 +10,7 @@ export const bn: Translations = {
       { label: "ডেমো", href: "#demo" },
     ],
     login: "সাইন ইন",
-    cta: "ডেমো শুরু",
+    cta: "Get Started",
     languageToggle: "EN",
     openMenu: "মেনু খুলুন",
     closeMenu: "মেনু বন্ধ করুন",

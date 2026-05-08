@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Eye, EyeOff, ShieldCheck, Salad, MapPin, Lock } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { LanguageToggle } from "@/components/shared/LanguageToggle";
+import { LandingNavbar } from "@/components/landing/LandingNavbar";
 
 const featureIcons = [Salad, ShieldCheck, MapPin];
 
@@ -41,29 +39,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[color:var(--background)]">
-      {/* Left decorative panel */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-[color:var(--primary)] p-10 lg:flex lg:w-[46%] xl:w-[42%]">
-        {/* Grid overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(color-mix(in_srgb,white_12%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_srgb,white_12%,transparent)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:linear-gradient(to_bottom_right,black_30%,transparent_80%)]" />
-        {/* Radial glow */}
-        <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-white/8 blur-3xl" />
+    <div className="min-h-screen bg-[color:var(--background)]">
+      <LandingNavbar />
 
-        {/* Logo */}
-        <div className="relative z-10 flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-white/20 text-xs font-black text-white backdrop-blur-sm">
-            SB
-          </span>
-          <span className="text-lg font-bold text-white">NutriShastho AI</span>
-        </div>
+      <div className="flex min-h-screen flex-col gap-6 px-6 pb-8 pt-24 lg:flex-row lg:gap-0 lg:px-0 lg:pb-0">
+        {/* Left decorative panel */}
+        <div className="relative order-2 flex min-h-[420px] flex-col justify-between overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[image:var(--login-panel-bg)] p-6 sm:p-8 lg:order-1 lg:min-h-auto lg:w-[46%] lg:rounded-none lg:border-y-0 lg:border-l-0 lg:border-r lg:p-10 xl:w-[42%]">
+          {/* Grid overlay */}
+          <div className="absolute inset-0 bg-[image:var(--login-panel-grid)] bg-[size:40px_40px] opacity-45 [mask-image:linear-gradient(to_bottom_right,black_24%,transparent_82%)]" />
+          {/* Crisp accent layers */}
+          <div className="absolute -right-28 top-20 h-72 w-72 rounded-full border border-[color:var(--login-panel-icon-border)] bg-[color:var(--login-panel-orb-primary)] shadow-[0_0_70px_rgb(217_129_38/0.18)]" />
+          <div className="absolute bottom-16 left-10 h-44 w-44 rounded-full border border-[color:var(--login-panel-icon-border)] bg-[color:var(--login-panel-orb-secondary)] shadow-[0_0_50px_rgb(8_127_91/0.14)]" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-[image:var(--login-panel-bottom)]" />
 
         {/* Hero copy */}
         <div className="relative z-10">
-          <h1 className="text-4xl font-black leading-tight text-white xl:text-5xl">
+          <h1 className="text-3xl font-black leading-tight text-[color:var(--foreground)] sm:text-4xl xl:text-5xl">
             {a.heroHeadline}
           </h1>
-          <p className="mt-5 max-w-sm text-base leading-7 text-white/75">
+          <p className="mt-5 max-w-sm text-base leading-7 text-[color:var(--muted)]">
             {a.heroSubtext}
           </p>
 
@@ -72,10 +66,12 @@ export default function LoginPage() {
               const Icon = featureIcons[i];
               return (
                 <li key={point} className="flex items-center gap-4">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 text-white backdrop-blur-sm">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[color:var(--login-panel-icon-border)] bg-[color:var(--login-panel-icon-bg)] text-[color:var(--primary)] shadow-[var(--login-panel-icon-shadow)]">
                     <Icon size={17} strokeWidth={2} />
                   </span>
-                  <span className="text-sm font-semibold text-white/90">{point}</span>
+                  <span className="text-sm font-semibold text-[color:var(--foreground)]">
+                    {point}
+                  </span>
                 </li>
               );
             })}
@@ -83,35 +79,16 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom note */}
-        <p className="relative z-10 text-xs font-medium text-white/50">
+        <p className="relative z-10 text-xs font-medium text-[color:var(--muted)]">
           © 2026 NutriShastho AI · Built for accessible, ethical care
         </p>
       </div>
 
       {/* Right form panel */}
-      <div className="flex flex-1 flex-col">
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-5 sm:px-10">
-          {/* Mobile logo */}
-          <Link href="/" className="flex items-center gap-2.5 lg:hidden">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[color:var(--primary)] text-[10px] font-black text-white">
-              SB
-            </span>
-            <span className="text-sm font-bold text-[color:var(--foreground)]">
-              NutriShastho AI
-            </span>
-          </Link>
-          <div className="hidden lg:block" />
-
-          <div className="flex items-center gap-3">
-            <LanguageToggle size="sm" />
-            <ThemeToggle size="sm" />
-          </div>
-        </div>
-
+      <div className="order-1 flex flex-1 lg:order-2">
         {/* Centered form */}
-        <div className="flex flex-1 items-center justify-center px-6 py-8 sm:px-10">
-          <div className="w-full max-w-md">
+        <div className="flex flex-1 items-center justify-center py-4 sm:py-8 lg:px-10">
+          <div className="w-full max-w-md rounded-[28px] border border-[color:var(--border)] bg-[color:var(--surface)]/72 p-6 shadow-[var(--shadow)] sm:p-8 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
             {/* Heading */}
             <div className="mb-8">
               <h2 className="text-3xl font-black text-[color:var(--foreground)]">
@@ -250,6 +227,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

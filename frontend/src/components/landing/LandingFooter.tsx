@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export function LandingFooter() {
@@ -14,9 +15,11 @@ export function LandingFooter() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3">
-              <img
+              <Image
                 src="/icon.png"
                 alt="NutriShastho AI"
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded-full object-cover"
               />
               <span className="text-lg font-bold text-[color:var(--foreground)]">
