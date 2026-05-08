@@ -14,9 +14,11 @@ export function LandingFooter() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-full bg-[color:var(--primary)] text-sm font-black text-white">
-                SB
-              </span>
+              <img
+                src="/icon.png"
+                alt="NutriShastho AI"
+                className="h-10 w-10 rounded-full object-cover"
+              />
               <span className="text-lg font-bold text-[color:var(--foreground)]">
                 {nav.product}
               </span>

@@ -5,6 +5,9 @@ import { AppProviders } from "@/providers/AppProviders";
 
 export const metadata: Metadata = {
   title: "NutriShastho AI",
+  icons: {
+    icon: "icon.png",
+  },
   description:
     "A Bangladesh-focused AI health and nutrition companion for budget-aware care.",
 };

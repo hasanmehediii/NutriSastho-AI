@@ -38,9 +38,11 @@ export function LandingNavbar() {
         ].join(" ")}
       >
         <a href="#" className="group flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-xl bg-[color:var(--primary)] text-[11px] font-black text-white shadow-sm transition-transform duration-150 group-hover:scale-105">
-            SB
-          </span>
+          <img
+            src="/icon.png"
+            alt="NutriShastho AI"
+            className="h-8 w-8 rounded-xl object-cover shadow-sm transition-transform duration-150 group-hover:scale-105"
+          />
           <span className="hidden text-sm font-bold text-[color:var(--foreground)] sm:block">
             {nav.product}
           </span>
