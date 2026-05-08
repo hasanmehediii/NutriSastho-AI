@@ -1,8 +1,8 @@
-# Project Plan: ShasthoBudget AI
+# Project Plan: NutriShastho AI
 
 ## 1. Project Summary
 
-**ShasthoBudget AI** is an AI-enabled personal health and nutrition SaaS designed for Bangladesh. The platform helps users manage two connected parts of daily wellbeing:
+**NutriShastho AI** is an AI-enabled personal health and nutrition SaaS designed for Bangladesh. The platform helps users manage two connected parts of daily wellbeing:
 
 1. **Monthly health and food budget**
 2. **Basic health monitoring and early guidance**
@@ -32,7 +32,7 @@ Many people in Bangladesh struggle to maintain a healthy lifestyle because they 
 - When to visit a doctor
 - Which nearby clinic or hospital to choose
 
-Most health apps give generic advice. They often ignore local food habits, affordability, and low-resource realities. ShasthoBudget AI solves this by giving practical, explainable, budget-aware health and diet guidance.
+Most health apps give generic advice. They often ignore local food habits, affordability, and low-resource realities. NutriShastho AI solves this by giving practical, explainable, budget-aware health and diet guidance.
 
 ## 4. Target Users
 
