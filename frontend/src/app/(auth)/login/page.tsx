@@ -42,7 +42,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen bg-[color:var(--background)]">
-      {/* ── Left decorative panel ──────────────────────────── */}
+      {/* Left decorative panel */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-[color:var(--primary)] p-10 lg:flex lg:w-[46%] xl:w-[42%]">
         {/* Grid overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(color-mix(in_srgb,white_12%,transparent)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_srgb,white_12%,transparent)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:linear-gradient(to_bottom_right,black_30%,transparent_80%)]" />
@@ -88,7 +88,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* ── Right form panel ──────────────────────────────── */}
+      {/* Right form panel */}
       <div className="flex flex-1 flex-col">
         {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-5 sm:px-10">

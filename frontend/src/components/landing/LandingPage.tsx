@@ -22,7 +22,7 @@ export function LandingPage() {
       <LandingNavbar />
 
       <main>
-        {/* ── Hero ──────────────────────────────────────────── */}
+        {/* Hero */}
         <section className="relative overflow-hidden px-6 pb-16 pt-32 lg:px-8 lg:pb-24 lg:pt-36">
           {/* Gradient backgrounds */}
           <div className="absolute inset-0 bg-[linear-gradient(135deg,color-mix(in_srgb,var(--surface-soft)_94%,transparent),color-mix(in_srgb,var(--accent-soft)_62%,transparent)_48%,var(--background))]" />
@@ -213,7 +213,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── Features ──────────────────────────────────────── */}
+        {/* Features */}
         <section id="features" className="px-6 py-20 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-3xl">
@@ -249,7 +249,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── Workflow ──────────────────────────────────────── */}
+        {/* Workflow */}
         <section
           id="workflow"
           className="bg-[color:var(--surface-soft)] px-6 py-20 lg:px-8"
@@ -276,7 +276,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── Safety ────────────────────────────────────────── */}
+        {/* Safety */}
         <section id="safety" className="px-6 py-20 lg:px-8">
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2 lg:items-center">
             <div>
@@ -305,7 +305,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── Demo ──────────────────────────────────────────── */}
+        {/* Demo */}
         <section id="demo" className="px-6 pb-24 lg:px-8">
           <div className="mx-auto grid max-w-7xl gap-8 rounded-[36px] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow)] lg:grid-cols-[1.1fr_0.9fr] lg:p-10">
             <div>
