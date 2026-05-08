@@ -62,3 +62,18 @@ button,
 a {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Smooth theme transitions */
+html {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+body,
+.theme-transition {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
