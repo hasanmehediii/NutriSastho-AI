@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: psql_db
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - 7432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - db_network
+  pg_bouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: pg_bouncer
+    environment:
+      - DB_HOST=db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - AUTH_TYPE=scram-sha-256
+    ports:
+      - 6432:5432
+    depends_on:
+      - db
+    networks:
+      - db_network
+
+
+networks:
+  db_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${DOCKER_VOLUME_PATH}
+      o: bind
