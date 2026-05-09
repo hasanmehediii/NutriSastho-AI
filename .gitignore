@@ -9,3 +9,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+
+backend/.env
+backend/alembic.ini
+backend/.venv
+backend/**/__pycache__
+
+**/.DS_Store
+
