@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -44,27 +45,33 @@ function readStoredTheme(): Theme {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light");
+  const initialized = useRef(false);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setThemeState(readStoredTheme());
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  // Keep the DOM in sync with the current state, including after hydration.
+  // Read stored theme and apply it BEFORE the browser paints.
+  // On first mount we read from localStorage and apply immediately,
+  // skipping the default "light" application. On subsequent theme
+  // changes, we apply the new value normally.
   useIsomorphicLayoutEffect(() => {
+    if (!initialized.current) {
+      initialized.current = true;
+      const stored = readStoredTheme();
+      applyTheme(stored);
+      setThemeState(stored);
+      return;
+    }
     applyTheme(theme);
+  }, [theme]);
+
+  // Persist theme to localStorage whenever it changes
+  useEffect(() => {
+    if (initialized.current) {
+      localStorage.setItem("sb-theme", theme);
+    }
   }, [theme]);
 
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("sb-theme", theme);
-  }, [theme]);
 
   const toggleTheme = useCallback(() => {
     setThemeState((currentTheme) =>
