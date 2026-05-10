@@ -75,6 +75,9 @@ requires-dist = [
     { name = "uvicorn", specifier = ">=0.46.0" },
 ]
 
+[package.metadata.requires-dev]
+dev = []
+
 [[package]]
 name = "bcrypt"
 version = "5.0.0"
