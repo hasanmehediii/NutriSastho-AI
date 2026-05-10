@@ -20,8 +20,23 @@
               "icon": "lucide-file",
               "title": "Todo"
             }
+          },
+          {
+            "id": "6466f41a113916c1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Work Distribution.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Work Distribution"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -183,6 +198,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "6d1c792f0838985c",
-  "lastOpenFiles": []
+  "active": "6466f41a113916c1",
+  "lastOpenFiles": [
+    "Todo.md",
+    "Work Distribution.md"
+  ]
 }
