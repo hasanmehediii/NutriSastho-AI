@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   HeartPulse,
@@ -21,6 +22,7 @@ import {
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { Languages } from "lucide-react";
+import { useAuth } from "@/providers/AuthProvider";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", labelBn: "ড্যাশবোর্ড", icon: LayoutDashboard },
@@ -37,7 +39,15 @@ const navItems = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { language, setLanguage } = useLanguage();
+  const { logout } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+    router.refresh();
+  }
 
   return (
     <aside
@@ -109,6 +119,7 @@ export function AppSidebar() {
         {!collapsed && (
           <button
             type="button"
+            onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[color:var(--muted)] transition-colors hover:bg-[color:var(--surface-soft)] hover:text-[color:var(--danger)]"
           >
             <LogOut size={18} strokeWidth={1.8} />

@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, ShieldCheck, Salad, MapPin, Lock } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import { useAuth } from "@/providers/AuthProvider";
 
 const featureIcons = [Salad, ShieldCheck, MapPin];
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { user, loading: authLoading, login } = useAuth();
   const t = useTranslation();
   const a = t.auth;
 
@@ -16,6 +20,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace("/dashboard");
+    }
+  }, [authLoading, router, user]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,12 +40,16 @@ export default function LoginPage() {
       return;
     }
 
-    setLoading(true);
-    // Simulate auth — replace with real API call
-    await new Promise((r) => setTimeout(r, 1400));
-    setLoading(false);
-    // Navigate to dashboard after real auth
-    window.location.href = "/dashboard";
+    try {
+      setLoading(true);
+      await login({ email: email.trim(), password });
+      router.replace("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to sign in.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
