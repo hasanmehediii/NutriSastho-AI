@@ -1,0 +1,5 @@
+.vercel
+.env
+alembic.ini
+.venv
+**/__pycache__
