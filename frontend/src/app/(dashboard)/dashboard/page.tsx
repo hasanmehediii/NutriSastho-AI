@@ -1,12 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { HealthOverview, mockVitals } from "@/components/dashboard/HealthOverview";
+import { HealthOverview } from "@/components/dashboard/HealthOverview";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RiskStatusCard } from "@/components/dashboard/RiskStatusCard";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Wallet, TrendingUp } from "lucide-react";
+import { Wallet, TrendingUp, Thermometer, HeartPulse, Scale, Activity } from "lucide-react";
+import { useAuth } from "@/providers/AuthProvider";
+import { getHealthProfile } from "@/services/health.service";
+import type { HealthProfile } from "@/types/user";
 
 const recentActivity = [
   { time: "Today 9:15 AM", text: "Logged vitals: BP 150/96, Temp 98.6°F", type: "health" as const },
@@ -24,7 +28,90 @@ const activityBadge: Record<string, { variant: "green" | "yellow" | "red" | "blu
   family: { variant: "default", label: "Family" },
 };
 
+function buildVitals(profile: HealthProfile | null) {
+  const temp = profile?.temperature_f ?? null;
+  const bpSys = profile?.bp_systolic ?? null;
+  const bpDia = profile?.bp_diastolic ?? null;
+  const bmi = profile?.bmi ?? null;
+
+  // Determine BP trend
+  let bpTrend: "up" | "down" | "stable" = "stable";
+  let bpTrendText = "Normal";
+  if (bpSys !== null && bpSys >= 140) {
+    bpTrend = "up";
+    bpTrendText = "High";
+  } else if (bpSys !== null && bpSys < 90) {
+    bpTrend = "down";
+    bpTrendText = "Low";
+  }
+
+  // Determine temp trend
+  let tempTrend: "up" | "down" | "stable" = "stable";
+  let tempTrendText = "Normal";
+  if (temp !== null && temp >= 100.4) {
+    tempTrend = "up";
+    tempTrendText = "Fever";
+  }
+
+  // Determine BMI category
+  let bmiTrend: "up" | "down" | "stable" = "stable";
+  let bmiTrendText = "Normal";
+  if (bmi !== null) {
+    if (bmi >= 25) { bmiTrend = "up"; bmiTrendText = "Overweight"; }
+    else if (bmi < 18.5) { bmiTrend = "down"; bmiTrendText = "Underweight"; }
+  }
+
+  return [
+    {
+      label: "Body Temperature",
+      value: temp !== null ? temp.toString() : "—",
+      unit: "°F",
+      trend: tempTrend,
+      trendText: tempTrendText,
+      icon: Thermometer,
+      color: "#f59e0b",
+    },
+    {
+      label: "Blood Pressure",
+      value: bpSys !== null && bpDia !== null ? `${bpSys}/${bpDia}` : "—",
+      unit: "mmHg",
+      trend: bpTrend,
+      trendText: bpTrendText,
+      icon: HeartPulse,
+      color: "#ef4444",
+    },
+    {
+      label: "BMI",
+      value: bmi !== null ? bmi.toString() : "—",
+      unit: "kg/m²",
+      trend: bmiTrend,
+      trendText: bmiTrendText,
+      icon: Scale,
+      color: "#087f5b",
+    },
+    {
+      label: "Risk Score",
+      value: "—",
+      unit: "/ 100",
+      trend: "stable" as const,
+      trendText: "Pending",
+      icon: Activity,
+      color: "#f59e0b",
+    },
+  ];
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const [healthProfile, setHealthProfile] = useState<HealthProfile | null>(null);
+
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -32,16 +119,63 @@ export default function DashboardPage() {
     day: "numeric",
   });
 
+  useEffect(() => {
+    getHealthProfile()
+      .then(setHealthProfile)
+      .catch(() => {});
+  }, []);
+
+  const displayName = user?.full_name || user?.email?.split("@")[0] || "User";
+  const vitals = buildVitals(healthProfile);
+
+  // Compute a simple risk score from vitals
+  let riskScore = 0;
+  const riskFactors: string[] = [];
+  if (healthProfile) {
+    if (healthProfile.bp_systolic && healthProfile.bp_systolic >= 140) {
+      riskScore += 30;
+      riskFactors.push(`Blood pressure ${healthProfile.bp_systolic}/${healthProfile.bp_diastolic} mmHg — above normal`);
+    }
+    if (healthProfile.temperature_f && healthProfile.temperature_f >= 100.4) {
+      riskScore += 20;
+      riskFactors.push(`Body temperature ${healthProfile.temperature_f}°F — elevated`);
+    }
+    if (healthProfile.bmi && healthProfile.bmi >= 30) {
+      riskScore += 15;
+      riskFactors.push(`BMI ${healthProfile.bmi} — obese range`);
+    } else if (healthProfile.bmi && healthProfile.bmi >= 25) {
+      riskScore += 8;
+      riskFactors.push(`BMI ${healthProfile.bmi} — overweight range`);
+    }
+    if (healthProfile.conditions && healthProfile.conditions.length > 0) {
+      riskScore += healthProfile.conditions.length * 10;
+      riskFactors.push(`Existing conditions: ${healthProfile.conditions.join(", ")}`);
+    }
+    if (healthProfile.symptoms && healthProfile.symptoms.length > 0) {
+      riskScore += healthProfile.symptoms.length * 5;
+      riskFactors.push(`Active symptoms: ${healthProfile.symptoms.join(", ")}`);
+    }
+  }
+  riskScore = Math.min(riskScore, 100);
+  const riskLevel = riskScore <= 30 ? "low" : riskScore <= 65 ? "medium" : "high";
+  const riskRecommendation = riskScore === 0
+    ? "No health data submitted yet. Submit your vitals in Health Input to see your risk analysis."
+    : riskLevel === "low"
+      ? "Your health indicators look good. Continue monitoring and maintain a healthy lifestyle."
+      : riskLevel === "medium"
+        ? "Some health indicators need attention. Consider consulting a general physician within 48h."
+        : "Multiple health indicators are concerning. Please seek medical attention soon.";
+
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <DashboardHeader
-        name="Rahim"
-        greeting="Good morning"
+        name={displayName}
+        greeting={getGreeting()}
         date={today}
       />
 
       {/* Vitals overview */}
-      <HealthOverview vitals={mockVitals} />
+      <HealthOverview vitals={vitals} />
 
       {/* Quick actions */}
       <div>
@@ -54,14 +188,10 @@ export default function DashboardPage() {
       {/* Risk + Budget row */}
       <div className="grid gap-4 lg:grid-cols-2">
         <RiskStatusCard
-          score={58}
-          level="medium"
-          factors={[
-            "Blood pressure 150/96 mmHg — above normal",
-            "Salt-heavy meals in recent diet log",
-            "Mild headache reported yesterday",
-          ]}
-          recommendation="Recheck blood pressure in 24h. Consult a general physician within 48h if it stays above 140/90."
+          score={riskScore}
+          level={riskLevel}
+          factors={riskFactors.length > 0 ? riskFactors : ["No health data submitted yet"]}
+          recommendation={riskRecommendation}
         />
 
         {/* Budget summary */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   User,
   Thermometer,
@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
+import { useAuth } from "@/providers/AuthProvider";
+import { submitHealthProfile, getHealthProfile } from "@/services/health.service";
 
 const symptomsList = [
   "Fever",
@@ -45,29 +47,59 @@ const conditionsList = [
 ];
 
 export default function HealthInputPage() {
+  const { user } = useAuth();
+
   // Profile
-  const [age, setAge] = useState("32");
-  const [gender, setGender] = useState("male");
-  const [height, setHeight] = useState("170");
-  const [weight, setWeight] = useState("72");
-  const [bloodGroup, setBloodGroup] = useState("B+");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("");
   const [activityLevel, setActivityLevel] = useState("moderate");
   const [pregnancy, setPregnancy] = useState("no");
   const [allergies, setAllergies] = useState("");
 
   // Vitals
-  const [temperature, setTemperature] = useState("98.6");
-  const [bpSystolic, setBpSystolic] = useState("150");
-  const [bpDiastolic, setBpDiastolic] = useState("96");
+  const [temperature, setTemperature] = useState("");
+  const [bpSystolic, setBpSystolic] = useState("");
+  const [bpDiastolic, setBpDiastolic] = useState("");
   const [bloodSugar, setBloodSugar] = useState("");
 
   // Symptoms
-  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>(["Headache"]);
-  const [selectedConditions, setSelectedConditions] = useState<string[]>(["Hypertension"]);
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
 
   // UI
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [prefilling, setPrefilling] = useState(true);
+
+  // Pre-fill from existing health profile and user data
+  useEffect(() => {
+    if (user?.blood_group) setBloodGroup(user.blood_group);
+
+    getHealthProfile()
+      .then((profile) => {
+        if (profile) {
+          if (profile.age) setAge(String(profile.age));
+          if (profile.gender) setGender(profile.gender);
+          if (profile.height_cm) setHeight(String(profile.height_cm));
+          if (profile.weight_kg) setWeight(String(profile.weight_kg));
+          if (profile.activity_level) setActivityLevel(profile.activity_level);
+          if (profile.pregnancy_status) setPregnancy(profile.pregnancy_status);
+          if (profile.allergies) setAllergies(profile.allergies);
+          if (profile.temperature_f) setTemperature(String(profile.temperature_f));
+          if (profile.bp_systolic) setBpSystolic(String(profile.bp_systolic));
+          if (profile.bp_diastolic) setBpDiastolic(String(profile.bp_diastolic));
+          if (profile.blood_sugar) setBloodSugar(String(profile.blood_sugar));
+          if (profile.symptoms && profile.symptoms.length > 0) setSelectedSymptoms(profile.symptoms);
+          if (profile.conditions && profile.conditions.length > 0) setSelectedConditions(profile.conditions);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setPrefilling(false));
+  }, [user]);
 
   const bmi =
     height && weight
@@ -80,11 +112,43 @@ export default function HealthInputPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+
+    try {
+      await submitHealthProfile({
+        age: age ? parseInt(age) : null,
+        gender: gender || null,
+        height_cm: height ? parseFloat(height) : null,
+        weight_kg: weight ? parseFloat(weight) : null,
+        activity_level: activityLevel || null,
+        pregnancy_status: pregnancy || null,
+        allergies: allergies || null,
+        temperature_f: temperature ? parseFloat(temperature) : null,
+        bp_systolic: bpSystolic ? parseInt(bpSystolic) : null,
+        bp_diastolic: bpDiastolic ? parseInt(bpDiastolic) : null,
+        blood_sugar: bloodSugar ? parseFloat(bloodSugar) : null,
+        symptoms: selectedSymptoms,
+        conditions: selectedConditions.filter((c) => c !== "None"),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save health data.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (prefilling) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex items-center gap-3 text-[color:var(--muted)]">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--muted)]/30 border-t-[color:var(--primary)]" />
+          Loading your health profile...
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -94,6 +158,14 @@ export default function HealthInputPage() {
         <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/8 px-5 py-3 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
           <CheckCircle2 size={18} strokeWidth={2} />
           Health data saved successfully!
+        </div>
+      )}
+
+      {/* Error toast */}
+      {error && (
+        <div className="flex items-center gap-3 rounded-2xl border border-red-500/25 bg-red-500/8 px-5 py-3 text-sm font-semibold text-red-600 dark:text-red-400">
+          <AlertCircle size={18} strokeWidth={2} />
+          {error}
         </div>
       )}
 
@@ -125,6 +197,7 @@ export default function HealthInputPage() {
               value={gender}
               onChange={(e) => setGender(e.target.value)}
               options={[
+                { value: "", label: "Select gender" },
                 { value: "male", label: "Male" },
                 { value: "female", label: "Female" },
                 { value: "other", label: "Other" },
@@ -159,10 +232,13 @@ export default function HealthInputPage() {
               icon={<Droplets size={16} strokeWidth={2} />}
               value={bloodGroup}
               onChange={(e) => setBloodGroup(e.target.value)}
-              options={["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => ({
-                value: b,
-                label: b,
-              }))}
+              options={[
+                { value: "", label: "Select" },
+                ...["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => ({
+                  value: b,
+                  label: b,
+                })),
+              ]}
             />
             <Select
               id="activity"

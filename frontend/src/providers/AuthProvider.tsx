@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { AuthCredentials, AuthUser, RegisterPayload } from "@/types/user";
+import type { AuthCredentials, AuthUser, ProfileUpdatePayload, RegisterPayload } from "@/types/user";
 import * as authService from "@/services/auth.service";
 
 type AuthContextValue = {
@@ -18,6 +18,7 @@ type AuthContextValue = {
   register: (credentials: RegisterPayload) => Promise<AuthUser>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<AuthUser | null>;
+  updateProfile: (data: ProfileUpdatePayload) => Promise<AuthUser>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -66,9 +67,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateProfile = useCallback(async (data: ProfileUpdatePayload) => {
+    const updatedUser = await authService.updateProfile(data);
+    setUser(updatedUser);
+    return updatedUser;
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, refreshUser }),
-    [user, loading, login, register, logout, refreshUser],
+    () => ({ user, loading, login, register, logout, refreshUser, updateProfile }),
+    [user, loading, login, register, logout, refreshUser, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

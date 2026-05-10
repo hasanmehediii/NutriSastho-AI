@@ -19,6 +19,8 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
+import { useAuth } from "@/providers/AuthProvider";
+import { useEffect } from "react";
 
 const budgetBreakdown = [
   { name: "Rice & Staples", value: 1800, color: "#087f5b" },
@@ -43,10 +45,17 @@ const healthExpenses = [
 ];
 
 export default function BudgetPage() {
+  const { user } = useAuth();
   const [budget, setBudget] = useState("6000");
   const [familySize, setFamilySize] = useState("4");
   const [mealCount, setMealCount] = useState("3");
   const [market, setMarket] = useState("");
+
+  useEffect(() => {
+    if (user?.location) {
+      setMarket(user.location);
+    }
+  }, [user]);
 
   const totalBudget = parseInt(budget) || 0;
   const totalAllocation = budgetBreakdown.reduce((s, c) => s + c.value, 0);
@@ -120,7 +129,7 @@ export default function BudgetPage() {
 
           <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
             <div className="h-52 w-52 shrink-0">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
                 <PieChart>
                   <Pie
                     data={budgetBreakdown}
@@ -172,7 +181,7 @@ export default function BudgetPage() {
           <CardDescription>Track how your budget is being used each week</CardDescription>
 
           <div className="mt-4 h-52">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+            <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
               <BarChart data={weeklySpend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="week" tick={{ fontSize: 11, fill: "var(--muted)" }} />

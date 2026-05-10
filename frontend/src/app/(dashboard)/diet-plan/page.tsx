@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Utensils, Flame, Dumbbell, Leaf, Milk, RefreshCw, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Utensils, Flame, Dumbbell, Leaf, Milk, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
@@ -15,6 +15,8 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { getHealthProfile } from "@/services/health.service";
+import type { HealthProfile } from "@/types/user";
 
 const days = [
   { key: "sat", label: "Sat" },
@@ -40,7 +42,8 @@ type DayPlan = {
   dinner: Meal;
 };
 
-const weekPlan: Record<string, DayPlan> = {
+// Base standard plan
+const standardPlan: Record<string, DayPlan> = {
   sat: {
     breakfast: { name: "Breakfast", items: ["Roti (2)", "Egg bhurji", "Banana", "Tea"], cost: 45, calories: 380 },
     lunch: { name: "Lunch", items: ["Rice", "Dal", "Spinach (shak)", "Rui fish curry"], cost: 85, calories: 620 },
@@ -102,7 +105,44 @@ const mealColors: Record<string, string> = {
 
 export default function DietPlanPage() {
   const [activeDay, setActiveDay] = useState("sat");
-  const plan = weekPlan[activeDay];
+  const [profile, setProfile] = useState<HealthProfile | null>(null);
+  
+  useEffect(() => {
+    getHealthProfile().then(setProfile).catch(() => {});
+  }, []);
+
+  // Determine adjustments based on real profile data
+  let conditionWarning = null;
+  if (profile) {
+    const conditions = profile.conditions || [];
+    if (conditions.includes("Hypertension") || (profile.bp_systolic && profile.bp_systolic >= 140)) {
+      conditionWarning = {
+        type: "hypertension",
+        title: "Diet adjusted for High Blood Pressure",
+        desc: "Low salt, reduced processed foods, more vegetables and potassium-rich items like bananas.",
+      };
+    } else if (conditions.includes("Diabetes") || (profile.blood_sugar && profile.blood_sugar > 140)) {
+      conditionWarning = {
+        type: "diabetes",
+        title: "Diet adjusted for Blood Sugar",
+        desc: "Low glycemic index foods, reduced direct sugars, balanced complex carbohydrates.",
+      };
+    } else if (profile.bmi && profile.bmi >= 25) {
+      conditionWarning = {
+        type: "weight",
+        title: "Diet adjusted for Weight Management",
+        desc: "Caloric deficit, high protein, increased fiber to keep you full longer.",
+      };
+    } else {
+      conditionWarning = {
+        type: "healthy",
+        title: "Standard Balanced Diet",
+        desc: "A well-rounded diet tailored for general health and immunity maintenance.",
+      };
+    }
+  }
+
+  const plan = standardPlan[activeDay];
   const meals = [plan.breakfast, plan.lunch, plan.snack, plan.dinner];
   const totalCalories = meals.reduce((s, m) => s + m.calories, 0);
   const totalCost = meals.reduce((s, m) => s + m.cost, 0);
@@ -110,13 +150,32 @@ export default function DietPlanPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       {/* Health adjustment banner */}
-      <div className="flex items-center gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/8 px-5 py-3">
-        <AlertTriangle size={18} strokeWidth={2} className="shrink-0 text-amber-500" />
-        <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-          <span className="font-bold">Diet adjusted for high blood pressure:</span>{" "}
-          Low salt, reduced processed foods, more vegetables and potassium-rich items.
-        </p>
-      </div>
+      {conditionWarning ? (
+        conditionWarning.type === "healthy" ? (
+          <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/8 px-5 py-3">
+            <CheckCircle2 size={18} strokeWidth={2} className="shrink-0 text-emerald-500" />
+            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="font-bold">{conditionWarning.title}:</span>{" "}
+              {conditionWarning.desc}
+            </p>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/8 px-5 py-3">
+            <AlertTriangle size={18} strokeWidth={2} className="shrink-0 text-amber-500" />
+            <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+              <span className="font-bold">{conditionWarning.title}:</span>{" "}
+              {conditionWarning.desc}
+            </p>
+          </div>
+        )
+      ) : (
+        <div className="flex items-center gap-3 rounded-2xl border border-indigo-500/25 bg-indigo-500/8 px-5 py-3">
+          <AlertTriangle size={18} strokeWidth={2} className="shrink-0 text-indigo-500" />
+          <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+            Submit your health vitals in the Health Input section to get a personalized diet plan.
+          </p>
+        </div>
+      )}
 
       {/* Day tabs */}
       <div className="flex items-center justify-between gap-4">
