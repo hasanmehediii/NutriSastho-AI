@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Eye,
   EyeOff,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import { useAuth } from "@/providers/AuthProvider";
 
 const featureIcons = [Salad, ShieldCheck, MapPin];
 
@@ -52,6 +54,8 @@ const inputCls =
   "w-full rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-sm text-[color:var(--foreground)] placeholder-[color:var(--muted)] outline-none ring-0 transition-all duration-200 hover:border-[color:var(--primary)]/60 focus:border-[color:var(--primary)] focus:ring-3 focus:ring-[color:var(--primary)]/15";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { user, loading: authLoading, register } = useAuth();
   const t = useTranslation();
   const a = t.auth;
   const r = (t as Record<string, unknown>).register as Record<string, string> | undefined;
@@ -70,6 +74,12 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
 
   const passwordInfo = useMemo(() => evaluatePassword(password), [password]);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace("/dashboard");
+    }
+  }, [authLoading, router, user]);
 
   /* ─── Submit ─── */
   async function handleSubmit(e: React.FormEvent) {
@@ -105,11 +115,23 @@ export default function RegisterPage() {
       return;
     }
 
-    setLoading(true);
-    // Simulate — replace with real API call
-    await new Promise((res) => setTimeout(res, 1400));
-    setLoading(false);
-    window.location.href = "/login";
+    try {
+      setLoading(true);
+      await register({
+        email: email.trim(),
+        password,
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        bloodGroup,
+        location: location.trim(),
+      });
+      router.replace("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to create account.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
