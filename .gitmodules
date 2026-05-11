@@ -1,0 +1,3 @@
+[submodule "mcp_99bugsincode"]
+	path = mcp_99bugsincode
+	url = https://huggingface.co/spaces/JobaerTamim7/mcp_99bugsincode
