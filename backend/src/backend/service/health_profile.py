@@ -5,16 +5,12 @@ from sqlalchemy import select
 from uuid import UUID
 
 
+
 class HealthProfileService:
     def __init__(self, session: Session) -> None:
         self.session = session
 
     def create(self, user_id: UUID, data: HealthProfileCreate) -> HealthProfile:
-        # Compute BMI if height and weight are provided
-        bmi = None
-        if data.height_cm and data.weight_kg and data.height_cm > 0:
-            height_m = data.height_cm / 100
-            bmi = round(data.weight_kg / (height_m ** 2), 1)
 
         profile = HealthProfile(
             user_id=user_id,
@@ -22,7 +18,6 @@ class HealthProfileService:
             gender=data.gender,
             height_cm=data.height_cm,
             weight_kg=data.weight_kg,
-            bmi=bmi,
             activity_level=data.activity_level,
             pregnancy_status=data.pregnancy_status,
             allergies=data.allergies,
