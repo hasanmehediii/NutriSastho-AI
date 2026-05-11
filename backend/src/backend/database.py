@@ -5,7 +5,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-run_type = os.getenv("TYPE", "local")
+run_type = os.getenv("TYPE", "local").strip()
 DATABASE_URL = None
 if run_type == "remote":
     DATABASE_URL = os.getenv("DATABASE_URL_REMOTE")
