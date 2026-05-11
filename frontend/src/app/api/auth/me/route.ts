@@ -25,9 +25,8 @@ export async function GET() {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  if (result.user.email !== session.user.email || result.user.id !== session.user.id) {
-    await setSession({ ...session, user: result.user });
-  }
+  // Always sync session with latest backend data so full_name, phone, etc. stay fresh
+  await setSession({ ...session, user: result.user });
 
   return NextResponse.json({ user: result.user });
 }

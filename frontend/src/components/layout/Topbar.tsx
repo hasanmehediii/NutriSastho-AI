@@ -28,8 +28,14 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const { language } = useLanguage();
   const { user, logout } = useAuth();
   const title = pageTitles[pathname]?.[language] ?? "NutriShastho AI";
-  const userLabel = user?.email ?? "Account";
-  const initials = userLabel.slice(0, 2).toUpperCase();
+  const displayName = user?.full_name || user?.email || "Account";
+  const initials = displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase() || "U";
 
   async function handleLogout() {
     await logout();
@@ -85,7 +91,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             {initials}
           </div>
           <span className="hidden text-sm font-semibold text-[color:var(--foreground)] sm:block">
-            {userLabel}
+            {displayName}
           </span>
         </button>
       </div>

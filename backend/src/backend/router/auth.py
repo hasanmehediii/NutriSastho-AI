@@ -7,6 +7,7 @@ from backend.controller.auth import (
     read_current_user,
     refresh_access_token,
 )
+from backend.controller.user_profile import update_my_profile
 from backend.schema.auth import AuthResponse, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -20,6 +21,9 @@ router.post("/login", response_model=AuthResponse)(login_user)
 
 # GET /auth/me -> current authenticated user
 router.get("/me", response_model=UserOut)(read_current_user)
+
+# PUT /auth/profile -> update user profile fields
+router.put("/profile", response_model=UserOut)(update_my_profile)
 
 # POST /auth/refresh -> rotate tokens from refresh token
 router.post("/refresh", response_model=AuthResponse)(refresh_access_token)

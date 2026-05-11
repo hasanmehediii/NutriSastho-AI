@@ -18,6 +18,7 @@ import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useAuth } from "@/providers/AuthProvider";
 
 /* Dynamically import Leaflet (no SSR) */
 const MapContainer = dynamic(
@@ -199,9 +200,15 @@ const typeColors: Record<string, string> = {
 };
 
 export default function NearbyCarePage() {
+  const { user } = useAuth();
   const [filter, setFilter] = useState("all");
   const [location, setLocation] = useState("BRAC University, Mohakhali");
   const [mounted, setMounted] = useState(false);
+
+  // Set location from user profile on mount
+  useState(() => {
+    if (user?.location) setLocation(user.location);
+  });
 
   const filtered = useMemo(
     () => (filter === "all" ? clinics : clinics.filter((c) => c.type === filter)),
