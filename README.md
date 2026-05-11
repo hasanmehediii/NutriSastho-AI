@@ -1,11 +1,11 @@
----
-title: Mcp 99bugsincode
-emoji: 🚀
-colorFrom: red
-colorTo: pink
-sdk: docker
-pinned: false
-license: mit
----
+### Submodules
+path = mcp_99bugsincode
+url = https://huggingface.co/spaces/JobaerTamim7/mcp_99bugsincode
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+## Cloning Repo:
+
+```bash
+git clone https://github.com/hasanmehediii/99BugsInCode.git
+cd 99BugsInCode
+git submodule update --init --recursive
+```

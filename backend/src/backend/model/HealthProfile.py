@@ -1,7 +1,7 @@
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import String, Float, Integer, JSON, ForeignKey, DateTime
+from sqlalchemy import Numeric, String, Float, Integer, JSON, ForeignKey, DateTime, Computed, cast
 from sqlalchemy.sql import func
-from uuid import uuid4, UUID
+from uuid import uuid7, UUID
 from datetime import datetime
 from .Base import Base
 
@@ -9,7 +9,7 @@ from .Base import Base
 class HealthProfile(Base):
     __tablename__ = "health_profiles"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid7)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True, nullable=False)
 
     # Profile fields
@@ -17,7 +17,14 @@ class HealthProfile(Base):
     gender: Mapped[str | None] = mapped_column(String(20), nullable=True)
     height_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
     weight_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
-    bmi: Mapped[float | None] = mapped_column(Float, nullable=True)
+    bmi: Mapped[float | None] = mapped_column(
+        Float, 
+        Computed(
+            func.round(
+                cast(weight_kg / func.pow(height_cm / 100, 2), Numeric), 3
+            )
+        ),
+        nullable=True)
     activity_level: Mapped[str | None] = mapped_column(String(30), nullable=True)
     pregnancy_status: Mapped[str | None] = mapped_column(String(30), nullable=True)
     allergies: Mapped[str | None] = mapped_column(String(500), nullable=True)
