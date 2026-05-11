@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
+import { ChartFrame } from "@/components/ui/ChartFrame";
 import {
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer,
   Tooltip,
   BarChart,
   Bar,
@@ -20,7 +20,6 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useAuth } from "@/providers/AuthProvider";
-import { useEffect } from "react";
 
 const budgetBreakdown = [
   { name: "Rice & Staples", value: 1800, color: "#087f5b" },
@@ -50,15 +49,11 @@ export default function BudgetPage() {
   const [familySize, setFamilySize] = useState("4");
   const [mealCount, setMealCount] = useState("3");
   const [market, setMarket] = useState("");
-
-  useEffect(() => {
-    if (user?.location) {
-      setMarket(user.location);
-    }
-  }, [user]);
+  const [marketEdited, setMarketEdited] = useState(false);
 
   const totalBudget = parseInt(budget) || 0;
   const totalAllocation = budgetBreakdown.reduce((s, c) => s + c.value, 0);
+  const marketValue = marketEdited ? market : user?.location ?? market;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -109,8 +104,11 @@ export default function BudgetPage() {
             id="market"
             label="Market Area"
             icon={<MapPin size={16} strokeWidth={2} />}
-            value={market}
-            onChange={(e) => setMarket(e.target.value)}
+            value={marketValue}
+            onChange={(e) => {
+              setMarketEdited(true);
+              setMarket(e.target.value);
+            }}
             placeholder="e.g. Mirpur, Dhaka"
           />
         </div>
@@ -128,9 +126,9 @@ export default function BudgetPage() {
           <CardDescription>How ৳{totalBudget.toLocaleString()} is allocated across food categories</CardDescription>
 
           <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
-            <div className="h-52 w-52 shrink-0">
-              <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
-                <PieChart>
+            <ChartFrame className="h-52 w-52 shrink-0">
+              {({ width, height }) => (
+                <PieChart width={width} height={height}>
                   <Pie
                     data={budgetBreakdown}
                     cx="50%"
@@ -152,11 +150,11 @@ export default function BudgetPage() {
                       borderRadius: "12px",
                       fontSize: "12px",
                     }}
-                    formatter={(value: any) => [`৳${value}`, ""]}
+                    formatter={(value: unknown) => [`৳${value ?? ""}`, ""] as [string, string]}
                   />
                 </PieChart>
-              </ResponsiveContainer>
-            </div>
+              )}
+            </ChartFrame>
 
             <div className="flex-1 space-y-2">
               {budgetBreakdown.map((item) => (
@@ -180,9 +178,9 @@ export default function BudgetPage() {
           <CardTitle>Weekly Spending</CardTitle>
           <CardDescription>Track how your budget is being used each week</CardDescription>
 
-          <div className="mt-4 h-52">
-            <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
-              <BarChart data={weeklySpend}>
+          <ChartFrame className="mt-4 h-52">
+            {({ width, height }) => (
+              <BarChart data={weeklySpend} width={width} height={height}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="week" tick={{ fontSize: 11, fill: "var(--muted)" }} />
                 <YAxis tick={{ fontSize: 11, fill: "var(--muted)" }} />
@@ -193,12 +191,12 @@ export default function BudgetPage() {
                     borderRadius: "12px",
                     fontSize: "12px",
                   }}
-                  formatter={(value: any) => [`৳${value}`, "Spent"]}
+                  formatter={(value: unknown) => [`৳${value ?? ""}`, "Spent"] as [string, string]}
                 />
                 <Bar dataKey="amount" fill="var(--primary)" radius={[6, 6, 0, 0]} />
               </BarChart>
-            </ResponsiveContainer>
-          </div>
+            )}
+          </ChartFrame>
         </Card>
       </div>
 

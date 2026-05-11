@@ -16,13 +16,13 @@ import {
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ChartFrame } from "@/components/ui/ChartFrame";
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
-  ResponsiveContainer,
   Tooltip,
   ReferenceLine,
 } from "recharts";
@@ -383,9 +383,9 @@ export default function RiskAnalysisPage() {
             </Badge>
           </div>
 
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
-              <LineChart data={trendData}>
+          <ChartFrame className="h-56">
+            {({ width, height }) => (
+              <LineChart data={trendData} width={width} height={height}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="date" tick={{ fontSize: 11, fill: "var(--muted)" }} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: "var(--muted)" }} />
@@ -408,8 +408,8 @@ export default function RiskAnalysisPage() {
                   activeDot={{ r: 6 }}
                 />
               </LineChart>
-            </ResponsiveContainer>
-          </div>
+            )}
+          </ChartFrame>
 
           <div className="mt-3 flex items-center gap-4 text-[11px] text-[color:var(--muted)]">
             <span className="flex items-center gap-1.5"><span className="h-2 w-4 rounded-full bg-emerald-500" /> 0–30: Low</span>

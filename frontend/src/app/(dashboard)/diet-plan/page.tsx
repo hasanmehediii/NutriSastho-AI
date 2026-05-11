@@ -1,20 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Utensils, Flame, Dumbbell, Leaf, Milk, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Utensils, Flame, Dumbbell, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
 import { getHealthProfile } from "@/services/health.service";
 import type { HealthProfile } from "@/types/user";
 

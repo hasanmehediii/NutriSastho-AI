@@ -1,6 +1,12 @@
 from sqlalchemy.orm import  mapped_column, Mapped
 from sqlalchemy import String
-from uuid import uuid7, UUID
+from uuid import UUID
+
+try:
+    from uuid import uuid7
+except ImportError:
+    from uuid import uuid4 as uuid7
+
 from .Base import Base
 
 
