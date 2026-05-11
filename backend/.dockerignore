@@ -1,0 +1,7 @@
+setup.*
+.venv
+.vercel
+migrations
+alembic.ini
+**/__pycache__
+.env
