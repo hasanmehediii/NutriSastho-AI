@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Plus,
@@ -17,12 +17,15 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { useAuth } from "@/providers/AuthProvider";
+import { getHealthProfile } from "@/services/health.service";
+import type { HealthProfile } from "@/types/user";
 
 type FamilyMember = {
   id: number;
   name: string;
   relation: string;
-  age: number;
+  age: number | string;
   gender: string;
   bloodGroup: string;
   riskLevel: "low" | "medium" | "high";
@@ -31,67 +34,97 @@ type FamilyMember = {
   avatarColor: string;
 };
 
-const initialMembers: FamilyMember[] = [
-  {
-    id: 1,
-    name: "Rahim Ahmed",
-    relation: "Self",
-    age: 32,
-    gender: "Male",
-    bloodGroup: "B+",
-    riskLevel: "medium",
-    lastCheckup: "May 9, 2026",
-    conditions: ["Hypertension"],
-    avatarColor: "#087f5b",
-  },
-  {
-    id: 2,
-    name: "Fatima Ahmed",
-    relation: "Wife",
-    age: 28,
-    gender: "Female",
-    bloodGroup: "A+",
-    riskLevel: "low",
-    lastCheckup: "April 20, 2026",
-    conditions: [],
-    avatarColor: "#6366f1",
-  },
-  {
-    id: 3,
-    name: "Yusuf Ahmed",
-    relation: "Son",
-    age: 5,
-    gender: "Male",
-    bloodGroup: "B+",
-    riskLevel: "low",
-    lastCheckup: "March 15, 2026",
-    conditions: [],
-    avatarColor: "#f59e0b",
-  },
-  {
-    id: 4,
-    name: "Amina Begum",
-    relation: "Mother",
-    age: 58,
-    gender: "Female",
-    bloodGroup: "O+",
-    riskLevel: "high",
-    lastCheckup: "May 1, 2026",
-    conditions: ["Diabetes", "Hypertension"],
-    avatarColor: "#ef4444",
-  },
-];
-
 const riskConfig = {
   low: { badge: "green" as const, label: "Low" },
   medium: { badge: "yellow" as const, label: "Medium" },
   high: { badge: "red" as const, label: "High" },
 };
 
+function computeRiskLevel(profile: HealthProfile | null): "low" | "medium" | "high" {
+  if (!profile) return "low";
+  let score = 0;
+  if (profile.bp_systolic && profile.bp_systolic >= 140) score += 30;
+  if (profile.temperature_f && profile.temperature_f >= 100.4) score += 20;
+  if (profile.bmi && profile.bmi >= 30) score += 15;
+  if (profile.blood_sugar && profile.blood_sugar > 140) score += 15;
+  if (profile.conditions && profile.conditions.length > 0) score += profile.conditions.length * 10;
+  
+  if (score > 65) return "high";
+  if (score > 30) return "medium";
+  return "low";
+}
+
 export default function FamilyPage() {
-  const [members] = useState<FamilyMember[]>(initialMembers);
+  const { user } = useAuth();
+  const [members, setMembers] = useState<FamilyMember[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null);
+
+  // New member form state
+  const [newName, setNewName] = useState("");
+  const [newRelation, setNewRelation] = useState("");
+  const [newAge, setNewAge] = useState("");
+  const [newGender, setNewGender] = useState("");
+  const [newBlood, setNewBlood] = useState("");
+
+  useEffect(() => {
+    // Fetch the primary user's health profile to populate the "Self" card
+    getHealthProfile().then((profile) => {
+      const selfMember: FamilyMember = {
+        id: 1,
+        name: user?.full_name || user?.email?.split("@")[0] || "User",
+        relation: "Self",
+        age: profile?.age || "—",
+        gender: profile?.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : "—",
+        bloodGroup: user?.blood_group || "—",
+        riskLevel: computeRiskLevel(profile),
+        lastCheckup: profile ? new Date(profile.created_at).toLocaleDateString() : "Never",
+        conditions: profile?.conditions || [],
+        avatarColor: "#087f5b",
+      };
+      
+      // We start with "Self" and some dummy family members for demonstration
+      setMembers([
+        selfMember,
+        {
+          id: 2,
+          name: "Fatima Begum",
+          relation: "Mother",
+          age: 58,
+          gender: "Female",
+          bloodGroup: "O+",
+          riskLevel: "high",
+          lastCheckup: "May 1, 2026",
+          conditions: ["Diabetes", "Hypertension"],
+          avatarColor: "#ef4444",
+        },
+      ]);
+    }).catch(() => {});
+  }, [user]);
+
+  function handleAddMember() {
+    if (!newName) return;
+    const colors = ["#6366f1", "#f59e0b", "#ec4899", "#8b5cf6", "#14b8a6"];
+    const newMember: FamilyMember = {
+      id: Date.now(),
+      name: newName,
+      relation: newRelation || "Other",
+      age: newAge || "—",
+      gender: newGender || "—",
+      bloodGroup: newBlood || "—",
+      riskLevel: "low",
+      lastCheckup: "Never",
+      conditions: [],
+      avatarColor: colors[members.length % colors.length],
+    };
+    setMembers([...members, newMember]);
+    setShowModal(false);
+    setNewName("");
+    setNewRelation("");
+    setNewAge("");
+    setNewGender("");
+    setNewBlood("");
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -116,7 +149,8 @@ export default function FamilyPage() {
             .split(" ")
             .map((w) => w[0])
             .join("")
-            .slice(0, 2);
+            .slice(0, 2)
+            .toUpperCase() || "U";
 
           return (
             <Card
@@ -248,52 +282,63 @@ export default function FamilyPage() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Input id="memberName" label="Full Name" placeholder="Enter name" icon={<User size={16} />} />
+              <Input
+                id="memberName"
+                label="Full Name"
+                placeholder="Enter name"
+                icon={<User size={16} />}
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
               <Select
                 id="memberRelation"
                 label="Relation"
                 options={[
-                  { value: "father", label: "Father" },
-                  { value: "mother", label: "Mother" },
-                  { value: "wife", label: "Wife" },
-                  { value: "husband", label: "Husband" },
-                  { value: "son", label: "Son" },
-                  { value: "daughter", label: "Daughter" },
-                  { value: "other", label: "Other" },
+                  { value: "", label: "Select" },
+                  { value: "Father", label: "Father" },
+                  { value: "Mother", label: "Mother" },
+                  { value: "Wife", label: "Wife" },
+                  { value: "Husband", label: "Husband" },
+                  { value: "Son", label: "Son" },
+                  { value: "Daughter", label: "Daughter" },
+                  { value: "Other", label: "Other" },
                 ]}
-                placeholder="Select"
+                value={newRelation}
+                onChange={(e) => setNewRelation(e.target.value)}
               />
-              <Input id="memberAge" label="Age" type="number" placeholder="e.g. 28" />
+              <Input
+                id="memberAge"
+                label="Age"
+                type="number"
+                placeholder="e.g. 28"
+                value={newAge}
+                onChange={(e) => setNewAge(e.target.value)}
+              />
               <Select
                 id="memberGender"
                 label="Gender"
                 options={[
-                  { value: "male", label: "Male" },
-                  { value: "female", label: "Female" },
-                  { value: "other", label: "Other" },
+                  { value: "", label: "Select" },
+                  { value: "Male", label: "Male" },
+                  { value: "Female", label: "Female" },
+                  { value: "Other", label: "Other" },
                 ]}
-                placeholder="Select"
+                value={newGender}
+                onChange={(e) => setNewGender(e.target.value)}
               />
               <Select
                 id="memberBlood"
                 label="Blood Group"
                 icon={<Droplets size={16} />}
-                options={["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => ({
-                  value: b,
-                  label: b,
-                }))}
-                placeholder="Select"
-              />
-              <Select
-                id="memberPregnancy"
-                label="Pregnancy Status"
-                icon={<Baby size={16} />}
                 options={[
-                  { value: "na", label: "Not applicable" },
-                  { value: "yes", label: "Pregnant" },
-                  { value: "postpartum", label: "Postpartum" },
+                  { value: "", label: "Select" },
+                  ...["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => ({
+                    value: b,
+                    label: b,
+                  }))
                 ]}
-                placeholder="Select"
+                value={newBlood}
+                onChange={(e) => setNewBlood(e.target.value)}
               />
             </div>
 
@@ -301,7 +346,7 @@ export default function FamilyPage() {
               <Button variant="secondary" onClick={() => setShowModal(false)}>
                 Cancel
               </Button>
-              <Button icon={<Plus size={14} />} onClick={() => setShowModal(false)}>
+              <Button icon={<Plus size={14} />} onClick={handleAddMember}>
                 Add Member
               </Button>
             </div>

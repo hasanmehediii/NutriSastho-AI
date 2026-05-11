@@ -1,6 +1,6 @@
 "use client";
 
-import type { AuthCredentials, AuthUser, RegisterPayload } from "@/types/user";
+import type { AuthCredentials, AuthUser, ProfileUpdatePayload, RegisterPayload } from "@/types/user";
 
 type AuthResponse = {
   user: AuthUser;
@@ -50,4 +50,19 @@ export async function getCurrentUser() {
   if (!response.ok) return null;
   const data = (await response.json()) as AuthResponse;
   return data.user;
+}
+
+export async function updateProfile(data: ProfileUpdatePayload): Promise<AuthUser> {
+  const response = await fetch("/api/auth/profile", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readError(response));
+  }
+
+  const result = (await response.json()) as AuthResponse;
+  return result.user;
 }

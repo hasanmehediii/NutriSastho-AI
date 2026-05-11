@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   User,
   Mail,
@@ -13,6 +13,7 @@ import {
   Download,
   Trash2,
   Info,
+  CheckCircle2,
 } from "lucide-react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -21,15 +22,30 @@ import { Badge } from "@/components/ui/Badge";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { useTheme } from "@/providers/ThemeProvider";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function SettingsPage() {
   const { language, setLanguage } = useLanguage();
   const { theme } = useTheme();
+  const { user, updateProfile } = useAuth();
 
-  const [name, setName] = useState("Rahim Ahmed");
-  const [email, setEmail] = useState("rahim.ahmed@example.com");
-  const [phone, setPhone] = useState("+880 1712-345678");
-  const [location, setLocation] = useState("Mirpur, Dhaka");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  // Pre-fill from real user data
+  useEffect(() => {
+    if (user) {
+      setName(user.full_name || "");
+      setEmail(user.email || "");
+      setPhone(user.phone || "");
+      setLocation(user.location || "");
+    }
+  }, [user]);
 
   const [notifications, setNotifications] = useState({
     healthAlerts: true,
@@ -42,8 +58,41 @@ export default function SettingsPage() {
     setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
+  async function handleSaveProfile() {
+    setSaving(true);
+    setError("");
+    try {
+      await updateProfile({
+        full_name: name.trim() || undefined,
+        phone: phone.trim() || undefined,
+        location: location.trim() || undefined,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save changes.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      {/* Success toast */}
+      {saved && (
+        <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/8 px-5 py-3 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+          <CheckCircle2 size={18} strokeWidth={2} />
+          Profile updated successfully!
+        </div>
+      )}
+
+      {/* Error toast */}
+      {error && (
+        <div className="rounded-2xl border border-red-500/25 bg-red-500/8 px-5 py-3 text-sm font-semibold text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
+
       {/* Profile section */}
       <Card>
         <div className="flex items-center gap-3 mb-5">
@@ -71,6 +120,7 @@ export default function SettingsPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled
           />
           <Input
             id="settingsPhone"
@@ -90,7 +140,9 @@ export default function SettingsPage() {
         </div>
 
         <div className="mt-4 flex justify-end">
-          <Button>Save Changes</Button>
+          <Button onClick={handleSaveProfile} loading={saving}>
+            Save Changes
+          </Button>
         </div>
       </Card>
 
