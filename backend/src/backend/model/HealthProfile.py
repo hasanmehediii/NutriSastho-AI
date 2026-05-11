@@ -1,7 +1,9 @@
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import Numeric, String, Float, Integer, JSON, ForeignKey, DateTime, Computed, cast
 from sqlalchemy.sql import func
-from uuid import uuid7, UUID
+from uuid import UUID
+
+from backend.uuid_compat import uuid7
 from datetime import datetime
 from .Base import Base
 

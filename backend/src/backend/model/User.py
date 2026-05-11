@@ -1,6 +1,8 @@
 from sqlalchemy.orm import  mapped_column, Mapped
 from sqlalchemy import String, UUID as SQLAlchemyUUID
-from uuid import UUID, uuid7
+from uuid import UUID
+
+from backend.uuid_compat import uuid7
 from .Base import Base
 
 
