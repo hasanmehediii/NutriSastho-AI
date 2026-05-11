@@ -1,8 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Bell, Search, Menu } from "lucide-react";
 import { useLanguage } from "@/providers/LanguageProvider";
+import { useAuth } from "@/providers/AuthProvider";
 
 const pageTitles: Record<string, { en: string; bn: string }> = {
   "/dashboard": { en: "Dashboard", bn: "ড্যাশবোর্ড" },
@@ -22,8 +24,18 @@ type TopbarProps = {
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { language } = useLanguage();
+  const { user, logout } = useAuth();
   const title = pageTitles[pathname]?.[language] ?? "NutriShastho AI";
+  const userLabel = user?.email ?? "Account";
+  const initials = userLabel.slice(0, 2).toUpperCase();
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+    router.refresh();
+  }
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-[color:var(--border)] bg-[color:var(--surface)]/80 px-4 backdrop-blur-xl sm:px-6">
@@ -65,13 +77,15 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         {/* User avatar */}
         <button
           type="button"
+          onClick={handleLogout}
           className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition-colors hover:bg-[color:var(--surface-soft)]"
+          title={language === "bn" ? "লগ আউট" : "Log out"}
         >
           <div className="grid h-8 w-8 place-items-center rounded-full bg-[color:var(--primary)]/15 text-xs font-bold text-[color:var(--primary)]">
-            RA
+            {initials}
           </div>
           <span className="hidden text-sm font-semibold text-[color:var(--foreground)] sm:block">
-            Rahim Ahmed
+            {userLabel}
           </span>
         </button>
       </div>

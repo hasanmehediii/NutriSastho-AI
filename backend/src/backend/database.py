@@ -5,7 +5,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-run_type = os.getenv("TYPE", "local")
+run_type = os.getenv("TYPE", "local").strip()
 DATABASE_URL = None
 if run_type == "remote":
     DATABASE_URL = os.getenv("DATABASE_URL_REMOTE")
@@ -20,7 +20,7 @@ else:
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set.")   
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False)
 
 
 def get_session():
