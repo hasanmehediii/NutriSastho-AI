@@ -17,7 +17,6 @@ import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/providers/AuthProvider";
 import { submitHealthProfile, getHealthProfile } from "@/services/health.service";
 
@@ -77,10 +76,11 @@ export default function HealthInputPage() {
 
   // Pre-fill from existing health profile and user data
   useEffect(() => {
-    if (user?.blood_group) setBloodGroup(user.blood_group);
+    const load = async () => {
+      if (user?.blood_group) setBloodGroup(user.blood_group);
 
-    getHealthProfile()
-      .then((profile) => {
+      try {
+        const profile = await getHealthProfile();
         if (profile) {
           if (profile.age) setAge(String(profile.age));
           if (profile.gender) setGender(profile.gender);
@@ -96,9 +96,13 @@ export default function HealthInputPage() {
           if (profile.symptoms && profile.symptoms.length > 0) setSelectedSymptoms(profile.symptoms);
           if (profile.conditions && profile.conditions.length > 0) setSelectedConditions(profile.conditions);
         }
-      })
-      .catch(() => {})
-      .finally(() => setPrefilling(false));
+      } catch {}
+      finally {
+        setPrefilling(false);
+      }
+    };
+
+    load();
   }, [user]);
 
   const bmi =
@@ -354,7 +358,7 @@ export default function HealthInputPage() {
             </div>
             <div>
               <CardTitle>Symptoms</CardTitle>
-              <CardDescription>Select any current symptoms you're experiencing</CardDescription>
+              <CardDescription>Select any current symptoms you&apos;re experiencing</CardDescription>
             </div>
           </div>
 
