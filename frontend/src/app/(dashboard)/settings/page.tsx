@@ -18,7 +18,6 @@ import {
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -29,21 +28,25 @@ export default function SettingsPage() {
   const { theme } = useTheme();
   const { user, updateProfile } = useAuth();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [location, setLocation] = useState("");
+  const [formData, setFormData] = useState(() => ({
+    name: user?.full_name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    location: user?.location || "",
+  }));
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
-  // Pre-fill from real user data
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (user) {
-      setName(user.full_name || "");
-      setEmail(user.email || "");
-      setPhone(user.phone || "");
-      setLocation(user.location || "");
+      setFormData({
+        name: user.full_name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        location: user.location || "",
+      });
     }
   }, [user]);
 
@@ -63,9 +66,9 @@ export default function SettingsPage() {
     setError("");
     try {
       await updateProfile({
-        full_name: name.trim() || undefined,
-        phone: phone.trim() || undefined,
-        location: location.trim() || undefined,
+        full_name: formData.name.trim() || undefined,
+        phone: formData.phone.trim() || undefined,
+        location: formData.location.trim() || undefined,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -110,16 +113,16 @@ export default function SettingsPage() {
             id="settingsName"
             label="Full Name"
             icon={<User size={16} strokeWidth={2} />}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
           />
           <Input
             id="settingsEmail"
             label="Email"
             icon={<Mail size={16} strokeWidth={2} />}
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={(e) => setFormData({...formData, email: e.target.value})}
             disabled
           />
           <Input
@@ -127,15 +130,15 @@ export default function SettingsPage() {
             label="Phone"
             icon={<Phone size={16} strokeWidth={2} />}
             type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            value={formData.phone}
+            onChange={(e) => setFormData({...formData, phone: e.target.value})}
           />
           <Input
             id="settingsLocation"
             label="Location"
             icon={<MapPin size={16} strokeWidth={2} />}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            value={formData.location}
+            onChange={(e) => setFormData({...formData, location: e.target.value})}
           />
         </div>
 

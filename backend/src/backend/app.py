@@ -1,11 +1,25 @@
+import json
+from uuid import UUID
+from datetime import datetime
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 
 from backend.router.auth import router as auth_router
 from backend.router.health_profile import router as health_router
 from backend.router.budget import router as budget_router
 
-app = FastAPI()
+
+def custom_encoder(obj):
+    if isinstance(obj, UUID):
+        return str(obj)
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return pydantic_encoder(obj)
+
+
+app = FastAPI(json_encoders={UUID: str, datetime: lambda v: v.isoformat()})
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[

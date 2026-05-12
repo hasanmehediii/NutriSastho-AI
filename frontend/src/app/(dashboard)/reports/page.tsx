@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import {
   FileText,
   Download,
-  Calendar,
   HeartPulse,
   ShieldAlert,
   Stethoscope,
   TestTube,
   Printer,
-  Clock,
   AlertTriangle,
 } from "lucide-react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -294,7 +292,7 @@ export default function ReportsPage() {
           <CardDescription>Previously generated health reports based on your data</CardDescription>
 
           <div className="mt-4 space-y-3">
-            {history.map((h, i) => {
+            {history.map((h) => {
               const hRisk = computeRisk(h);
               return (
                 <div
