@@ -1,6 +1,8 @@
 from sqlalchemy.orm import  mapped_column, Mapped
 from sqlalchemy import String, UUID as SQLAlchemyUUID
-from uuid import UUID, uuid7
+from uuid import UUID
+
+from backend.uuid_compat import uuid7
 from .Base import Base
 
 
@@ -13,3 +15,4 @@ class User(Base):
     full_name: Mapped[str | None] = mapped_column(String(120), nullable=True, default=None)
     phone: Mapped[str | None] = mapped_column(String(30), nullable=True, default=None)
     blood_group: Mapped[str | None] = mapped_column(String(10), nullable=True, default=None)
+    location: Mapped[str | None] = mapped_column(String(120), nullable=True, default=None)

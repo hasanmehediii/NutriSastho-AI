@@ -94,6 +94,61 @@ export async function callBackendHealthHistory(accessToken: string) {
   return { history: data as unknown[], status: 200 };
 }
 
+export async function callBackendBudgetLatest(accessToken: string) {
+  const response = await fetch(getBackendUrl("/budget/latest"), {
+    method: "GET",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    return {
+      error: getErrorDetail(data, "Failed to fetch budget plan."),
+      status: response.status,
+    };
+  }
+
+  return { plan: data, status: 200 };
+}
+
+export async function callBackendBudgetSubmit(
+  accessToken: string,
+  body: Record<string, unknown>,
+) {
+  const response = await fetch(getBackendUrl("/budget/"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    return {
+      error: getErrorDetail(data, "Failed to save budget plan."),
+      status: response.status,
+    };
+  }
+
+  return { plan: data, status: 200 };
+}
+
 export async function callBackendProfileUpdate(
   accessToken: string,
   body: Record<string, unknown>,

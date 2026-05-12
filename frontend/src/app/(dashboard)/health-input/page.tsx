@@ -47,7 +47,7 @@ const conditionsList = [
 ];
 
 export default function HealthInputPage() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
 
   // Profile
   const [age, setAge] = useState("");
@@ -131,6 +131,16 @@ export default function HealthInputPage() {
         symptoms: selectedSymptoms,
         conditions: selectedConditions.filter((c) => c !== "None"),
       });
+
+      const bg = bloodGroup.trim();
+      if (bg && bg !== (user?.blood_group ?? "").trim()) {
+        try {
+          await updateProfile({ blood_group: bg });
+        } catch {
+          /* health log saved; account blood group can be updated from Settings */
+        }
+      }
+
       setSaved(true);
       setTimeout(() => setSaved(false), 4000);
     } catch (err) {
