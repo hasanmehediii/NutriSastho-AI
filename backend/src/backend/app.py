@@ -4,6 +4,7 @@ from datetime import datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 from fastapi.json import pydantic_encoder
 
 from backend.router.auth import router as auth_router
