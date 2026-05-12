@@ -101,11 +101,11 @@ export default function BudgetPage() {
 
   useEffect(() => {
     let alive = true;
-    setLoadingInitial(true);
-    setError("");
 
-    getBudgetPlan()
-      .then((plan) => {
+    const load = async () => {
+      setError("");
+      try {
+        const plan = await getBudgetPlan();
         if (!alive || !plan) return;
         setBudget(String(plan.monthly_budget_bdt));
         setFamilySize(String(plan.family_size));
@@ -116,13 +116,14 @@ export default function BudgetPage() {
         }
         setPreferredText((plan.preferred_foods ?? []).join(", "));
         setAvoidText((plan.foods_to_avoid ?? []).join(", "));
-      })
-      .catch(() => {
+      } catch {
         if (alive) setError("Could not load your saved budget.");
-      })
-      .finally(() => {
+      } finally {
         if (alive) setLoadingInitial(false);
-      });
+      }
+    };
+
+    load();
 
     return () => {
       alive = false;
