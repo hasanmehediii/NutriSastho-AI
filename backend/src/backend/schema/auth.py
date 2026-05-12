@@ -9,6 +9,7 @@ class UserCreate(User):
     full_name: str = Field(min_length=1, max_length=120)
     phone: str = Field(min_length=1, max_length=30)
     blood_group: str = Field(min_length=1, max_length=10)
+    location: str = Field(min_length=1, max_length=120)
 
 
 class UserLogin(User):
@@ -21,6 +22,7 @@ class UserOut(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     blood_group: Optional[str] = None
+    location: Optional[str] = None
 
 
 class AuthResponse(BaseModel):

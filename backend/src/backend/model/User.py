@@ -15,3 +15,4 @@ class User(Base):
     full_name: Mapped[str | None] = mapped_column(String(120), nullable=True, default=None)
     phone: Mapped[str | None] = mapped_column(String(30), nullable=True, default=None)
     blood_group: Mapped[str | None] = mapped_column(String(10), nullable=True, default=None)
+    location: Mapped[str | None] = mapped_column(String(120), nullable=True, default=None)
