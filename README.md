@@ -4,6 +4,17 @@ NutriShastho AI is a Bangladesh-focused health and nutrition assistant built by 
 
 The project is designed as decision support, not a doctor replacement. Rule-based safety checks are used first, and AI-generated content is framed as guidance rather than diagnosis.
 
+### Submodules
+path = mcp_99bugsincode
+url = https://huggingface.co/spaces/JobaerTamim7/mcp_99bugsincode
+
+## Cloning Repo:
+
+```bash
+git clone https://github.com/hasanmehediii/99BugsInCode.git
+cd 99BugsInCode
+git submodule update --init --recursive
+```
 ## Current Status
 
 Implemented in this repo:
