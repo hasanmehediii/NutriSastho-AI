@@ -10,8 +10,23 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# OS
 **/.DS_Store
+Thumbs.db
+
+# environment files
 .env
 .env*
+
+# Python virtual environments
 *venv/
+*/.venv/
+
+# Docker volumes
 *docker_data/
+
+# Python cache (all subdirectories)
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
