@@ -1,5 +1,29 @@
-.vercel
+# Environment
 .env
+.env.*
+
+# Python virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+*.pyc
+
+# Alembic config (contains DB URL)
 alembic.ini
-.venv
-**/__pycache__
+
+# Docker volumes / data
+docker_data/
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db
