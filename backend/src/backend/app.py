@@ -10,6 +10,7 @@ from pydantic.json import pydantic_encoder
 from backend.router.auth import router as auth_router
 from backend.router.health_profile import router as health_router
 from backend.router.budget import router as budget_router
+from backend.router.exercise_plan import router as exercise_router
 
 
 def custom_encoder(obj):
@@ -44,4 +45,5 @@ app.include_router(auth_router)
 # include health routes
 app.include_router(health_router)
 app.include_router(budget_router)
+app.include_router(exercise_router)
 

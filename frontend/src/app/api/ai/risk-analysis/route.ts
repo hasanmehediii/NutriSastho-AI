@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import { callBackendHealthProfile } from "../../health/_backend";
+import { callBackendHealthProfile, callMcpTool } from "../../health/_backend";
 import type { RiskAnalysisResponse } from "@/types/diet";
 
 type HealthProfile = {
@@ -125,14 +125,15 @@ function extractJson(text: string) {
   }
 }
 
-function isRiskAnalysis(value: Partial<RiskAnalysisResponse> | null): value is RiskAnalysisResponse {
+function isRiskAnalysis(value: unknown): value is RiskAnalysisResponse {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
   return Boolean(
-    value &&
-      typeof value.score === "number" &&
-      ["low", "medium", "high"].includes(String(value.level)) &&
-      Array.isArray(value.factors) &&
-      Array.isArray(value.explanations) &&
-      Array.isArray(value.recommendations),
+    typeof v.score === "number" &&
+      ["low", "medium", "high"].includes(String(v.level)) &&
+      Array.isArray(v.factors) &&
+      Array.isArray(v.explanations) &&
+      Array.isArray(v.recommendations),
   );
 }
 
@@ -195,6 +196,19 @@ export async function POST() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
+  // ── 1. Try MCP server (AI + RAG) ──
+  try {
+    const mcpResult = await callMcpTool("analyze_risk", {
+      user_id: session.user.id,
+    });
+    if ("data" in mcpResult && isRiskAnalysis(mcpResult.data)) {
+      return NextResponse.json(mcpResult.data);
+    }
+  } catch {
+    // MCP unreachable — fall through to direct LLM calls
+  }
+
+  // ── 2. Fallback: direct Groq → Gemini → rules ──
   const profileResult = await callBackendHealthProfile(session.access_token);
   const profile = "profile" in profileResult ? (profileResult.profile as HealthProfile | null) : null;
   const fallback = computeRisk(profile);
