@@ -1,6 +1,7 @@
 "use client";
 
 import type { DietPlanResponse, RiskAnalysisResponse } from "@/types/diet";
+import type { ExercisePlanResponse } from "@/types/exercise_plan";
 
 async function readError(response: Response) {
   try {
@@ -35,4 +36,17 @@ export async function generateRiskAnalysis(): Promise<RiskAnalysisResponse> {
   }
 
   return (await response.json()) as RiskAnalysisResponse;
+}
+
+export async function generateExercisePlan(): Promise<ExercisePlanResponse> {
+  const response = await fetch("/api/ai/exercise-plan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error(await readError(response));
+  }
+
+  return (await response.json()) as ExercisePlanResponse;
 }

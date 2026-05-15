@@ -6,6 +6,7 @@ import {
   ShieldAlert,
   Wallet,
   Utensils,
+  Dumbbell,
 } from "lucide-react";
 
 const actions = [
@@ -41,11 +42,19 @@ const actions = [
     color: "#6366f1",
     description: "Bangladeshi meal plan",
   },
+  {
+    href: "/exercise-plan",
+    label: "Exercise Plan",
+    labelBn: "ব্যায়াম",
+    icon: Dumbbell,
+    color: "#8b5cf6",
+    description: "AI-powered workout plan",
+  },
 ];
 
 export function QuickActions() {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {actions.map((a) => {
         const Icon = a.icon;
         return (

@@ -304,7 +304,7 @@ export default function RiskAnalysisPage() {
               <div key={f.factor} className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge variant={levelConfig[f.level].badge}>{f.weight}pts</Badge>
+                    <Badge variant={(levelConfig[f.level?.toLowerCase() as keyof typeof levelConfig] || levelConfig.low).badge}>{f.weight}pts</Badge>
                     <span className="text-sm text-[color:var(--foreground)]">{f.factor}</span>
                   </div>
                 </div>
@@ -313,7 +313,7 @@ export default function RiskAnalysisPage() {
                     className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: `${f.weight}%`,
-                      backgroundColor: levelConfig[f.level].color,
+                      backgroundColor: (levelConfig[f.level?.toLowerCase() as keyof typeof levelConfig] || levelConfig.low).color,
                     }}
                   />
                 </div>
