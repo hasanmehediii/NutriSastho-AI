@@ -8,6 +8,8 @@ This guide provides step-by-step instructions to run all 4 components of the Nut
 
 The project requires a PostgreSQL database running on port `7432`. The easiest way to run this is using Docker.
 
+> **Prerequisite:** Docker Desktop must be open and running before running any `docker` commands.
+
 1. Open your terminal and run:
 ```bash
 docker run --name nutrishastho-db -e POSTGRES_USER=tester -e POSTGRES_PASSWORD=secret -e POSTGRES_DB=bugtracker -p 7432:5432 -d postgres:15
@@ -26,27 +28,42 @@ This is the main API serving user authentication, health profiles, and storing e
 cd backend
 ```
 
-2. Create and activate a virtual environment:
+2. Create a virtual environment:
 ```bash
 python -m venv venv
-.\venv\Scripts\activate
 ```
 
-3. Install all dependencies (including the `[standard]` extras for FastAPI):
+3. Activate it (**PowerShell**):
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+   Or if using **CMD**:
+```cmd
+.\venv\Scripts\activate.bat
+```
+
+   > **PowerShell tip:** If you get an "execution policy" error, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then retry.
+
+4. Install all dependencies:
 ```bash
 pip install -e .
+pip install "fastapi[standard]"
 ```
 
-4. Run database migrations to create all tables:
+5. Run database migrations to create all tables:
 ```bash
 alembic upgrade head
 ```
 
-5. Start the development server:
-```bash
-fastapi dev src/backend/app.py --port 8000
+6. Start the development server:
+```powershell
+$env:PYTHONIOENCODING="utf-8"; fastapi dev src/backend/app.py --port 8000
 ```
-*Server will be available at `http://localhost:8000`*
+
+   > **Why `PYTHONIOENCODING`?** Windows terminals default to cp1252 encoding which crashes when printing emoji in the startup banner. Setting this to `utf-8` fixes it.
+
+*Server will be available at `http://localhost:8000` — API docs at `http://localhost:8000/docs`*
 
 ---
 
@@ -59,21 +76,26 @@ This is the AI orchestration engine that handles Risk Analysis and Exercise Plan
 cd mcp_99bugsincode
 ```
 
-2. Create and activate a virtual environment:
+2. Create a virtual environment:
 ```bash
 python -m venv venv
-.\venv\Scripts\activate
 ```
 
-3. Install the required dependencies:
+3. Activate it (**PowerShell**):
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+4. Install the required dependencies:
 ```bash
 pip install -e .
 ```
 
-4. Start the MCP server using the `sse` transport:
-```bash
-fastmcp run src/mcp_99bugsincode/app.py --transport sse --port 7860
+5. Start the MCP server using the `sse` transport:
+```powershell
+$env:PYTHONIOENCODING="utf-8"; fastmcp run src/mcp_99bugsincode/app.py --transport sse --port 7860
 ```
+
 *Server will be available at `http://localhost:7860/sse`*
 
 ---
@@ -96,12 +118,15 @@ npm install
 ```bash
 npm run dev
 ```
+
 *Website will be available at `http://localhost:3000`*
 
 ---
 
 ### Troubleshooting
 
-- **"Connection Refused (Port 7432)"**: Your Docker container isn't running. Double check Terminal 1.
-- **"ModuleNotFoundError: No module named alembic"**: Make sure you activated the backend virtual environment (`.\venv\Scripts\activate`) before running alembic.
+- **"Connection Refused (Port 7432)"**: Your Docker container isn't running. Make sure Docker Desktop is open, then check Terminal 1.
+- **"ModuleNotFoundError: No module named alembic"**: Make sure you activated the backend virtual environment before running alembic. Use `.\venv\Scripts\Activate.ps1` in PowerShell.
+- **"UnicodeEncodeError: charmap codec"**: Set `$env:PYTHONIOENCODING="utf-8"` before running `fastapi` or `fastmcp` commands (see steps above).
+- **"RuntimeError: To use the fastapi command, install fastapi[standard]"**: Run `pip install "fastapi[standard]"` inside the activated backend venv.
 - **"404 / 406 Error on Risk Analysis page"**: The frontend expects the MCP server to run with SSE. Ensure you ran `fastmcp` with `--transport sse` in Terminal 3.
