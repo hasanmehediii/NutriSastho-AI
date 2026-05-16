@@ -1,217 +1,124 @@
-# NutriShastho AI — MCP-Powered Risk Factor, Exercise Plan & RAG Integration
+# MCP Diet Plan Generation with Web-Scraped Bangladeshi Food Data
 
-Integrate the MCP server with AI (Gemini/Groq) to collect user health + expense data from the dashboard and generate: **risk factor analysis**, **physical exercise plans**, and lay the groundwork for **RAG-based** contextual recommendations.
+## Goal
 
-## Current State Summary
+Add a `generate_diet_plan` MCP tool so diet planning goes through the same MCP → RAG → LLM pipeline as risk analysis and exercise plans. Enrich the RAG knowledge base with real Bangladeshi food data scraped from the web, so the AI can suggest authentic Bangla food items with nutritional info and local pricing context.
 
-| Layer | What exists today |
-|---|---|
-| **Frontend** (Next.js 16) | 9 dashboard pages — Health Input, Budget, Diet Plan, Risk Analysis, etc. already wired to backend |
-| **Backend** (FastAPI) | Auth, Health Profile CRUD, Budget CRUD with Postgres via SQLAlchemy |
-| **AI layer** | Next.js API routes (`/api/ai/risk-analysis`, `/api/ai/diet-plan`) call Groq → Gemini → fallback rules. Works, but runs entirely in Next.js route handlers — MCP server is unused |
-| **MCP server** (`mcp_99bugsincode`) | Skeleton FastMCP app with a single mock `get_db` tool. Not connected to anything |
-| **Data** | Hospital CSV (175 rows), health profiles in Postgres |
+## Current State
 
-## User Review Required
-
-> [!IMPORTANT]
-> **MCP Server Role Clarification**: The MCP server currently has only a stub `get_db` tool. There are two approaches to integrating it:
->
-> **Option A (Recommended)**: Build MCP tools that aggregate user data from the database and call Gemini/Groq to produce risk analysis + exercise plans. The Next.js API routes would then call the MCP server instead of directly calling Groq/Gemini. This makes the MCP server the single AI brain.
->
-> **Option B**: Keep AI calls in Next.js routes and use MCP server only for database aggregation tools. Simpler but less "MCP-centric."
->
-> **This plan follows Option A.**
-
-> [!WARNING]
-> **RAG requires a vector database**. The simplest approach for a hackathon-ready RAG is to:
-> - Use **ChromaDB** (in-process, no external infra) to store health/nutrition knowledge embeddings
-> - Embed a curated knowledge base of Bangladeshi health guidelines, exercise recommendations, and nutrition data
-> - Query the vector store before prompting the LLM, injecting relevant context
->
-> If you want a more production-grade RAG (e.g., Pinecone, Weaviate), let me know. ChromaDB keeps everything local and simple.
-
-## Open Questions
-
-1. **Exercise Plan Scope**: Should the exercise plan be a weekly schedule (like diet plan with 7 days) or a single daily routine? I'll assume **weekly schedule with daily variety**.
-2. **RAG Knowledge Sources**: Should I seed the RAG knowledge base with:
-   - Bangladeshi dietary guidelines (BIRDEM, NIPSOM)
-   - WHO exercise recommendations
-   - Common disease-exercise mappings (diabetes, hypertension, obesity)
-   - The hospital CSV data?
-   
-   I'll include all of the above as embedded knowledge chunks.
-3. **MCP Server Port**: Currently set to `7860`. Is that fine, or should it be different?
+- **Risk analysis** and **exercise plan** already have MCP tools (`analyze_risk`, `generate_exercise_plan`) that use RAG + LLM.
+- **Diet plan** currently only works via the Next.js route (`/api/ai/diet-plan/route.ts`) which calls Groq → Gemini → rule fallback directly. It does **not** go through MCP at all.
+- The knowledge base has 4 nutrition documents (`bd_nutrition_guidelines`, `bd_hypertension_diet`, `bd_diabetes_diet`, `bd_budget_nutrition`) but no detailed food item database.
 
 ## Proposed Changes
 
-### Component 1: MCP Server — The AI Brain
+### 1. Web Scraping — Bangladeshi Food Content
 
-Transform the skeleton MCP server into a functional health intelligence engine with tools for risk analysis, exercise plan generation, and RAG-based queries.
+#### Approach
 
----
+Most Bangladeshi food websites (banglarecipes.com.au, bdfoodrecipe.com, nutritionbangla.com) block automated scraping (403, timeouts). However, **runnarhut.com** is accessible and has Bengali food/health content. We will:
 
-#### [MODIFY] [pyproject.toml](file:///d:/99BugsInCode/mcp_99bugsincode/pyproject.toml)
-Add dependencies: `google-genai`, `groq`, `chromadb`, `psycopg2-binary`, `sqlalchemy`, `python-dotenv`
+1. **Scrape runnarhut.com** articles for Bengali food names, recipes, and health tips
+2. **Supplement** with structured data from the INFS Food Composition Table for Bangladesh (publicly available nutritional data)
+3. Store all scraped content as new knowledge base documents for RAG
 
-#### [MODIFY] [app.py](file:///d:/99BugsInCode/mcp_99bugsincode/src/mcp_99bugsincode/app.py)
-Complete rewrite — add these MCP tools:
+#### [NEW] `mcp_99bugsincode/src/mcp_99bugsincode/scraper.py`
 
-1. **`get_user_health_data(user_id: str)`** — Fetches latest health profile + budget from Postgres
-2. **`analyze_risk(user_id: str)`** — Aggregates health data → calls Groq/Gemini with RAG context → returns risk score, factors, explanations, recommendations
-3. **`generate_exercise_plan(user_id: str)`** — Uses health profile + risk data + RAG context → generates personalized weekly exercise plan
-4. **`query_health_knowledge(query: str)`** — RAG tool: searches embedded knowledge base and returns relevant health/exercise/nutrition information
-
-#### [NEW] [rag.py](file:///d:/99BugsInCode/mcp_99bugsincode/src/mcp_99bugsincode/rag.py)
-RAG engine module:
-- Initialize ChromaDB collection on startup
-- Seed with health knowledge documents (exercise guidelines, nutrition info, disease management)
-- `search(query, top_k)` → returns relevant document chunks
-- `add_documents(docs)` → for expanding the knowledge base
-
-#### [NEW] [knowledge_base.py](file:///d:/99BugsInCode/mcp_99bugsincode/src/mcp_99bugsincode/knowledge_base.py)
-Curated health knowledge data for RAG seeding:
-- Bangladeshi dietary guidelines for common conditions
-- Exercise recommendations by condition (diabetes, hypertension, obesity, underweight)
-- WHO physical activity guidelines
-- Age-appropriate exercise modifications
-- Pregnancy/postpartum exercise safety
-
-#### [NEW] [llm.py](file:///d:/99BugsInCode/mcp_99bugsincode/src/mcp_99bugsincode/llm.py)
-LLM abstraction layer:
-- `call_groq(prompt, system_prompt)` → Groq API call
-- `call_gemini(prompt, system_prompt)` → Gemini API call  
-- `call_llm(prompt, system_prompt)` → tries Groq first, falls back to Gemini
-- JSON extraction and validation helpers
-
-#### [NEW] [db.py](file:///d:/99BugsInCode/mcp_99bugsincode/src/mcp_99bugsincode/db.py)
-Database access for MCP server:
-- Connect to the same Postgres database as the backend
-- Fetch health profile, budget data, and health history for a given user
+A one-time scraping module that:
+- Fetches article pages from runnarhut.com (healthy food recipes, balanced diet guides)
+- Extracts food names (both Bangla and English), ingredients, and nutritional tips
+- Saves extracted content into structured knowledge documents
+- Can be run manually to refresh data: `python -m mcp_99bugsincode.scraper`
 
 ---
 
-### Component 2: Backend — New Exercise Plan Endpoint
+### 2. Bangladeshi Food Nutrition Database
 
-Add a backend endpoint to store generated exercise plans.
+#### [MODIFY] `mcp_99bugsincode/src/mcp_99bugsincode/knowledge_base.py`
 
----
+Add ~15 new knowledge documents covering:
 
-#### [NEW] [ExercisePlan.py](file:///d:/99BugsInCode/backend/src/backend/model/ExercisePlan.py)
-New SQLAlchemy model:
-- `id`, `user_id`, `plan_data` (JSON — weekly schedule), `risk_level`, `source` (groq/gemini/rules), `created_at`
+**Food Item Database (with Bangla names):**
+- Staples: ভাত (Rice), রুটি (Roti), চিড়া (Chira/Flattened Rice), মুড়ি (Muri/Puffed Rice)
+- Proteins: ডিম (Egg), মুরগি (Chicken), ইলিশ (Hilsa), রুই (Rui), তেলাপিয়া (Tilapia), ছোট মাছ (Small Fish), মসুর ডাল (Masoor Dal), ছোলা (Chola), সয়াবিন (Soybean)
+- Vegetables: পালং শাক (Spinach), লাল শাক (Red Amaranth), বেগুন (Eggplant), আলু (Potato), করলা (Bitter Gourd), ঢেঁড়স (Okra), পেঁপে (Papaya), লাউ (Bottle Gourd), পটল (Pointed Gourd)
+- Fruits: কলা (Banana), পেয়ারা (Guava), আম (Mango), কমলা (Orange), তরমুজ (Watermelon)
+- Dairy: দই (Yogurt), দুধ (Milk), ঘি (Ghee)
+- Cooking oils: সরিষার তেল (Mustard Oil), সয়াবিন তেল (Soybean Oil)
 
-#### [NEW] [exercise_plan.py](file:///d:/99BugsInCode/backend/src/backend/schema/exercise_plan.py)
-Pydantic schemas for exercise plan create/response
+Each document includes: English name, Bangla name (বাংলা), calories per 100g, protein, fat, carbs, approximate cost (BDT), and which health conditions it's good/bad for.
 
-#### [NEW] [exercise_plan.py](file:///d:/99BugsInCode/backend/src/backend/service/exercise_plan.py)
-Service: create and get_latest exercise plan
-
-#### [NEW] [exercise_plan.py](file:///d:/99BugsInCode/backend/src/backend/controller/exercise_plan.py)
-Controller: submit_exercise_plan, get_my_exercise_plan
-
-#### [NEW] [exercise_plan.py](file:///d:/99BugsInCode/backend/src/backend/router/exercise_plan.py)
-Router: `POST /exercise/plan`, `GET /exercise/plan`
-
-#### [MODIFY] [app.py](file:///d:/99BugsInCode/backend/src/backend/app.py)
-Register the new exercise plan router
-
-#### [NEW] Alembic migration
-Generate migration for the new `exercise_plans` table
+**Meal Pattern Documents:**
+- Bangladeshi breakfast patterns (সকালের নাস্তা)
+- Bangladeshi lunch patterns (দুপুরের খাবার)
+- Bangladeshi dinner patterns (রাতের খাবার)
+- Bangladeshi snack patterns (বিকালের নাস্তা)
+- Condition-specific meal templates (diabetes, hypertension, pregnancy, weight loss)
+- Budget-tier meal plans (< 3000 BDT, 3000-6000 BDT, 6000-10000 BDT, 10000+ BDT per month)
 
 ---
 
-### Component 3: Frontend — Exercise Plan Page + MCP Integration
+### 3. MCP Diet Plan Tool
 
-Add a new Exercise Plan dashboard page and rewire AI calls to go through the MCP server.
+#### [MODIFY] `mcp_99bugsincode/src/mcp_99bugsincode/app.py`
 
----
+Add a new `generate_diet_plan` MCP tool that:
 
-#### [NEW] [exercise_plan.ts](file:///d:/99BugsInCode/frontend/src/types/exercise_plan.ts)
-TypeScript types for exercise plan data
+1. Fetches user health profile + budget from the shared PostgreSQL database
+2. Builds a rule-based fallback diet plan (similar to what the frontend does now)
+3. Queries RAG for condition-specific and budget-specific food knowledge
+4. Sends profile + budget + RAG context to the LLM for a personalized weekly plan
+5. Returns structured JSON matching the existing `DietPlanResponse` shape
 
-#### [MODIFY] [_backend.ts](file:///d:/99BugsInCode/frontend/src/app/api/health/_backend.ts)
-Add: `callMcpTool(toolName, args)` — calls MCP server's HTTP endpoint, `callBackendExercisePlan`, `callBackendExercisePlanSubmit`
-
-#### [NEW] [route.ts](file:///d:/99BugsInCode/frontend/src/app/api/ai/exercise-plan/route.ts)
-New API route:
-- Calls MCP `generate_exercise_plan` tool
-- Falls back to rule-based exercise plan if MCP fails
-- Saves result to backend
-
-#### [MODIFY] [route.ts](file:///d:/99BugsInCode/frontend/src/app/api/ai/risk-analysis/route.ts)
-Rewire to call MCP `analyze_risk` tool first, fall back to existing Groq/Gemini direct calls
-
-#### [MODIFY] [ai.service.ts](file:///d:/99BugsInCode/frontend/src/services/ai.service.ts)
-Add `generateExercisePlan()` function
-
-#### [NEW] [page.tsx](file:///d:/99BugsInCode/frontend/src/app/(dashboard)/exercise-plan/page.tsx)
-New dashboard page with:
-- Weekly exercise schedule (tabs for each day like diet plan)
-- Exercise cards showing: exercise name, duration, intensity, target area, calories burned
-- Color-coded intensity levels (light/moderate/vigorous)
-- Condition-specific warnings (e.g., "Avoid high-intensity if BP > 140")
-- RAG-powered "Why this exercise?" explanations
-- Regenerate button
-- Risk-level badge showing which AI generated the plan
-
-#### [MODIFY] [AppSidebar.tsx](file:///d:/99BugsInCode/frontend/src/components/layout/AppSidebar.tsx)
-Add "Exercise Plan" navigation item with `Dumbbell` icon between Diet Plan and Risk Analysis
-
----
-
-### Component 4: Frontend Environment
-
----
-
-#### [MODIFY] [.env](file:///d:/99BugsInCode/frontend/.env)
-Add `MCP_SERVER_URL=http://localhost:7860` and API keys forwarding
-
-#### [MODIFY] [.env](file:///d:/99BugsInCode/mcp_99bugsincode/.env) [NEW]
-Create env file with database URL, Gemini/Groq keys
-
----
-
-## Architecture Flow
-
-```mermaid
-sequenceDiagram
-    participant User as User (Browser)
-    participant FE as Next.js Frontend
-    participant API as Next.js API Routes
-    participant MCP as MCP Server (FastMCP)
-    participant RAG as ChromaDB (RAG)
-    participant LLM as Groq / Gemini
-    participant DB as PostgreSQL
-
-    User->>FE: Enter health data + budget
-    FE->>API: POST /api/health/profile
-    API->>DB: Save health profile
-
-    User->>FE: View Exercise Plan
-    FE->>API: POST /api/ai/exercise-plan
-    API->>MCP: call tool "generate_exercise_plan"
-    MCP->>DB: Fetch user health + budget data
-    MCP->>RAG: Query relevant exercise knowledge
-    RAG-->>MCP: Return matching documents
-    MCP->>LLM: Prompt with data + RAG context
-    LLM-->>MCP: Return exercise plan JSON
-    MCP-->>API: Return structured plan
-    API->>DB: Save exercise plan
-    API-->>FE: Return plan to display
+```python
+@mcp.tool()
+async def generate_diet_plan(user_id: str) -> str:
+    """Generate a personalized weekly diet plan using AI + RAG knowledge.
+    
+    Considers user's health profile, conditions, budget constraints,
+    and local Bangladeshi food availability to create a practical,
+    budget-aware meal plan with Bangla food items.
+    """
 ```
+
+The tool will use the same pattern as `generate_exercise_plan`: rule-based fallback → RAG context → LLM → validate → return.
+
+---
+
+### 4. Frontend Integration
+
+#### [MODIFY] `frontend/src/app/api/ai/diet-plan/route.ts`
+
+Update the `POST` handler to try MCP first (like exercise-plan does):
+
+```
+1. Try MCP server → callMcpTool("generate_diet_plan", { user_id })
+2. If MCP fails → fall back to existing Groq → Gemini → rules chain
+```
+
+This is a small change — add a MCP attempt block at the top of `POST()`, before the existing fallback logic.
+
+---
 
 ## Verification Plan
 
 ### Automated Tests
-1. **MCP Server**: Start MCP server, call each tool via HTTP and verify JSON responses
-2. **Backend**: Run `alembic upgrade head` to verify migration, test exercise plan CRUD endpoints with `curl`
-3. **Frontend**: `npm run build` in frontend to verify no TypeScript errors
-4. **Integration**: Start all 3 services (backend, MCP, frontend), navigate to Exercise Plan page, submit health data, and verify the full pipeline works
+1. Run the MCP server and verify `generate_diet_plan` tool is listed
+2. Call the tool with a test user ID and verify valid JSON response
+3. Verify the response matches `DietPlanResponse` shape (days, meals, nutrition, etc.)
 
 ### Manual Verification
-1. Log in → go to Health Input → enter test vitals (high BP, diabetes)
-2. Go to Exercise Plan → verify plan is generated with condition-appropriate exercises
-3. Go to Risk Analysis → verify MCP-powered analysis matches health data
-4. Check that "Source" badges show correct AI provider (Groq/Gemini)
-5. Verify RAG context is influencing recommendations (e.g., hypertension → low-intensity exercises)
+1. Start all 3 services (backend, MCP, frontend)
+2. Log in, submit health profile + budget
+3. Navigate to Diet Plan page
+4. Verify the plan now shows Bangla food names and is personalized
+5. Check MCP server logs to confirm the tool was called
+6. Test with MCP server stopped — should fall back to existing behavior
+
+## Open Questions
+
+> [!IMPORTANT]
+> **Scraping depth**: Should we scrape multiple pages from runnarhut.com (they have 11 pages of articles), or is the curated food database approach sufficient? Scraping more pages gives richer Bengali food context but takes longer to implement.
+
+> [!NOTE]
+> **Bangla text in responses**: The diet plan currently returns English food names. With the new knowledge base, the LLM can return both English and Bangla names (e.g., "Masoor Dal (মসুর ডাল)"). Should we always include Bangla names, or only when the user's language is set to Bengali?
