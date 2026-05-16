@@ -27,7 +27,7 @@ Implemented in this repo:
 - AI diet-plan and risk-analysis API routes with deterministic rule fallback and optional Groq/Gemini generation.
 - PostgreSQL models and Alembic migrations for users, health profiles, and budget plans.
 - Sample Bangladesh hospital/clinic data under `data/`.
-- A Hugging Face Space / MCP submodule scaffold in `mcp_99bugsincode/`.
+- A FastMCP AI server in `mcp_99bugsincode/` for MCP-powered risk analysis, exercise planning, and RAG-backed health guidance over SSE.
 
 Still in progress:
 
@@ -66,6 +66,16 @@ Still in progress:
 - Explainable risk factors and practical recommendations.
 - Optional AI-generated explanation when provider keys are configured.
 
+**MCP and RAG Health Intelligence**
+
+- FastMCP server exposes AI tools over SSE at `http://localhost:7860/sse`.
+- In-memory ChromaDB collection is seeded from `mcp_99bugsincode/src/mcp_99bugsincode/knowledge_base.py`.
+- Curated knowledge chunks cover hypertension, diabetes, obesity, pregnancy, asthma, elderly exercise, WHO activity guidance, Bangladesh nutrition, budget nutrition, blood pressure stages, blood sugar ranges, and BMI risk categories.
+- `analyze_risk` retrieves condition-specific knowledge and adds it to the LLM prompt before returning risk factors, explanations, and recommendations.
+- `generate_exercise_plan` retrieves exercise safety guidance and creates a weekly plan with intensity, warnings, rest day, calories, and practical no-gym routines.
+- `query_health_knowledge` lets the MCP server search the RAG knowledge base directly for health, exercise, and nutrition questions.
+- The RAG layer is local and rebuilt on MCP startup, so no external vector database is required for development.
+
 **Localization and Accessibility**
 
 - English and Bengali language provider.
@@ -97,7 +107,7 @@ Still in progress:
 - SQLAlchemy
 - Alembic
 - PostgreSQL
-- `uv` for Python dependency management
+- Python `venv` + `pip` for local development
 
 **AI**
 
@@ -105,9 +115,16 @@ Still in progress:
 - Optional Groq API
 - Optional Gemini API
 
+**MCP and RAG**
+
+- FastMCP server over SSE
+- Model Context Protocol tools for health intelligence workflows
+- ChromaDB in-memory retrieval for local RAG context
+- PostgreSQL reads shared with the FastAPI backend
+
 ## System Architecture
 
-NutriShastho AI is organized as a frontend-first web app with a separate FastAPI backend for persistent user, health, and budget data. The Next.js app owns the user experience, session cookie, dashboard pages, and AI orchestration routes. The Python backend owns authentication tokens, database writes, and core persisted records.
+NutriShastho AI is organized as a frontend-first web app with a separate FastAPI backend for persistent user, health, and budget data, plus a FastMCP server for AI tool orchestration. The Next.js app owns the user experience, session cookie, dashboard pages, and AI-facing API routes. The Python backend owns authentication tokens, database writes, and core persisted records. The MCP server reads the same PostgreSQL data and exposes health intelligence tools over SSE.
 
 ```text
 Browser
@@ -138,9 +155,38 @@ FastAPI Backend
   |
   v
 PostgreSQL Database
+  ^
+  |
+FastMCP Server
+  |-- /sse transport on port 7860
+  |-- analyze_risk tool
+  |-- generate_exercise_plan tool
+  |-- ChromaDB in-memory RAG context
+  |-- Groq/Gemini provider calls when keys exist
 ```
 
-Optional AI provider flow:
+MCP-powered AI flow:
+
+```text
+Saved user + health profile + budget plan
+  |
+  v
+Next.js API route
+  |-- connect to MCP_SERVER_URL/sse
+  |-- call MCP tool such as analyze_risk or generate_exercise_plan
+  |
+  v
+FastMCP Server
+  |-- read PostgreSQL context
+  |-- query local RAG knowledge when relevant
+  |-- call Groq/Gemini when keys are configured
+  |-- return structured result
+  |
+  v
+Next.js route validates result or falls back to local rules
+```
+
+Provider fallback flow:
 
 ```text
 Saved health profile + saved budget plan
@@ -188,6 +234,15 @@ The AI routes are intentionally defensive. If a provider key is missing, the net
 - PostgreSQL connection setup in `backend/src/backend/database.py`.
 - Sample Bangladesh clinic/hospital seed data in `data/hospitals_bangladesh_seed.csv`.
 
+**MCP / RAG Layer**
+
+- MCP app entrypoint in `mcp_99bugsincode/src/mcp_99bugsincode/app.py`.
+- RAG search engine in `mcp_99bugsincode/src/mcp_99bugsincode/rag.py`.
+- Curated seed documents in `mcp_99bugsincode/src/mcp_99bugsincode/knowledge_base.py`.
+- LLM provider helper in `mcp_99bugsincode/src/mcp_99bugsincode/llm.py`.
+- Database readers in `mcp_99bugsincode/src/mcp_99bugsincode/db.py`.
+- FastMCP tools include `get_user_health_data`, `analyze_risk`, `generate_exercise_plan`, and `query_health_knowledge`.
+
 ## Data Flow
 
 **Authentication**
@@ -228,7 +283,7 @@ The AI routes are intentionally defensive. If a provider key is missing, the net
 |-- data/                    # Seed/sample Bangladesh hospital data
 |-- docs/                    # Product plan and TODO notes
 |-- frontend/                # Next.js application
-|-- mcp_99bugsincode/        # Hugging Face Space / MCP submodule
+|-- mcp_99bugsincode/        # FastMCP AI server / Hugging Face Space submodule
 |-- package.json             # Root npm workspace scripts for frontend
 |-- vercel.json              # Vercel config for frontend deployment
 `-- README.md
@@ -246,6 +301,7 @@ Main frontend pages:
 /health-input      # Health profile and vitals input
 /budget            # Budget planner
 /diet-plan         # Diet plan output
+/exercise-plan     # MCP-backed weekly exercise plan output
 /risk-analysis     # Risk score and explanations
 /nearby-care       # Nearby care page
 /reports           # Report page
@@ -266,6 +322,7 @@ Main Next.js API routes:
 /api/budget
 /api/ai/diet-plan
 /api/ai/risk-analysis
+/api/ai/exercise-plan
 /api/clinics        # placeholder
 /api/reports        # placeholder
 ```
@@ -275,8 +332,7 @@ Main Next.js API routes:
 - Node.js 20+
 - npm
 - Python 3.11+
-- `uv`
-- PostgreSQL, or Docker if you want to use the included backend compose file
+- PostgreSQL, or Docker if you want the local database command from `docs/Run.md`
 
 ## Clone
 
@@ -295,6 +351,7 @@ Frontend and Next.js API routes:
 ```env
 BACKEND_URL=http://localhost:8000
 NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+MCP_SERVER_URL=http://localhost:7860
 AUTH_COOKIE_SECRET=replace-with-a-long-random-secret
 
 GROQ_API_KEY=
@@ -315,6 +372,17 @@ JWT_SECRET_KEY=replace-with-a-long-random-secret
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
 JWT_REFRESH_TOKEN_EXPIRE_MINUTES=10080
 ```
+
+MCP server:
+
+```env
+DATABASE_URL=postgresql://tester:secret@localhost:7432/bugtracker
+GEMINI_API_KEY=
+GROQ_API_KEY=
+MCP_PORT=7860
+```
+
+For the local Docker command in `docs/Run.md`, PostgreSQL is exposed on host port `7432`. Use `6432` only if you intentionally run the `pg_bouncer` service from `backend/docker-compose.yaml`.
 
 If you use `backend/docker-compose.yaml`, it also expects:
 
@@ -337,37 +405,73 @@ Install backend dependencies:
 
 ```bash
 cd backend
-uv sync
+python -m venv venv
+.\venv\Scripts\activate
+pip install -e .
+pip install "fastapi[standard]"
+```
+
+Install MCP dependencies:
+
+```bash
+cd mcp_99bugsincode
+python -m venv venv
+.\venv\Scripts\activate
+pip install -e .
 ```
 
 ## Database Setup
 
-Start PostgreSQL yourself, or use the backend compose file:
+Start PostgreSQL yourself, or use the local Docker command from `docs/Run.md`:
 
 ```bash
-cd backend
-docker compose up -d
+docker run --name nutrishastho-db -e POSTGRES_USER=tester -e POSTGRES_PASSWORD=secret -e POSTGRES_DB=bugtracker -p 7432:5432 -d postgres:15
 ```
 
 Run migrations:
 
-```bash
+```powershell
 cd backend
-uv run alembic upgrade head
+.\venv\Scripts\activate
+alembic upgrade head
 ```
 
 ## Run Locally
 
-Start the backend:
+Run the app with four terminals:
+
+1. PostgreSQL database:
 
 ```bash
-cd backend
-uv run uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
+docker run --name nutrishastho-db -e POSTGRES_USER=tester -e POSTGRES_PASSWORD=secret -e POSTGRES_DB=bugtracker -p 7432:5432 -d postgres:15
 ```
 
-Start the frontend in another terminal:
+If the container already exists:
 
 ```bash
+docker start nutrishastho-db
+```
+
+2. FastAPI backend:
+
+```powershell
+cd backend
+.\venv\Scripts\activate
+$env:PYTHONIOENCODING="utf-8"; fastapi dev src/backend/app.py --port 8000
+```
+
+3. FastMCP AI server:
+
+```powershell
+cd mcp_99bugsincode
+.\venv\Scripts\activate
+$env:PYTHONIOENCODING="utf-8"; fastmcp run src/mcp_99bugsincode/app.py --transport sse --port 7860
+```
+
+4. Next.js frontend:
+
+```bash
+cd frontend
 npm run dev
 ```
 
@@ -375,6 +479,8 @@ Open:
 
 - Frontend: `http://localhost:3000`
 - Backend: `http://localhost:8000`
+- Backend docs: `http://localhost:8000/docs`
+- MCP SSE endpoint: `http://localhost:7860/sse`
 
 ## Root Scripts
 
@@ -402,9 +508,10 @@ npm run build
 
 The backend does not currently define a dedicated test command or test suite. For backend sanity checks, start the API and verify the root endpoint:
 
-```bash
+```powershell
 cd backend
-uv run uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
+.\venv\Scripts\activate
+fastapi dev src/backend/app.py --port 8000
 ```
 
 Then open:
@@ -433,6 +540,9 @@ GET  /health/history        # Get health profile history
 
 GET  /budget/latest         # Get latest budget plan
 POST /budget/               # Save budget plan
+
+GET  /exercise/plan         # Get latest saved exercise plan
+POST /exercise/plan         # Save generated exercise plan
 ```
 
 Next.js API routes proxy browser requests through the session cookie to the backend:
@@ -444,6 +554,16 @@ Next.js API routes proxy browser requests through the session cookie to the back
 /api/budget
 /api/ai/diet-plan
 /api/ai/risk-analysis
+/api/ai/exercise-plan
+```
+
+MCP tools exposed by the FastMCP server:
+
+```text
+get_user_health_data(user_id)          # Fetch latest health, budget, and recent history
+analyze_risk(user_id)                  # Risk analysis using DB context + RAG + optional LLM
+generate_exercise_plan(user_id)        # Weekly exercise plan using DB context + RAG + optional LLM
+query_health_knowledge(query, top_k)   # Direct RAG search over curated health knowledge
 ```
 
 ## User Flow
@@ -504,6 +624,9 @@ Diet Planning
 Risk Analysis
   -> deterministic scoring, optional AI explanation, risk factors, recommendations
 
+MCP + RAG
+  -> ChromaDB in-memory knowledge search, DB-aware AI prompts, direct knowledge query tool
+
 Localization and UX
   -> English/Bengali language provider, theme provider, responsive dashboard
 
@@ -543,14 +666,16 @@ Alembic migrations in `backend/migrations/versions/` create and evolve these tab
 
 - The frontend uses Next.js API routes as a boundary between browser code and backend/AI services.
 - Browser clients do not call FastAPI directly for protected app workflows; they go through session-aware Next.js routes.
+- MCP is the preferred AI orchestration path for risk and exercise workflows; Next.js keeps deterministic fallbacks so the app still works when MCP or provider APIs are unavailable.
 - Medical safety is not delegated only to an LLM. Rule-based fallbacks exist for risk scoring and diet generation.
 - AI provider calls are optional so the app can still demo core functionality without API keys.
-- The backend and frontend can be deployed independently, connected by `BACKEND_URL`.
+- The backend, MCP server, and frontend can be deployed independently, connected by `BACKEND_URL` and `MCP_SERVER_URL`.
 
 ## Known Limitations
 
 - Clinic and report API routes are placeholders.
 - AI output quality depends on the configured provider and key availability.
+- The RAG knowledge base is curated but small, local, and in-memory; it is rebuilt on MCP startup and should be expanded/verified before production use.
 - The local rule engine is intentionally simple and should be expanded before real clinical use.
 - Refresh token revocation is currently in memory, so it is not durable across backend restarts.
 - The sample clinic/hospital data is suitable for demo use and should be replaced or verified for production.
@@ -585,6 +710,36 @@ Planned improvements:
 - Treat health records as sensitive personal data.
 - Rotate provider keys if they are exposed.
 
+## Local Secrets and Machine Setup
+
+To move this project to a new machine without repeating local setup problems, keep a private backup of these files and values. Store them in a password manager, encrypted note, or private local backup, not in public Git history.
+
+```text
+.env                          # Frontend/Next.js values, provider keys, backend/MCP URLs if used from root
+backend/.env                  # Backend DB URL, JWT secret, local Docker DB settings, provider keys if backend uses them
+mcp_99bugsincode/.env         # MCP DB URL, Groq/Gemini keys, MCP port
+backend/alembic.ini           # Migration DB URL if customized locally
+```
+
+Important local values to keep consistent:
+
+```text
+POSTGRES_USER=tester
+POSTGRES_PASSWORD=secret
+POSTGRES_DB=bugtracker
+DATABASE_URL_LOCAL=postgresql://tester:secret@localhost:7432/bugtracker
+MCP DATABASE_URL=postgresql://tester:secret@localhost:7432/bugtracker
+BACKEND_URL=http://localhost:8000
+NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+MCP_SERVER_URL=http://localhost:7860
+AUTH_COOKIE_SECRET=<your long random secret>
+JWT_SECRET_KEY=<your long random secret>
+GROQ_API_KEY=<your key if using Groq>
+GEMINI_API_KEY=<your key if using Gemini>
+```
+
+Also preserve your Docker/PostgreSQL data volume if you need the same local users and health records on another machine. If you recreate the container from scratch, run Alembic migrations again before registering users.
+
 ## Troubleshooting
 
 **Backend says `DATABASE_URL environment variable is not set.`**
@@ -614,6 +769,28 @@ This is expected when provider keys are missing, invalid, or the provider respon
 **Database migrations cannot connect**
 
 Confirm PostgreSQL is running and the URL in `backend/alembic.ini` or your environment matches your local database.
+
+**MCP says it cannot connect to PostgreSQL on port `6432`**
+
+Your MCP `.env` is pointing at pgBouncer, but the simple local Docker setup exposes PostgreSQL on `7432`. Use:
+
+```env
+DATABASE_URL=postgresql://tester:secret@localhost:7432/bugtracker
+```
+
+Restart the MCP server after changing `.env`.
+
+**MCP routes return 404 or 406**
+
+The frontend connects through the MCP SSE transport. Start MCP with:
+
+```powershell
+fastmcp run src/mcp_99bugsincode/app.py --transport sse --port 7860
+```
+
+**Python imports code from an old project folder**
+
+If `pip install -e .` was previously run from another checkout, Python may import `backend` or `mcp_99bugsincode` from the old path. Recreate the affected venv or rerun `pip install -e .` from the correct folder, then restart the server.
 
 **Vercel build fails from the repo root**
 
