@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import {
-  Users,
   Plus,
   HeartPulse,
   Calendar,
@@ -10,9 +9,8 @@ import {
   Activity,
   X,
   User,
-  Baby,
 } from "lucide-react";
-import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";

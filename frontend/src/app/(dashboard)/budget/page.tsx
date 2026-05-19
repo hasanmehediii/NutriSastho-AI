@@ -1,7 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { Wallet, Users, Utensils, MapPin, TrendingUp, Stethoscope, TestTube, Pill } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Wallet,
+  Users,
+  Utensils,
+  MapPin,
+  TrendingUp,
+  Stethoscope,
+  TestTube,
+  Pill,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -20,8 +31,10 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useAuth } from "@/providers/AuthProvider";
+import { getBudgetPlan, saveBudgetPlan } from "@/services/budget.service";
+import type { BudgetCategory, BudgetWeek } from "@/types/user";
 
-const budgetBreakdown = [
+const CATEGORY_TEMPLATE: BudgetCategory[] = [
   { name: "Rice & Staples", value: 1800, color: "#087f5b" },
   { name: "Protein (Fish/Egg/Chicken)", value: 1500, color: "#6366f1" },
   { name: "Vegetables", value: 900, color: "#22c55e" },
@@ -30,12 +43,32 @@ const budgetBreakdown = [
   { name: "Oil & Spices", value: 750, color: "#ef4444" },
 ];
 
-const weeklySpend = [
-  { week: "Week 1", amount: 1500 },
-  { week: "Week 2", amount: 1400 },
-  { week: "Week 3", amount: 1200 },
-  { week: "Week 4", amount: 900 },
-];
+function scaleCategories(totalBdt: number): BudgetCategory[] {
+  const templateTotal = CATEGORY_TEMPLATE.reduce((s, c) => s + c.value, 0);
+  if (templateTotal <= 0 || totalBdt <= 0) return [];
+  const raw = CATEGORY_TEMPLATE.map((c) => (totalBdt * c.value) / templateTotal);
+  const rounded = raw.map((x) => Math.round(x));
+  const drift = totalBdt - rounded.reduce((s, v) => s + v, 0);
+  if (drift !== 0 && rounded.length) {
+    rounded[rounded.length - 1] = Math.max(0, rounded[rounded.length - 1] + drift);
+  }
+  return CATEGORY_TEMPLATE.map((c, i) => ({ ...c, value: rounded[i] ?? 0 }));
+}
+
+function defaultWeeklySpend(totalBdt: number): BudgetWeek[] {
+  if (totalBdt <= 0) return [];
+  const base = totalBdt / 4;
+  const factors = [0.98, 0.96, 0.92, 0.86];
+  const amounts = factors.map((f) => Math.max(0, Math.round(base * f)));
+  const drift = totalBdt - amounts.reduce((s, v) => s + v, 0);
+  if (drift !== 0 && amounts.length) {
+    amounts[amounts.length - 1] = Math.max(0, amounts[amounts.length - 1] + drift);
+  }
+  return ["Week 1", "Week 2", "Week 3", "Week 4"].map((week, i) => ({
+    week,
+    amount: amounts[i] ?? 0,
+  }));
+}
 
 const healthExpenses = [
   { icon: Stethoscope, label: "Doctor consultation", estimate: "৳500–800", color: "#6366f1" },
@@ -50,13 +83,115 @@ export default function BudgetPage() {
   const [mealCount, setMealCount] = useState("3");
   const [market, setMarket] = useState("");
   const [marketEdited, setMarketEdited] = useState(false);
+  const [preferredText, setPreferredText] = useState("");
+  const [avoidText, setAvoidText] = useState("");
 
-  const totalBudget = parseInt(budget) || 0;
-  const totalAllocation = budgetBreakdown.reduce((s, c) => s + c.value, 0);
+  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const totalBudget = parseInt(budget, 10) || 0;
   const marketValue = marketEdited ? market : user?.location ?? market;
+
+  const budgetBreakdown = useMemo(() => scaleCategories(totalBudget), [totalBudget]);
+  const weeklySpend = useMemo(() => defaultWeeklySpend(totalBudget), [totalBudget]);
+
+  const totalAllocation = budgetBreakdown.reduce((s, c) => s + c.value, 0) || 1;
+
+  useEffect(() => {
+    let alive = true;
+
+    const load = async () => {
+      setError("");
+      try {
+        const plan = await getBudgetPlan();
+        if (!alive || !plan) return;
+        setBudget(String(plan.monthly_budget_bdt));
+        setFamilySize(String(plan.family_size));
+        setMealCount(String(plan.meals_per_day));
+        if (plan.market_area) {
+          setMarket(plan.market_area);
+          setMarketEdited(true);
+        }
+        setPreferredText((plan.preferred_foods ?? []).join(", "));
+        setAvoidText((plan.foods_to_avoid ?? []).join(", "));
+      } catch {
+        if (alive) setError("Could not load your saved budget.");
+      } finally {
+        if (alive) setLoadingInitial(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  async function handleSave() {
+    setError("");
+    if (!totalBudget || totalBudget < 1) {
+      setError("Enter a monthly food budget of at least ৳1.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const preferred_foods = preferredText
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const foods_to_avoid = avoidText
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      await saveBudgetPlan({
+        monthly_budget_bdt: parseInt(budget, 10) || 0,
+        family_size: parseInt(familySize, 10) || 1,
+        meals_per_day: parseInt(mealCount, 10) || 3,
+        market_area: marketValue.trim() || null,
+        preferred_foods,
+        foods_to_avoid,
+      });
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save budget.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loadingInitial) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex items-center gap-3 text-[color:var(--muted)]">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--muted)]/30 border-t-[color:var(--primary)]" />
+          Loading your budget…
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      {saved && (
+        <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/8 px-5 py-3 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+          <CheckCircle2 size={18} strokeWidth={2} />
+          Budget saved. Charts reflect your latest plan.
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center gap-3 rounded-2xl border border-red-500/25 bg-red-500/8 px-5 py-3 text-sm font-semibold text-red-600 dark:text-red-400">
+          <AlertCircle size={18} strokeWidth={2} />
+          {error}
+        </div>
+      )}
+
       {/* Input form */}
       <Card>
         <div className="flex items-center gap-3 mb-5">
@@ -113,8 +248,27 @@ export default function BudgetPage() {
           />
         </div>
 
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Input
+            id="preferredFoods"
+            label="Preferred foods (comma separated)"
+            value={preferredText}
+            onChange={(e) => setPreferredText(e.target.value)}
+            placeholder="e.g. Rui fish, eggs, seasonal vegetables"
+          />
+          <Input
+            id="foodsToAvoid"
+            label="Foods to avoid (comma separated)"
+            value={avoidText}
+            onChange={(e) => setAvoidText(e.target.value)}
+            placeholder="e.g. Shrimp, packaged snacks"
+          />
+        </div>
+
         <div className="mt-4 flex justify-end">
-          <Button icon={<TrendingUp size={16} />}>Generate Plan</Button>
+          <Button icon={<TrendingUp size={16} />} loading={saving} onClick={() => void handleSave()}>
+            Save budget
+          </Button>
         </div>
       </Card>
 

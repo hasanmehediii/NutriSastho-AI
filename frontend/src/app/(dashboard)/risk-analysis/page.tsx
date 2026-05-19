@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {
   ShieldAlert,
   AlertTriangle,
-  CheckCircle2,
   Brain,
   Stethoscope,
   TestTube,
@@ -15,7 +14,6 @@ import {
 } from "lucide-react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { ChartFrame } from "@/components/ui/ChartFrame";
 import {
   LineChart,
@@ -26,9 +24,10 @@ import {
   Tooltip,
   ReferenceLine,
 } from "recharts";
-import { useAuth } from "@/providers/AuthProvider";
 import { getHealthProfile, getHealthHistory } from "@/services/health.service";
+import { generateRiskAnalysis } from "@/services/ai.service";
 import type { HealthProfile } from "@/types/user";
+import type { RiskAnalysisResponse } from "@/types/diet";
 
 const levelConfig = {
   low: { color: "#22c55e", label: "Low Risk", badge: "green" as const },
@@ -204,25 +203,32 @@ function RiskGauge({ score, color }: { score: number; color: string }) {
 }
 
 export default function RiskAnalysisPage() {
-  const { user } = useAuth();
   const [profile, setProfile] = useState<HealthProfile | null>(null);
   const [history, setHistory] = useState<HealthProfile[]>([]);
+  const [aiAnalysis, setAiAnalysis] = useState<RiskAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getHealthProfile(), getHealthHistory()])
-      .then(([p, h]) => {
-        setProfile(p);
-        setHistory(h);
+    Promise.allSettled([getHealthProfile(), getHealthHistory(), generateRiskAnalysis()])
+      .then(([profileResult, historyResult, aiResult]) => {
+        if (profileResult.status === "fulfilled") setProfile(profileResult.value);
+        if (historyResult.status === "fulfilled") setHistory(historyResult.value);
+        if (aiResult.status === "fulfilled") setAiAnalysis(aiResult.value);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
   const { score: riskScore, factors: riskFactors, level: riskLevel } = computeRisk(profile);
-  const config = levelConfig[riskLevel];
-  const explanations = generateExplanations(profile);
-  const recommendations = generateRecommendations(profile);
+  const displayScore = aiAnalysis?.score ?? riskScore;
+  const displayFactors = aiAnalysis?.factors ?? riskFactors;
+  const displayLevel = aiAnalysis?.level ?? riskLevel;
+  const config = levelConfig[displayLevel];
+  const explanations = aiAnalysis?.explanations ?? generateExplanations(profile);
+  const recommendations = aiAnalysis?.recommendations.map((rec) => ({
+    ...rec,
+    icon: rec.type === "test" ? TestTube : rec.type === "doctor" ? Stethoscope : ArrowRight,
+  })) ?? generateRecommendations(profile);
 
   // Build trend data from history
   const trendData = history
@@ -251,7 +257,7 @@ export default function RiskAnalysisPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       {/* Emergency banner (shown for high risk) */}
-      {riskLevel === "high" && (
+      {displayLevel === "high" && (
         <div className="flex items-center gap-3 rounded-2xl border border-red-500/25 bg-red-500/10 px-5 py-4">
           <ShieldAlert size={22} strokeWidth={2} className="shrink-0 text-red-500" />
           <div>
@@ -279,7 +285,7 @@ export default function RiskAnalysisPage() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Gauge */}
         <Card className="lg:col-span-2 flex flex-col items-center justify-center">
-          <RiskGauge score={riskScore} color={config.color} />
+          <RiskGauge score={displayScore} color={config.color} />
           <Badge variant={config.badge} dot className="mt-2 text-sm">
             {config.label}
           </Badge>
@@ -294,11 +300,11 @@ export default function RiskAnalysisPage() {
           <CardDescription>What contributes to your current risk score</CardDescription>
 
           <div className="mt-4 space-y-3">
-            {riskFactors.length > 0 ? riskFactors.map((f) => (
+            {displayFactors.length > 0 ? displayFactors.map((f) => (
               <div key={f.factor} className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge variant={levelConfig[f.level].badge}>{f.weight}pts</Badge>
+                    <Badge variant={(levelConfig[f.level?.toLowerCase() as keyof typeof levelConfig] || levelConfig.low).badge}>{f.weight}pts</Badge>
                     <span className="text-sm text-[color:var(--foreground)]">{f.factor}</span>
                   </div>
                 </div>
@@ -307,7 +313,7 @@ export default function RiskAnalysisPage() {
                     className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: `${f.weight}%`,
-                      backgroundColor: levelConfig[f.level].color,
+                      backgroundColor: (levelConfig[f.level?.toLowerCase() as keyof typeof levelConfig] || levelConfig.low).color,
                     }}
                   />
                 </div>

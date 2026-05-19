@@ -34,6 +34,31 @@ export type ProfileUpdatePayload = {
   location?: string;
 };
 
+export type BudgetCategory = {
+  name: string;
+  value: number;
+  color: string;
+};
+
+export type BudgetWeek = {
+  week: string;
+  amount: number;
+};
+
+export type BudgetPlan = {
+  id: string;
+  user_id: string;
+  monthly_budget_bdt: number;
+  family_size: number;
+  meals_per_day: number;
+  market_area?: string | null;
+  preferred_foods: string[];
+  foods_to_avoid: string[];
+  category_breakdown: BudgetCategory[];
+  weekly_spend: BudgetWeek[];
+  created_at: string;
+};
+
 export type HealthProfile = {
   id: string;
   user_id: string;

@@ -1,91 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Utensils, Flame, Dumbbell, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Utensils,
+  Flame,
+  Dumbbell,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Tabs } from "@/components/ui/Tabs";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { getHealthProfile } from "@/services/health.service";
-import type { HealthProfile } from "@/types/user";
-
-const days = [
-  { key: "sat", label: "Sat" },
-  { key: "sun", label: "Sun" },
-  { key: "mon", label: "Mon" },
-  { key: "tue", label: "Tue" },
-  { key: "wed", label: "Wed" },
-  { key: "thu", label: "Thu" },
-  { key: "fri", label: "Fri" },
-];
-
-type Meal = {
-  name: string;
-  items: string[];
-  cost: number;
-  calories: number;
-};
-
-type DayPlan = {
-  breakfast: Meal;
-  lunch: Meal;
-  snack: Meal;
-  dinner: Meal;
-};
-
-// Base standard plan
-const standardPlan: Record<string, DayPlan> = {
-  sat: {
-    breakfast: { name: "Breakfast", items: ["Roti (2)", "Egg bhurji", "Banana", "Tea"], cost: 45, calories: 380 },
-    lunch: { name: "Lunch", items: ["Rice", "Dal", "Spinach (shak)", "Rui fish curry"], cost: 85, calories: 620 },
-    snack: { name: "Snack", items: ["Muri", "Chanachur", "Guava"], cost: 20, calories: 150 },
-    dinner: { name: "Dinner", items: ["Rice (small)", "Chicken curry", "Mixed vegetables", "Salad"], cost: 90, calories: 550 },
-  },
-  sun: {
-    breakfast: { name: "Breakfast", items: ["Paratha (1)", "Egg omelette", "Tea"], cost: 40, calories: 360 },
-    lunch: { name: "Lunch", items: ["Rice", "Masoor dal", "Papaya", "Tilapia curry"], cost: 75, calories: 580 },
-    snack: { name: "Snack", items: ["Puffed rice (chira)", "Yogurt"], cost: 25, calories: 170 },
-    dinner: { name: "Dinner", items: ["Khichuri", "Egg curry", "Bhorta (potato)"], cost: 60, calories: 490 },
-  },
-  mon: {
-    breakfast: { name: "Breakfast", items: ["Bread (2)", "Boiled egg", "Milk", "Banana"], cost: 40, calories: 390 },
-    lunch: { name: "Lunch", items: ["Rice", "Chola dal", "Begun bhaji", "Small fish (puti)"], cost: 70, calories: 560 },
-    snack: { name: "Snack", items: ["Seasonal fruit", "Biscuit"], cost: 20, calories: 140 },
-    dinner: { name: "Dinner", items: ["Rice", "Lau ghonto", "Egg curry", "Salad"], cost: 55, calories: 480 },
-  },
-  tue: {
-    breakfast: { name: "Breakfast", items: ["Roti (2)", "Sabzi", "Tea"], cost: 30, calories: 320 },
-    lunch: { name: "Lunch", items: ["Rice", "Moong dal", "Chicken (small)", "Shak"], cost: 95, calories: 640 },
-    snack: { name: "Snack", items: ["Mango (seasonal)", "Peanuts"], cost: 25, calories: 180 },
-    dinner: { name: "Dinner", items: ["Rice (small)", "Fish curry (Pangash)", "Mixed veg"], cost: 70, calories: 510 },
-  },
-  wed: {
-    breakfast: { name: "Breakfast", items: ["Chira with milk", "Banana", "Dates (2)"], cost: 35, calories: 370 },
-    lunch: { name: "Lunch", items: ["Rice", "Masoor dal", "Aloo bhorta", "Hilsa (small piece)"], cost: 100, calories: 650 },
-    snack: { name: "Snack", items: ["Guava", "Tea"], cost: 15, calories: 120 },
-    dinner: { name: "Dinner", items: ["Roti (2)", "Egg curry", "Salad", "Cucumber"], cost: 45, calories: 420 },
-  },
-  thu: {
-    breakfast: { name: "Breakfast", items: ["Paratha (1)", "Dal", "Tea"], cost: 35, calories: 340 },
-    lunch: { name: "Lunch", items: ["Rice", "Chicken curry", "Mixed veg", "Dal"], cost: 90, calories: 630 },
-    snack: { name: "Snack", items: ["Papaya", "Muri"], cost: 20, calories: 150 },
-    dinner: { name: "Dinner", items: ["Rice (small)", "Small fish fry", "Shak", "Bhorta"], cost: 60, calories: 470 },
-  },
-  fri: {
-    breakfast: { name: "Breakfast", items: ["Roti (2)", "Egg bhurji", "Milk"], cost: 45, calories: 400 },
-    lunch: { name: "Lunch", items: ["Polao (small)", "Chicken roast", "Salad", "Borhani"], cost: 110, calories: 700 },
-    snack: { name: "Snack", items: ["Seasonal fruit", "Yogurt"], cost: 25, calories: 160 },
-    dinner: { name: "Dinner", items: ["Rice", "Dal", "Mixed veg curry"], cost: 50, calories: 450 },
-  },
-};
-
-const nutritionData = [
-  { nutrient: "Calories", value: 1700, target: 2000, unit: "kcal" },
-  { nutrient: "Protein", value: 58, target: 65, unit: "g" },
-  { nutrient: "Iron", value: 14, target: 18, unit: "mg" },
-  { nutrient: "Calcium", value: 650, target: 1000, unit: "mg" },
-  { nutrient: "Fiber", value: 22, target: 25, unit: "g" },
-];
+import { generateDietPlan } from "@/services/ai.service";
+import type { DietPlanResponse } from "@/types/diet";
 
 const mealColors: Record<string, string> = {
   Breakfast: "#f59e0b",
@@ -94,179 +24,272 @@ const mealColors: Record<string, string> = {
   Dinner: "#ef4444",
 };
 
+function formatSource(source: DietPlanResponse["source"]) {
+  if (source === "groq") return "Groq AI";
+  if (source === "gemini") return "Gemini AI";
+  return "Rule-based";
+}
+
 export default function DietPlanPage() {
   const [activeDay, setActiveDay] = useState("sat");
-  const [profile, setProfile] = useState<HealthProfile | null>(null);
-  
-  useEffect(() => {
-    getHealthProfile().then(setProfile).catch(() => {});
-  }, []);
+  const [planData, setPlanData] = useState<DietPlanResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [regenerating, setRegenerating] = useState(false);
+  const [error, setError] = useState("");
 
-  // Determine adjustments based on real profile data
-  let conditionWarning = null;
-  if (profile) {
-    const conditions = profile.conditions || [];
-    if (conditions.includes("Hypertension") || (profile.bp_systolic && profile.bp_systolic >= 140)) {
-      conditionWarning = {
-        type: "hypertension",
-        title: "Diet adjusted for High Blood Pressure",
-        desc: "Low salt, reduced processed foods, more vegetables and potassium-rich items like bananas.",
-      };
-    } else if (conditions.includes("Diabetes") || (profile.blood_sugar && profile.blood_sugar > 140)) {
-      conditionWarning = {
-        type: "diabetes",
-        title: "Diet adjusted for Blood Sugar",
-        desc: "Low glycemic index foods, reduced direct sugars, balanced complex carbohydrates.",
-      };
-    } else if (profile.bmi && profile.bmi >= 25) {
-      conditionWarning = {
-        type: "weight",
-        title: "Diet adjusted for Weight Management",
-        desc: "Caloric deficit, high protein, increased fiber to keep you full longer.",
-      };
+  async function loadPlan(isRegenerate = false) {
+    setError("");
+    if (isRegenerate) {
+      setRegenerating(true);
     } else {
-      conditionWarning = {
-        type: "healthy",
-        title: "Standard Balanced Diet",
-        desc: "A well-rounded diet tailored for general health and immunity maintenance.",
-      };
+      setLoading(true);
+    }
+
+    try {
+      const nextPlan = await generateDietPlan();
+      setPlanData(nextPlan);
+      setActiveDay(nextPlan.days[0]?.key ?? "sat");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate diet plan.");
+    } finally {
+      setLoading(false);
+      setRegenerating(false);
     }
   }
 
-  const plan = standardPlan[activeDay];
-  const meals = [plan.breakfast, plan.lunch, plan.snack, plan.dinner];
-  const totalCalories = meals.reduce((s, m) => s + m.calories, 0);
-  const totalCost = meals.reduce((s, m) => s + m.cost, 0);
+  useEffect(() => {
+    let alive = true;
+
+    generateDietPlan()
+      .then((nextPlan) => {
+        if (!alive) return;
+        setPlanData(nextPlan);
+        setActiveDay(nextPlan.days[0]?.key ?? "sat");
+      })
+      .catch((err) => {
+        if (!alive) return;
+        setError(err instanceof Error ? err.message : "Failed to generate diet plan.");
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex items-center gap-3 text-[color:var(--muted)]">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[color:var(--muted)]/30 border-t-[color:var(--primary)]" />
+          Generating your budget-aware diet plan...
+        </div>
+      </div>
+    );
+  }
+
+  const selectedDay = planData?.days.find((day) => day.key === activeDay) ?? planData?.days[0];
+  const meals = selectedDay
+    ? [
+        selectedDay.plan.breakfast,
+        selectedDay.plan.lunch,
+        selectedDay.plan.snack,
+        selectedDay.plan.dinner,
+      ]
+    : [];
+  const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
+  const totalCost = meals.reduce((sum, meal) => sum + meal.cost, 0);
+  const monthlyEstimate = totalCost * 30 * (planData?.budget?.family_size ?? 1);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      {/* Health adjustment banner */}
-      {conditionWarning ? (
-        conditionWarning.type === "healthy" ? (
-          <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/8 px-5 py-3">
-            <CheckCircle2 size={18} strokeWidth={2} className="shrink-0 text-emerald-500" />
-            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="font-bold">{conditionWarning.title}:</span>{" "}
-              {conditionWarning.desc}
-            </p>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/8 px-5 py-3">
-            <AlertTriangle size={18} strokeWidth={2} className="shrink-0 text-amber-500" />
-            <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-              <span className="font-bold">{conditionWarning.title}:</span>{" "}
-              {conditionWarning.desc}
-            </p>
-          </div>
-        )
-      ) : (
-        <div className="flex items-center gap-3 rounded-2xl border border-indigo-500/25 bg-indigo-500/8 px-5 py-3">
-          <AlertTriangle size={18} strokeWidth={2} className="shrink-0 text-indigo-500" />
-          <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
-            Submit your health vitals in the Health Input section to get a personalized diet plan.
-          </p>
+      {error && (
+        <div className="flex items-center gap-3 rounded-2xl border border-red-500/25 bg-red-500/8 px-5 py-3 text-sm font-semibold text-red-600 dark:text-red-400">
+          <AlertTriangle size={18} strokeWidth={2} />
+          {error}
         </div>
       )}
 
-      {/* Day tabs */}
-      <div className="flex items-center justify-between gap-4">
-        <Tabs tabs={days} active={activeDay} onChange={setActiveDay} />
-        <Button variant="secondary" icon={<RefreshCw size={14} />}>
-          Regenerate
-        </Button>
-      </div>
-
-      {/* Meals grid */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {meals.map((meal) => (
-          <Card key={meal.name} className="group hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: mealColors[meal.name] }}
-                />
-                <h3 className="text-sm font-bold text-[color:var(--foreground)]">{meal.name}</h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="green">{meal.calories} kcal</Badge>
-                <Badge>৳{meal.cost}</Badge>
-              </div>
+      {planData && (
+        <>
+          {planData.conditionWarning.type === "healthy" ? (
+            <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/8 px-5 py-3">
+              <CheckCircle2 size={18} strokeWidth={2} className="shrink-0 text-emerald-500" />
+              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="font-bold">{planData.conditionWarning.title}:</span>{" "}
+                {planData.conditionWarning.desc}
+              </p>
             </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/8 px-5 py-3">
+              <AlertTriangle size={18} strokeWidth={2} className="shrink-0 text-amber-500" />
+              <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                <span className="font-bold">{planData.conditionWarning.title}:</span>{" "}
+                {planData.conditionWarning.desc}
+              </p>
+            </div>
+          )}
 
-            <div className="space-y-1.5">
-              {meal.items.map((item) => (
-                <div key={item} className="flex items-center gap-2 text-sm text-[color:var(--muted)]">
-                  <Utensils size={12} strokeWidth={2} className="shrink-0 text-[color:var(--primary)]" />
-                  {item}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Tabs
+              tabs={planData.days.map((day) => ({ key: day.key, label: day.label }))}
+              active={activeDay}
+              onChange={setActiveDay}
+            />
+            <div className="flex items-center gap-2">
+              <Badge variant={planData.source === "rules" ? "default" : "blue"} dot>
+                {formatSource(planData.source)}
+              </Badge>
+              <Button
+                variant="secondary"
+                icon={<RefreshCw size={14} />}
+                loading={regenerating}
+                onClick={() => void loadPlan(true)}
+              >
+                Regenerate
+              </Button>
+            </div>
+          </div>
+
+          {planData.budget && (
+            <Card>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <div>
+                  <p className="text-[11px] font-medium text-[color:var(--muted)]">Monthly Budget</p>
+                  <p className="text-lg font-black text-[color:var(--foreground)]">
+                    BDT {planData.budget.monthly_budget_bdt.toLocaleString()}
+                  </p>
                 </div>
-              ))}
+                <div>
+                  <p className="text-[11px] font-medium text-[color:var(--muted)]">Family Size</p>
+                  <p className="text-lg font-black text-[color:var(--foreground)]">
+                    {planData.budget.family_size}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium text-[color:var(--muted)]">Market Area</p>
+                  <p className="text-lg font-black text-[color:var(--foreground)]">
+                    {planData.budget.market_area || "Not set"}
+                  </p>
+                </div>
+                <div className="ml-auto flex items-center gap-2 text-xs font-semibold text-[color:var(--muted)]">
+                  <Sparkles size={14} />
+                  Connected to saved budget and health data
+                </div>
+              </div>
+            </Card>
+          )}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {meals.map((meal) => (
+              <Card key={meal.name} className="transition-shadow hover:shadow-md">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: mealColors[meal.name] }}
+                    />
+                    <h3 className="text-sm font-bold text-[color:var(--foreground)]">
+                      {meal.name}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="green">{meal.calories} kcal</Badge>
+                    <Badge>BDT {meal.cost}</Badge>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  {meal.items.length > 0 ? (
+                    meal.items.map((item) => (
+                      <div key={item} className="flex items-center gap-2 text-sm text-[color:var(--muted)]">
+                        <Utensils size={12} strokeWidth={2} className="shrink-0 text-[color:var(--primary)]" />
+                        {item}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-[color:var(--muted)]">
+                      All suggested items were filtered by your avoid/allergy list.
+                    </p>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            <Card className="min-w-[200px] flex-1">
+              <div className="flex items-center gap-3">
+                <Flame size={20} strokeWidth={2} className="text-amber-500" />
+                <div>
+                  <p className="text-[11px] font-medium text-[color:var(--muted)]">Daily Calories</p>
+                  <p className="text-xl font-black text-[color:var(--foreground)]">
+                    {totalCalories} kcal
+                  </p>
+                </div>
+              </div>
+            </Card>
+            <Card className="min-w-[200px] flex-1">
+              <div className="flex items-center gap-3">
+                <Utensils size={20} strokeWidth={2} className="text-[color:var(--primary)]" />
+                <div>
+                  <p className="text-[11px] font-medium text-[color:var(--muted)]">Daily Cost</p>
+                  <p className="text-xl font-black text-[color:var(--foreground)]">
+                    BDT {totalCost}
+                  </p>
+                </div>
+              </div>
+            </Card>
+            <Card className="min-w-[200px] flex-1">
+              <div className="flex items-center gap-3">
+                <Dumbbell size={20} strokeWidth={2} className="text-indigo-500" />
+                <div>
+                  <p className="text-[11px] font-medium text-[color:var(--muted)]">Monthly Est.</p>
+                  <p className="text-xl font-black text-[color:var(--foreground)]">
+                    BDT {monthlyEstimate.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <Card>
+            <CardTitle>Nutrition Summary</CardTitle>
+            <CardDescription>Daily intake vs recommended targets</CardDescription>
+
+            <div className="mt-4 space-y-3">
+              {planData.nutrition.map((nutrient) => {
+                const pct = Math.min(100, Math.round((nutrient.value / nutrient.target) * 100));
+                return (
+                  <div key={nutrient.nutrient}>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium text-[color:var(--foreground)]">
+                        {nutrient.nutrient}
+                      </span>
+                      <span className="text-[color:var(--muted)]">
+                        {nutrient.value}
+                        {nutrient.unit} / {nutrient.target}
+                        {nutrient.unit}
+                      </span>
+                    </div>
+                    <div className="mt-1 h-2 overflow-hidden rounded-full bg-[color:var(--surface-muted)]">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${pct}%`,
+                          backgroundColor: pct >= 80 ? "#22c55e" : pct >= 50 ? "#f59e0b" : "#ef4444",
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
-        ))}
-      </div>
-
-      {/* Daily summary */}
-      <div className="flex flex-wrap gap-4">
-        <Card className="flex-1 min-w-[200px]">
-          <div className="flex items-center gap-3">
-            <Flame size={20} strokeWidth={2} className="text-amber-500" />
-            <div>
-              <p className="text-[11px] font-medium text-[color:var(--muted)]">Daily Calories</p>
-              <p className="text-xl font-black text-[color:var(--foreground)]">{totalCalories} kcal</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="flex-1 min-w-[200px]">
-          <div className="flex items-center gap-3">
-            <Utensils size={20} strokeWidth={2} className="text-[color:var(--primary)]" />
-            <div>
-              <p className="text-[11px] font-medium text-[color:var(--muted)]">Daily Cost</p>
-              <p className="text-xl font-black text-[color:var(--foreground)]">৳{totalCost}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="flex-1 min-w-[200px]">
-          <div className="flex items-center gap-3">
-            <Dumbbell size={20} strokeWidth={2} className="text-indigo-500" />
-            <div>
-              <p className="text-[11px] font-medium text-[color:var(--muted)]">Monthly Est.</p>
-              <p className="text-xl font-black text-[color:var(--foreground)]">৳{totalCost * 30}</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Nutrition chart */}
-      <Card>
-        <CardTitle>Nutrition Summary</CardTitle>
-        <CardDescription>Daily intake vs recommended targets</CardDescription>
-
-        <div className="mt-4 space-y-3">
-          {nutritionData.map((n) => {
-            const pct = Math.min(100, Math.round((n.value / n.target) * 100));
-            return (
-              <div key={n.nutrient}>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-[color:var(--foreground)]">{n.nutrient}</span>
-                  <span className="text-[color:var(--muted)]">
-                    {n.value}{n.unit} / {n.target}{n.unit}
-                  </span>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-[color:var(--surface-muted)]">
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${pct}%`,
-                      backgroundColor: pct >= 80 ? "#22c55e" : pct >= 50 ? "#f59e0b" : "#ef4444",
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
+        </>
+      )}
     </div>
   );
 }

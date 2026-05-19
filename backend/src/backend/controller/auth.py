@@ -27,6 +27,7 @@ def _auth_response(user: UserModel):
             "full_name": user.full_name,
             "phone": user.phone,
             "blood_group": user.blood_group,
+            "location": user.location,
         },
         "access_token": create_access_token(str(user.id), user.email),
         "refresh_token": create_refresh_token(str(user.id), user.email),
@@ -43,6 +44,7 @@ def add_user(user: UserCreate, session: Session = Depends(get_session)):
         full_name=user.full_name,
         phone=user.phone,
         blood_group=user.blood_group,
+        location=user.location,
     )
     try:
         created = svc.register_user(user_model)
@@ -103,6 +105,7 @@ def read_current_user(current_user: UserModel = Depends(get_current_user)):
         "full_name": current_user.full_name,
         "phone": current_user.phone,
         "blood_group": current_user.blood_group,
+        "location": current_user.location,
     }
 
 

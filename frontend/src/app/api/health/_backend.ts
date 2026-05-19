@@ -1,5 +1,3 @@
-import type { AuthSession } from "@/types/user";
-
 const BACKEND_URL =
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
@@ -94,6 +92,61 @@ export async function callBackendHealthHistory(accessToken: string) {
   return { history: data as unknown[], status: 200 };
 }
 
+export async function callBackendBudgetLatest(accessToken: string) {
+  const response = await fetch(getBackendUrl("/budget/latest"), {
+    method: "GET",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    return {
+      error: getErrorDetail(data, "Failed to fetch budget plan."),
+      status: response.status,
+    };
+  }
+
+  return { plan: data, status: 200 };
+}
+
+export async function callBackendBudgetSubmit(
+  accessToken: string,
+  body: Record<string, unknown>,
+) {
+  const response = await fetch(getBackendUrl("/budget/"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    return {
+      error: getErrorDetail(data, "Failed to save budget plan."),
+      status: response.status,
+    };
+  }
+
+  return { plan: data, status: 200 };
+}
+
 export async function callBackendProfileUpdate(
   accessToken: string,
   body: Record<string, unknown>,
@@ -123,4 +176,114 @@ export async function callBackendProfileUpdate(
   }
 
   return { user: data, status: 200 };
+}
+
+// ── MCP Server Integration ──
+
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+
+const MCP_SERVER_URL = process.env.MCP_SERVER_URL || "http://localhost:7860";
+
+export async function callMcpTool(
+  toolName: string,
+  args: Record<string, unknown>,
+) {
+  const transport = new SSEClientTransport(new URL(`${MCP_SERVER_URL}/sse`));
+  const client = new Client(
+    { name: "nutrishastho-nextjs", version: "1.0.0" },
+    { capabilities: {} }
+  );
+
+  try {
+    await client.connect(transport);
+    
+    const result = await client.callTool({
+      name: toolName,
+      arguments: args,
+    });
+
+    const textContent = result.content.find((c) => c.type === "text");
+    if (!textContent || typeof textContent.text !== "string") {
+      throw new Error("No text content in MCP response");
+    }
+
+    let data;
+    try {
+      data = JSON.parse(textContent.text);
+    } catch {
+      data = textContent.text;
+    }
+
+    return { data, status: 200 };
+  } catch (error) {
+    console.error("MCP call failed:", error);
+    return { 
+      error: error instanceof Error ? error.message : "MCP call failed", 
+      status: 500 
+    };
+  } finally {
+    try {
+      await client.close();
+    } catch {
+      // Ignore close errors
+    }
+  }
+}
+
+// ── Exercise Plan Backend Helpers ──
+
+export async function callBackendExercisePlan(accessToken: string) {
+  const response = await fetch(getBackendUrl("/exercise/plan"), {
+    method: "GET",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    return {
+      error: getErrorDetail(data, "Failed to fetch exercise plan."),
+      status: response.status,
+    };
+  }
+
+  return { plan: data, status: 200 };
+}
+
+export async function callBackendExercisePlanSubmit(
+  accessToken: string,
+  body: Record<string, unknown>,
+) {
+  const response = await fetch(getBackendUrl("/exercise/plan"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    return {
+      error: getErrorDetail(data, "Failed to save exercise plan."),
+      status: response.status,
+    };
+  }
+
+  return { plan: data, status: 200 };
 }
