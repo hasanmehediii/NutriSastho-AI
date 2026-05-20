@@ -18,6 +18,8 @@ import {
   Settings,
   X,
   LogOut,
+  MessageCircle,
+  BookOpen,
 } from "lucide-react";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
@@ -29,9 +31,11 @@ const navItems = [
   { href: "/budget", label: "Budget", labelBn: "বাজেট", icon: Wallet },
   { href: "/diet-plan", label: "Diet Plan", labelBn: "ডায়েট প্ল্যান", icon: Utensils },
   { href: "/meal-scanner", label: "Meal Scanner", labelBn: "খাবার স্ক্যানার", icon: Camera },
+  { href: "/nutribot", label: "NutriBot Chat", labelBn: "নিউট্রিবট", icon: MessageCircle },
   { href: "/exercise-plan", label: "Exercise Plan", labelBn: "ব্যায়াম পরিকল্পনা", icon: Dumbbell },
   { href: "/risk-analysis", label: "Risk Analysis", labelBn: "রিস্ক বিশ্লেষণ", icon: ShieldAlert },
   { href: "/nearby-care", label: "Nearby Care", labelBn: "কাছের সেবা", icon: MapPin },
+  { href: "/food-database", label: "Food Database", labelBn: "খাদ্য তালিকা", icon: BookOpen },
   { href: "/reports", label: "Reports", labelBn: "রিপোর্ট", icon: FileText },
   { href: "/family", label: "Family", labelBn: "পরিবার", icon: Users },
   { href: "/settings", label: "Settings", labelBn: "সেটিংস", icon: Settings },
