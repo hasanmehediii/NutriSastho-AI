@@ -203,7 +203,8 @@ export async function callMcpTool(
       arguments: args,
     });
 
-    const textContent = result.content.find((c) => c.type === "text");
+    const content = result.content as Array<{ type: string; text?: string }>;
+    const textContent = content.find((c) => c.type === "text");
     if (!textContent || typeof textContent.text !== "string") {
       throw new Error("No text content in MCP response");
     }
