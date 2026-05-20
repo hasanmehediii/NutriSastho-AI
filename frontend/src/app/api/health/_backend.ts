@@ -288,3 +288,67 @@ export async function callBackendExercisePlanSubmit(
 
   return { plan: data, status: 200 };
 }
+
+// ── Food Item Backend Helpers ──
+
+export async function callBackendFoodItems() {
+  const response = await fetch(getBackendUrl("/food"), {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    return {
+      error: getErrorDetail(data, "Failed to fetch food items."),
+      status: response.status,
+    };
+  }
+
+  return { items: data as FoodItemFromBackend[], status: 200 };
+}
+
+export async function callBackendSyncPrices() {
+  const response = await fetch(getBackendUrl("/food/sync-prices"), {
+    method: "POST",
+    cache: "no-store",
+  });
+
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    return {
+      error: getErrorDetail(data, "Failed to sync prices."),
+      status: response.status,
+    };
+  }
+
+  return { result: data as { status: string; updated_items: number; failed_items: number; total_items: number; source: string }, status: 200 };
+}
+
+export type FoodItemFromBackend = {
+  id: string;
+  name_en: string;
+  name_bn: string;
+  category: string;
+  serving: string;
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  fiber_g: number;
+  price_bdt: string;
+  tags: string[];
+};
+

@@ -3,7 +3,9 @@ import { getSession } from "@/lib/auth/session";
 import {
   callBackendBudgetLatest,
   callBackendHealthProfile,
+  callBackendFoodItems,
 } from "../../health/_backend";
+import type { FoodItemFromBackend } from "../../health/_backend";
 import type { DayPlan, DietPlanResponse, Meal } from "@/types/diet";
 
 type HealthProfile = {
@@ -35,10 +37,6 @@ const DAYS = [
   { key: "thu", label: "Thu" },
   { key: "fri", label: "Fri" },
 ] as const;
-
-const LOW_COST_PROTEINS = ["egg", "masoor dal", "chola", "small fish", "soybean"];
-const MID_COST_PROTEINS = ["rui fish", "tilapia", "chicken", "egg", "dal"];
-const HIGH_COST_PROTEINS = ["rui fish", "chicken", "yogurt", "milk", "small fish"];
 
 function jsonResponse(data: DietPlanResponse) {
   return NextResponse.json(data);
@@ -76,19 +74,35 @@ function getConditionWarning(profile: HealthProfile | null): DietPlanResponse["c
   };
 }
 
-function pickProteins(monthlyBudget: number, preferred: string[]) {
-  const preferredLower = preferred.map((p) => p.toLowerCase());
-  const base =
-    monthlyBudget < 5000
-      ? LOW_COST_PROTEINS
-      : monthlyBudget < 10000
-        ? MID_COST_PROTEINS
-        : HIGH_COST_PROTEINS;
+// ── Dynamic price helpers ──
 
-  return [
-    ...preferred.filter(Boolean).slice(0, 2),
-    ...base.filter((p) => !preferredLower.some((x) => x.includes(p))),
-  ];
+function parsePriceBdt(priceStr: string): number {
+  // Parse "15-20 ৳" → average 17.5, or "15 ৳" → 15
+  const nums = priceStr.match(/\d+/g);
+  if (!nums || nums.length === 0) return 0;
+  const values = nums.map(Number);
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
+function pickFoodsByCategory(
+  foodItems: FoodItemFromBackend[],
+  category: string,
+  budget: "low" | "mid" | "high",
+  avoided: string[],
+  count: number,
+): FoodItemFromBackend[] {
+  const avoidLower = avoided.map((a) => a.toLowerCase());
+  const filtered = foodItems
+    .filter((f) => f.category === category)
+    .filter((f) => !avoidLower.some((bad) => f.name_en.toLowerCase().includes(bad)))
+    .sort((a, b) => parsePriceBdt(a.price_bdt) - parsePriceBdt(b.price_bdt));
+
+  if (budget === "low") return filtered.slice(0, count);
+  if (budget === "mid") {
+    const mid = Math.floor(filtered.length / 3);
+    return filtered.slice(mid, mid + count);
+  }
+  return filtered.slice(-count);
 }
 
 function removeAvoided(items: string[], avoided: string[]) {
@@ -103,6 +117,7 @@ function meal(name: Meal["name"], items: string[], cost: number, calories: numbe
 function buildRulesDietPlan(
   profile: HealthProfile | null,
   budget: BudgetPlan | null,
+  foodItems: FoodItemFromBackend[],
 ): DietPlanResponse {
   const monthlyBudget = budget?.monthly_budget_bdt ?? 6000;
   const familySize = budget?.family_size ?? 1;
@@ -112,55 +127,114 @@ function buildRulesDietPlan(
     ...(budget?.foods_to_avoid ?? []),
     ...((profile?.allergies ?? "").split(",").map((x) => x.trim()).filter(Boolean)),
   ];
-  const proteins = pickProteins(monthlyBudget, preferred);
-  const lowSalt = getConditionWarning(profile).type === "hypertension";
-  const diabetic = getConditionWarning(profile).type === "diabetes";
-  const weightFocused = getConditionWarning(profile).type === "weight";
+
+  const budgetTier: "low" | "mid" | "high" =
+    monthlyBudget < 5000 ? "low" : monthlyBudget < 10000 ? "mid" : "high";
+
+  const conditionWarning = getConditionWarning(profile);
+  const lowSalt = conditionWarning.type === "hypertension";
+  const diabetic = conditionWarning.type === "diabetes";
+  const weightFocused = conditionWarning.type === "weight";
+
+  // Dynamically pick proteins from the live food database sorted by price
+  const proteins = pickFoodsByCategory(foodItems, "fish_meat", budgetTier, avoided, 5);
+  const grains = pickFoodsByCategory(foodItems, "rice_grains", budgetTier, avoided, 4);
+  const dals = pickFoodsByCategory(foodItems, "dal_pulses", budgetTier, avoided, 3);
+  const vegs = pickFoodsByCategory(foodItems, "vegetables", budgetTier, avoided, 5);
+  const fruits = pickFoodsByCategory(foodItems, "fruits", budgetTier, avoided, 3);
+
+  // If preferred foods are specified, push them to front
+  const preferredLower = preferred.map((p) => p.toLowerCase());
+  const sortByPreferred = (items: FoodItemFromBackend[]) => {
+    return items.sort((a, b) => {
+      const aMatch = preferredLower.some((p) => a.name_en.toLowerCase().includes(p)) ? -1 : 0;
+      const bMatch = preferredLower.some((p) => b.name_en.toLowerCase().includes(p)) ? -1 : 0;
+      return aMatch - bMatch;
+    });
+  };
+  sortByPreferred(proteins);
 
   const dayPlans = DAYS.map((day, index) => {
-    const protein = proteins[index % proteins.length] ?? "egg";
-    const secondProtein = proteins[(index + 2) % proteins.length] ?? "dal";
-    const ricePortion = diabetic || weightFocused ? "Rice (small portion)" : "Rice";
+    const protein = proteins[index % proteins.length];
+    const secondProtein = proteins[(index + 2) % proteins.length];
+    const grain = grains[index % grains.length];
+    const dal = dals[index % dals.length];
+    const veg = vegs[index % vegs.length];
+    const veg2 = vegs[(index + 1) % vegs.length];
+    const fruit = fruits[index % fruits.length];
+
+    const proteinName = protein?.name_en ?? "Egg";
+    const secondProteinName = secondProtein?.name_en ?? "Dal";
+    const grainName = grain?.name_en ?? "Rice";
+    const dalName = dal?.name_en ?? "Masoor Dal";
+    const vegName = veg?.name_en ?? "Mixed vegetables";
+    const veg2Name = veg2?.name_en ?? "Leafy vegetables";
+    const fruitName = fruit?.name_en ?? "Banana";
+
+    const ricePortion = diabetic || weightFocused ? `${grainName} (small portion)` : grainName;
     const saltNote = lowSalt ? "low-salt" : "home-cooked";
-    const snack = diabetic
+    const snackItems = diabetic
       ? ["Guava", "Roasted chickpeas"]
-      : ["Seasonal fruit", monthlyBudget < 5000 ? "Muri" : "Yogurt"];
+      : [fruitName, monthlyBudget < 5000 ? "Muri" : "Yogurt"];
+
+    // Calculate cost from live prices
+    const breakfastCost = Math.round(
+      (parsePriceBdt(grain?.price_bdt ?? "8") + parsePriceBdt(protein?.price_bdt ?? "12")) * 0.6
+    );
+    const lunchCost = Math.round(
+      parsePriceBdt(grain?.price_bdt ?? "8") +
+      parsePriceBdt(dal?.price_bdt ?? "20") +
+      parsePriceBdt(protein?.price_bdt ?? "20") +
+      parsePriceBdt(veg?.price_bdt ?? "5")
+    );
+    const snackCost = Math.round(parsePriceBdt(fruit?.price_bdt ?? "5") + 5);
+    const dinnerCost = Math.round(
+      parsePriceBdt(grain?.price_bdt ?? "8") * 0.7 +
+      parsePriceBdt(secondProtein?.price_bdt ?? "15") +
+      parsePriceBdt(veg2?.price_bdt ?? "5")
+    );
 
     const plan: DayPlan = {
       breakfast: meal(
         "Breakfast",
         removeAvoided(
           [
-            index % 2 === 0 ? "Roti (2)" : "Chira with milk",
-            protein.includes("egg") ? "Boiled egg" : "Vegetable bhaji",
-            diabetic ? "Unsweetened tea" : "Banana",
+            index % 2 === 0 ? "Roti (2)" : `${grainName}`,
+            proteinName.includes("Egg") ? "Boiled egg" : `${vegName} bhaji`,
+            diabetic ? "Unsweetened tea" : fruitName,
           ],
           avoided,
         ),
-        Math.round(dailyBudgetPerPerson * 0.22),
+        breakfastCost || Math.round(dailyBudgetPerPerson * 0.22),
         diabetic ? 320 : 380,
       ),
       lunch: meal(
         "Lunch",
-        removeAvoided([ricePortion, "Dal", `${protein} curry (${saltNote})`, "Leafy vegetables"], avoided),
-        Math.round(dailyBudgetPerPerson * 0.38),
+        removeAvoided(
+          [ricePortion, dalName, `${proteinName} curry (${saltNote})`, veg2Name],
+          avoided,
+        ),
+        lunchCost || Math.round(dailyBudgetPerPerson * 0.38),
         diabetic || weightFocused ? 520 : 620,
       ),
       snack: meal(
         "Snack",
-        removeAvoided(snack, avoided),
-        Math.round(dailyBudgetPerPerson * 0.12),
+        removeAvoided(snackItems, avoided),
+        snackCost || Math.round(dailyBudgetPerPerson * 0.12),
         diabetic ? 130 : 170,
       ),
       dinner: meal(
         "Dinner",
-        removeAvoided([
-          weightFocused ? "Roti (2)" : "Rice (small)",
-          `${secondProtein} curry`,
-          "Mixed vegetables",
-          "Cucumber salad",
-        ], avoided),
-        Math.round(dailyBudgetPerPerson * 0.28),
+        removeAvoided(
+          [
+            weightFocused ? "Roti (2)" : `${grainName} (small)`,
+            `${secondProteinName} curry`,
+            vegName,
+            "Cucumber salad",
+          ],
+          avoided,
+        ),
+        dinnerCost || Math.round(dailyBudgetPerPerson * 0.28),
         weightFocused ? 430 : 520,
       ),
     };
@@ -178,7 +252,7 @@ function buildRulesDietPlan(
           market_area: budget.market_area,
         }
       : null,
-    conditionWarning: getConditionWarning(profile),
+    conditionWarning,
     days: dayPlans,
     nutrition: [
       { nutrient: "Calories", value: weightFocused ? 1600 : 1800, target: 2000, unit: "kcal" },
@@ -211,14 +285,33 @@ function isDietPlanResponse(value: Partial<DietPlanResponse> | null): value is D
   );
 }
 
-function buildPrompt(profile: HealthProfile | null, budget: BudgetPlan | null) {
+function buildFoodContext(foodItems: FoodItemFromBackend[]) {
+  // Build a compact table of food items with live prices for the LLM
+  const rows = foodItems.map(
+    (f) => `${f.name_en} (${f.name_bn}) | ${f.category} | ${f.serving} | ${f.price_bdt} | ${f.calories}kcal | P:${f.protein_g}g C:${f.carbs_g}g F:${f.fat_g}g | tags: ${f.tags.join(",")}`
+  );
+  return rows.join("\n");
+}
+
+function buildPrompt(
+  profile: HealthProfile | null,
+  budget: BudgetPlan | null,
+  foodItems: FoodItemFromBackend[],
+) {
   return [
     "Generate a budget-aware Bangladeshi weekly diet plan as strict JSON only.",
     "Do not include markdown. Do not include medical diagnosis.",
     "Shape: {source,budget,conditionWarning,days,nutrition}.",
     "Each days item: {key,label,plan:{breakfast,lunch,snack,dinner}}.",
     "Each meal: {name,items,cost,calories}. Costs are BDT per person per day.",
-    "Use local foods and respect allergies/foods_to_avoid.",
+    "Use the LIVE MARKET PRICES below to calculate realistic costs.",
+    "Respect allergies/foods_to_avoid and stay within the user's budget.",
+    "",
+    "=== LIVE FOOD PRICES (scraped from Bangladeshi market) ===",
+    "Format: Name (Bengali) | Category | Serving | Price BDT | Calories | Macros | Tags",
+    buildFoodContext(foodItems),
+    "=== END FOOD PRICES ===",
+    "",
     `Budget: ${JSON.stringify(budget)}`,
     `Health profile: ${JSON.stringify(profile)}`,
   ].join("\n");
@@ -282,15 +375,19 @@ export async function POST() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const [profileResult, budgetResult] = await Promise.all([
+  // Fetch health, budget, and live food items in parallel
+  const [profileResult, budgetResult, foodResult] = await Promise.all([
     callBackendHealthProfile(session.access_token),
     callBackendBudgetLatest(session.access_token),
+    callBackendFoodItems(),
   ]);
 
   const profile = "profile" in profileResult ? (profileResult.profile as HealthProfile | null) : null;
   const budget = "plan" in budgetResult ? (budgetResult.plan as BudgetPlan | null) : null;
-  const fallback = buildRulesDietPlan(profile, budget);
-  const prompt = buildPrompt(profile, budget);
+  const foodItems: FoodItemFromBackend[] = "items" in foodResult ? (foodResult.items ?? []) : [];
+
+  const fallback = buildRulesDietPlan(profile, budget, foodItems);
+  const prompt = buildPrompt(profile, budget, foodItems);
 
   try {
     const groqText = await callGroq(prompt);
