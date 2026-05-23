@@ -21,7 +21,7 @@ def search_foods(food_name: str) -> str:
         return f"Database error: {str(e)}"
 
 def search_clinics(city: str, limit: int) -> str:
-    url = f"{get_frontend_url()}/api/clinics?limit={limit}"
+    url = f"{get_backend_url()}/clinics?limit={limit}"
     if city:
         url += f"&city={urllib.parse.quote(city)}"
     try:

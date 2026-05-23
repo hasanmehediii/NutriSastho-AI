@@ -2,7 +2,8 @@ from fastmcp import FastMCP
 from mcp_99bugsincode.logger import logger
 from mcp_99bugsincode.schemas import (
     BMICalculatorInput, DailyCaloriesInput, FoodSearchInput, 
-    HospitalSearchInput, MealPlanInput, DiabetesRiskInput, UserProfileInput
+    HospitalSearchInput, MealPlanInput, DiabetesRiskInput, UserProfileInput,
+    MedicalReportInput, FoodScrapeInput
 )
 from mcp_99bugsincode.backend_integration import (
     search_foods, search_clinics, fetch_health_profile, fetch_budget_plan
@@ -103,3 +104,39 @@ def get_user_budget_plan(input: UserProfileInput) -> str:
     """Fetch a user's nutrition budget from the backend API."""
     logger.info(f"Executing tool: get_user_budget_plan for {input.user_id}")
     return fetch_budget_plan(input.user_id)
+
+@mcp.tool()
+def analyze_medical_report(input: MedicalReportInput) -> str:
+    """Analyze a medical lab report based on the user's health profile."""
+    logger.info(f"Executing tool: analyze_medical_report for user {input.user_id}")
+    profile_data = fetch_health_profile(input.user_id)
+    return f"Patient Context:\n{profile_data}\n\nLab Report Text:\n{input.report_text}\n\nExplain any out-of-range values in simple terms."
+
+@mcp.tool()
+def scrape_live_food_price(input: FoodScrapeInput) -> str:
+    """Scrape the live market price of a food ingredient from Bangladeshi e-commerce sites."""
+    logger.info(f"Executing tool: scrape_live_food_price for {input.food_name}")
+    import httpx
+    from bs4 import BeautifulSoup
+    import re
+    try:
+        query = f"price of {input.food_name} in bangladesh"
+        response = httpx.post(
+            "https://html.duckduckgo.com/html/",
+            headers={"User-Agent": "Mozilla/5.0"},
+            data={"q": query},
+            timeout=10.0
+        )
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, "html.parser")
+            snippets = [a.text for a in soup.select('.result__snippet')]
+            prices_found = []
+            for text in snippets:
+                matches = re.findall(r'(?:BDT|Tk|৳|Tk\.|BDT\.)\s*(\d{2,4})', text, re.IGNORECASE)
+                matches += re.findall(r'(\d{2,4})\s*(?:BDT|Tk|৳|/-)', text, re.IGNORECASE)
+                prices_found.extend([int(m) for m in matches])
+            if prices_found:
+                return f"Live market scan found prices for {input.food_name} ranging from {min(prices_found)} to {max(prices_found)} BDT."
+        return f"Could not determine exact live price for {input.food_name}."
+    except Exception as e:
+        return f"Error scraping live price: {str(e)}"
