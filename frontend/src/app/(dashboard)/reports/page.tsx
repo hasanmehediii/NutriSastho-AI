@@ -10,6 +10,8 @@ import {
   TestTube,
   Printer,
   AlertTriangle,
+  Bot,
+  Activity
 } from "lucide-react";
 import { Card, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -68,6 +70,19 @@ export default function ReportsPage() {
   const [generating, setGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // New states for lab report analysis
+  const [reportText, setReportText] = useState("");
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<{
+    summary: string;
+    abnormal_findings: Array<{
+      parameter: string;
+      value: string;
+      explanation: string;
+      recommendation: string;
+    }>;
+  } | null>(null);
+
   useEffect(() => {
     Promise.all([getHealthProfile(), getHealthHistory()])
       .then(([p, h]) => {
@@ -82,8 +97,27 @@ export default function ReportsPage() {
     setGenerating(true);
     await new Promise((r) => setTimeout(r, 2000));
     setGenerating(false);
-    // In a real app, this would trigger a PDF download
     alert("Report generated! (Mock download)");
+  }
+
+  async function handleAnalyzeReport() {
+    if (!reportText.trim()) return;
+    setAnalyzing(true);
+    try {
+      const res = await fetch("/api/ai/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ report_text: reportText }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAnalysisResult(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   if (loading) {
@@ -102,12 +136,11 @@ export default function ReportsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      {/* Actions */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold text-[color:var(--foreground)]">Health Reports</h2>
           <p className="text-sm text-[color:var(--muted)]">
-            Generate doctor-ready health summaries from your data
+            Generate doctor-ready health summaries from your data and analyze lab reports
           </p>
         </div>
         <div className="flex gap-2">
@@ -124,7 +157,7 @@ export default function ReportsPage() {
             onClick={handleGenerate}
             disabled={!profile}
           >
-            Generate New Report
+            Generate Summary PDF
           </Button>
         </div>
       </div>
@@ -137,11 +170,65 @@ export default function ReportsPage() {
               No Health Data Available
             </p>
             <p className="mt-0.5 text-xs text-amber-600/80 dark:text-amber-400/80">
-              Please submit your vitals in the Health Input section to generate a report.
+              Please submit your vitals in the Health Input section.
             </p>
           </div>
         </div>
       )}
+
+      {/* Lab Report Analysis Section */}
+      <Card variant="bordered">
+        <div className="flex items-center gap-2 mb-3">
+          <Bot size={20} className="text-[color:var(--primary)]" />
+          <h3 className="text-lg font-bold text-[color:var(--foreground)]">AI Lab Report Analysis</h3>
+        </div>
+        <p className="text-sm text-[color:var(--muted)] mb-4">
+          Paste the text from your medical lab report (e.g. CBC, lipid profile, blood sugar) here, and NutriShastho AI will explain any out-of-range values in simple terms based on your profile.
+        </p>
+        <div className="flex flex-col gap-3">
+          <textarea
+            value={reportText}
+            onChange={(e) => setReportText(e.target.value)}
+            placeholder="Paste lab results here..."
+            className="w-full min-h-[120px] rounded-xl border border-[color:var(--border)] bg-transparent px-4 py-3 text-sm text-[color:var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
+          />
+          <Button 
+            onClick={handleAnalyzeReport} 
+            loading={analyzing} 
+            disabled={!reportText.trim()}
+            className="self-end"
+          >
+            Analyze with AI
+          </Button>
+        </div>
+
+        {analysisResult && (
+          <div className="mt-6 space-y-4 border-t border-[color:var(--border)] pt-5">
+            <h4 className="text-md font-bold text-[color:var(--foreground)]">Analysis Summary</h4>
+            <p className="text-sm text-[color:var(--foreground)] bg-[color:var(--primary)]/10 p-4 rounded-xl">
+              {analysisResult.summary}
+            </p>
+            
+            {analysisResult.abnormal_findings && analysisResult.abnormal_findings.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-md font-bold text-red-500 flex items-center gap-2">
+                  <Activity size={16} /> Key Findings to Watch
+                </h4>
+                {analysisResult.abnormal_findings.map((finding, i) => (
+                  <div key={i} className="bg-[color:var(--surface-soft)] rounded-xl p-4 border border-[color:var(--border)]">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-bold text-sm text-[color:var(--foreground)]">{finding.parameter}</span>
+                      <Badge variant="red">{finding.value}</Badge>
+                    </div>
+                    <p className="text-sm text-[color:var(--muted)] mb-2"><strong>Explanation:</strong> {finding.explanation}</p>
+                    <p className="text-sm text-[color:var(--muted)]"><strong>Action:</strong> {finding.recommendation}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
 
       {/* Current report preview */}
       {profile && risk && (
@@ -150,10 +237,10 @@ export default function ReportsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-black text-[color:var(--foreground)]">
-                  NutriShastho AI Health Report
+                  NutriShastho Standard Health Summary
                 </h3>
                 <p className="mt-1 text-xs text-[color:var(--muted)]">
-                  Generated {new Date().toLocaleDateString()} · Report ID: NS-{new Date().getTime().toString().slice(-6)}
+                  Generated {new Date().toLocaleDateString()}
                 </p>
               </div>
               <Badge variant={reportLevelBadge[risk.level]} dot>{risk.level} Risk</Badge>
@@ -285,43 +372,6 @@ export default function ReportsPage() {
         </Card>
       )}
 
-      {/* Past reports */}
-      {history.length > 0 && (
-        <Card>
-          <CardTitle>Report History</CardTitle>
-          <CardDescription>Previously generated health reports based on your data</CardDescription>
-
-          <div className="mt-4 space-y-3">
-            {history.map((h) => {
-              const hRisk = computeRisk(h);
-              return (
-                <div
-                  key={h.id}
-                  className="flex items-center justify-between rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-soft)]/50 px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-9 w-9 place-items-center rounded-lg bg-[color:var(--primary)]/10">
-                      <FileText size={16} strokeWidth={2} className="text-[color:var(--primary)]" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[color:var(--foreground)]">
-                        {new Date(h.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[11px] text-[color:var(--muted)]">Score: {hRisk.score}/100</span>
-                        <Badge variant={reportLevelBadge[hRisk.level]}>{hRisk.level}</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm" icon={<Download size={14} />}>
-                    Download
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }

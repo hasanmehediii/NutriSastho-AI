@@ -35,6 +35,7 @@ export default function DietPlanPage() {
   const [planData, setPlanData] = useState<DietPlanResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [regenerating, setRegenerating] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
 
   async function loadPlan(isRegenerate = false) {
@@ -138,7 +139,7 @@ export default function DietPlanPage() {
               active={activeDay}
               onChange={setActiveDay}
             />
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
               <Badge variant={planData.source === "rules" ? "default" : "blue"} dot>
                 {formatSource(planData.source)}
               </Badge>
@@ -149,6 +150,26 @@ export default function DietPlanPage() {
                 onClick={() => void loadPlan(true)}
               >
                 Regenerate
+              </Button>
+              <Button
+                variant="secondary"
+                className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 dark:text-emerald-400"
+                icon={<RefreshCw size={14} className={syncing ? "animate-spin" : ""} />}
+                onClick={async () => {
+                  setSyncing(true);
+                  try {
+                    const res = await fetch("/api/food/sync-prices", { method: "POST" });
+                    if (!res.ok) throw new Error("Failed to sync");
+                    await loadPlan(true); // reload plan with new prices
+                  } catch (e) {
+                    console.error("Sync failed:", e);
+                  } finally {
+                    setSyncing(false);
+                  }
+                }}
+                disabled={syncing || loading || regenerating}
+              >
+                {syncing ? "Syncing..." : "Sync Live Market Prices"}
               </Button>
             </div>
           </div>

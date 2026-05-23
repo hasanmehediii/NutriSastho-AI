@@ -31,3 +31,12 @@ class DiabetesRiskInput(BaseModel):
 
 class UserProfileInput(BaseModel):
     user_id: str = Field(..., description="The UUID of the user")
+
+class MedicalReportInput(BaseModel):
+    user_id: str = Field(..., description="The UUID of the user")
+    report_text: str = Field(..., description="The raw text of the medical lab report")
+
+class FoodScrapeInput(BaseModel):
+    food_name: str = Field(..., description="The name of the food ingredient to scrape the live price for")
+
+

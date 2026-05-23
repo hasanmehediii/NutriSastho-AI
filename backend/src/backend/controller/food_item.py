@@ -23,3 +23,8 @@ def get_all_food_items(session: Session = Depends(get_session)):
     svc = FoodItemService(session)
     items = svc.get_all()
     return [_food_item_to_dict(i) for i in items]
+
+async def sync_prices(session: Session = Depends(get_session)):
+    svc = FoodItemService(session)
+    result = await svc.sync_realtime_prices()
+    return result

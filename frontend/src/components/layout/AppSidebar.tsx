@@ -40,7 +40,7 @@ const navItems = [
   { href: "/nearby-care", label: "Nearby Care", labelBn: "কাছের সেবা", icon: MapPin },
   { href: "/food-database", label: "Food Database", labelBn: "খাদ্য তালিকা", icon: BookOpen },
   { href: "/reports", label: "Reports", labelBn: "রিপোর্ট", icon: FileText },
-  { href: "/family", label: "Family", labelBn: "পরিবার", icon: Users },
+  // { href: "/family", label: "Family", labelBn: "পরিবার", icon: Users },
   { href: "/settings", label: "Settings", labelBn: "সেটিংস", icon: Settings },
 ];
 

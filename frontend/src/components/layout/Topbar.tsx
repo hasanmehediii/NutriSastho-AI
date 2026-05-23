@@ -14,7 +14,7 @@ const pageTitles: Record<string, { en: string; bn: string }> = {
   "/risk-analysis": { en: "Risk Analysis", bn: "রিস্ক বিশ্লেষণ" },
   "/nearby-care": { en: "Nearby Care", bn: "কাছের সেবা" },
   "/reports": { en: "Reports", bn: "রিপোর্ট" },
-  "/family": { en: "Family Profiles", bn: "পরিবার প্রোফাইল" },
+  // "/family": { en: "Family Profiles", bn: "পরিবার প্রোফাইল" },
   "/settings": { en: "Settings", bn: "সেটিংস" },
 };
 
