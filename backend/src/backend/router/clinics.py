@@ -3,8 +3,12 @@ import math
 import os
 from typing import Optional
 
-from fastapi import APIRouter, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from backend.database import get_session
+from backend.model.Clinic import Clinic
 
 router = APIRouter(prefix="/clinics", tags=["Clinics"])
 
@@ -28,6 +32,22 @@ def infer_type(name: str) -> str:
     return "Hospital"
 
 cached_hospitals = None
+
+
+def hospital_from_clinic(clinic: Clinic) -> dict:
+    return {
+        "id": clinic.id,
+        "hospital_name": clinic.hospital_name,
+        "area": clinic.area,
+        "city": clinic.city,
+        "country": clinic.country,
+        "latitude": clinic.latitude,
+        "longitude": clinic.longitude,
+        "image_url": clinic.image_url or "",
+        "address": clinic.address or "",
+        "type": clinic.facility_type,
+    }
+
 
 def load_hospitals():
     global cached_hospitals
@@ -69,9 +89,11 @@ def get_clinics(
     lng: Optional[float] = Query(0.0),
     city: Optional[str] = Query(""),
     type: Optional[str] = Query(""),
-    limit: Optional[int] = Query(30)
+    limit: Optional[int] = Query(30),
+    session: Session = Depends(get_session),
 ):
-    hospitals = load_hospitals()
+    clinics = session.execute(select(Clinic)).scalars().all()
+    hospitals = [hospital_from_clinic(clinic) for clinic in clinics] or load_hospitals()
     city_filter = city.lower() if city else ""
     type_filter = type.lower() if type else ""
     
