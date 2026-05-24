@@ -80,6 +80,24 @@ def get_cors_origins() -> list[str]:
     return list(dict.fromkeys([*defaults, *origins]))
 
 
+def get_int_env(name: str, default: int, minimum: int = 0) -> int:
+    load_env_files()
+
+    raw_value = os.getenv(name)
+    if raw_value is None or raw_value.strip() == "":
+        return default
+
+    try:
+        value = int(raw_value)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be an integer.") from exc
+
+    if value < minimum:
+        raise ValueError(f"{name} must be at least {minimum}.")
+
+    return value
+
+
 def is_non_local_environment() -> bool:
     load_env_files()
 
