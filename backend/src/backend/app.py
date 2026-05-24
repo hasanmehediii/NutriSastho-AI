@@ -13,6 +13,7 @@ from backend.router.budget import router as budget_router
 from backend.router.exercise_plan import router as exercise_router
 from backend.router.food_item import router as food_router
 from backend.router.clinics import router as clinics_router
+from backend.config import get_cors_origins
 
 
 def custom_encoder(obj):
@@ -26,11 +27,7 @@ def custom_encoder(obj):
 app = FastAPI(json_encoders={UUID: str, datetime: lambda v: v.isoformat()})
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://server99bugsincode.vercel.app",
-    ],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

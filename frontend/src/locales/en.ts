@@ -8,6 +8,7 @@ export const en: Translations = {
       { label: "How it works", href: "#workflow" },
       { label: "Safety", href: "#safety" },
       { label: "Demo", href: "#demo" },
+      { label: "Documentation", href: "/documentation" },
     ],
     login: "Sign in",
     cta: "Get Started",

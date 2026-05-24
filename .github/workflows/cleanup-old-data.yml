@@ -1,0 +1,37 @@
+name: Cleanup Old Database Records
+
+on:
+  schedule:
+    - cron: "0 20 * * *"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      TYPE: remote
+      ENV: production
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      RETENTION_EXERCISE_PLANS_DAYS: ${{ vars.RETENTION_EXERCISE_PLANS_DAYS || '30' }}
+      RETENTION_BUDGET_PLANS_DAYS: ${{ vars.RETENTION_BUDGET_PLANS_DAYS || '180' }}
+      RETENTION_HEALTH_PROFILES_DAYS: ${{ vars.RETENTION_HEALTH_PROFILES_DAYS || '365' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev
+
+      - name: Cleanup old rows
+        run: uv run python scripts/cleanup_old_data.py --apply

@@ -21,6 +21,15 @@ class ExercisePlanService:
         return self.session.execute(stmt).scalars().first()
 
     def create(self, user_id: UUID, data: ExercisePlanCreate) -> ExercisePlan:
+        latest = self.get_latest(user_id)
+        if (
+            latest
+            and latest.plan_data == data.plan_data
+            and latest.risk_level == data.risk_level
+            and latest.source == data.source
+        ):
+            return latest
+
         row = ExercisePlan(
             user_id=user_id,
             plan_data=data.plan_data,

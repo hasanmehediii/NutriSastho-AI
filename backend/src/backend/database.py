@@ -1,26 +1,10 @@
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-import os
-import dotenv
 
-dotenv.load_dotenv()
+from sqlalchemy import create_engine
 
-run_type = os.getenv("TYPE", "local").strip()
-DATABASE_URL = None
-if run_type == "remote":
-    DATABASE_URL = os.getenv("DATABASE_URL_REMOTE")
-elif run_type == "local":
-    DATABASE_URL = os.getenv("DATABASE_URL_LOCAL")
-elif run_type == "testing":
-    DATABASE_URL = os.getenv("DATABASE_URL_TESTING")
-else:
-    raise ValueError(f"Invalid TYPE value: {run_type}. Expected 'local' or 'remote' or 'testing'.")
+from backend.config import get_database_url
 
-
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is not set.")   
-
-engine = create_engine(DATABASE_URL, echo=False)
+engine = create_engine(get_database_url(), echo=False, pool_pre_ping=True)
 
 
 def get_session():

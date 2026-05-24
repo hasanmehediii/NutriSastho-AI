@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: nutrishastho-backend
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: TYPE
+        value: remote
+      - key: ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+
+  - type: web
+    name: nutrishastho-mcp
+    runtime: docker
+    plan: free
+    rootDir: mcp_99bugsincode
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: BACKEND_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false

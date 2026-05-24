@@ -1,0 +1,48 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      TYPE: remote
+      ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      JWT_REFRESH_TOKEN_EXPIRE_MINUTES: ${JWT_REFRESH_TOKEN_EXPIRE_MINUTES:-10080}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      PORT: 8000
+    ports:
+      - "8000:8000"
+
+  mcp:
+    build:
+      context: ./mcp_99bugsincode
+    environment:
+      BACKEND_URL: http://backend:8000
+      FRONTEND_URL: http://frontend:3000
+      PORT: 7860
+    ports:
+      - "7860:7860"
+    depends_on:
+      - backend
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      NODE_ENV: production
+      BACKEND_URL: http://backend:8000
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
+      MCP_SERVER_URL: http://mcp:7860
+      AUTH_COOKIE_SECRET: ${AUTH_COOKIE_SECRET}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - mcp

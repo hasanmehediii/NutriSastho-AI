@@ -9,6 +9,8 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
+from backend.config import is_non_local_environment, load_env_files
+
 
 JWT_ALGORITHM = "HS256"
 DEFAULT_EXPIRES_MINUTES = 60
@@ -34,9 +36,10 @@ def _json_encode(value: dict[str, Any]) -> bytes:
 
 
 def _get_secret() -> bytes:
+    load_env_files()
     secret = os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY")
     if not secret:
-        if os.getenv("TYPE", "local") in {"remote", "production"}:
+        if is_non_local_environment():
             raise TokenError("JWT secret key is missing for non-local environment")
         secret = "change-this-dev-jwt-secret"
     return secret.encode("utf-8")

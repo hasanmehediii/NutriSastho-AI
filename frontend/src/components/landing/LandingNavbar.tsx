@@ -20,7 +20,10 @@ export function LandingNavbar() {
   const nextLanguage = language === "en" ? "bn" : "en";
   const languageButtonLabel = language === "en" ? "বাং" : "EN";
 
-  const getSectionHref = (href: string) => (pathname === "/" ? href : `/${href}`);
+  const getSectionHref = (href: string) => {
+    if (href.startsWith("/")) return href;
+    return pathname === "/" ? href : `/${href}`;
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
