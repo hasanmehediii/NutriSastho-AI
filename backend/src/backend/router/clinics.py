@@ -4,7 +4,7 @@ import os
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from backend.database import get_session
@@ -92,10 +92,22 @@ def get_clinics(
     limit: Optional[int] = Query(30),
     session: Session = Depends(get_session),
 ):
-    clinics = session.execute(select(Clinic)).scalars().all()
-    hospitals = [hospital_from_clinic(clinic) for clinic in clinics] or load_hospitals()
     city_filter = city.lower() if city else ""
     type_filter = type.lower() if type else ""
+
+    query = select(Clinic)
+    if city_filter and city_filter != "all":
+        query = query.where(
+            or_(func.lower(Clinic.city) == city_filter, func.lower(Clinic.area) == city_filter)
+        )
+    if type_filter and type_filter != "all":
+        query = query.where(func.lower(Clinic.facility_type) == type_filter)
+
+    try:
+        clinics = session.execute(query).scalars().all()
+    except Exception:
+        clinics = []
+    hospitals = [hospital_from_clinic(clinic) for clinic in clinics] or load_hospitals()
     
     results = []
     for h in hospitals:

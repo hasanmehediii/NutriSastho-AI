@@ -8,7 +8,7 @@ import {
 } from "@/lib/documentation";
 
 type DocumentationDetailProps = {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 };
 
 export function generateStaticParams() {
