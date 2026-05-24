@@ -92,7 +92,10 @@ def get_clinics(
     limit: Optional[int] = Query(30),
     session: Session = Depends(get_session),
 ):
-    clinics = session.execute(select(Clinic)).scalars().all()
+    try:
+        clinics = session.execute(select(Clinic)).scalars().all()
+    except Exception:
+        clinics = []
     hospitals = [hospital_from_clinic(clinic) for clinic in clinics] or load_hospitals()
     city_filter = city.lower() if city else ""
     type_filter = type.lower() if type else ""
