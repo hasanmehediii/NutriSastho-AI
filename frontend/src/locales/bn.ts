@@ -8,6 +8,7 @@ export const bn: Translations = {
       { label: "কিভাবে কাজ করে", href: "#workflow" },
       { label: "নিরাপত্তা", href: "#safety" },
       { label: "ডেমো", href: "#demo" },
+      { label: "Documentation", href: "/documentation" },
     ],
     login: "সাইন ইন",
     cta: "Get Started",

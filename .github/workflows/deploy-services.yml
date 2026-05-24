@@ -1,0 +1,44 @@
+name: Trigger Platform Deploys
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    branches:
+      - main
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      RENDER_BACKEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}
+      RENDER_MCP_DEPLOY_HOOK_URL: ${{ secrets.RENDER_MCP_DEPLOY_HOOK_URL }}
+      VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Trigger configured deploy hooks
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -n "${RENDER_BACKEND_DEPLOY_HOOK_URL}" ]; then
+            curl -fsS -X POST "${RENDER_BACKEND_DEPLOY_HOOK_URL}"
+            echo "Triggered Render backend deploy."
+          fi
+
+          if [ -n "${RENDER_MCP_DEPLOY_HOOK_URL}" ]; then
+            curl -fsS -X POST "${RENDER_MCP_DEPLOY_HOOK_URL}"
+            echo "Triggered Render MCP deploy."
+          fi
+
+          if [ -n "${VERCEL_DEPLOY_HOOK_URL}" ]; then
+            curl -fsS -X POST "${VERCEL_DEPLOY_HOOK_URL}"
+            echo "Triggered Vercel frontend deploy."
+          fi
+
+          if [ -z "${RENDER_BACKEND_DEPLOY_HOOK_URL}${RENDER_MCP_DEPLOY_HOOK_URL}${VERCEL_DEPLOY_HOOK_URL}" ]; then
+            echo "No deploy hooks configured. Platform Git integrations can still deploy automatically."
+          fi

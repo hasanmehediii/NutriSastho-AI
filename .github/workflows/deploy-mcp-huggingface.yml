@@ -1,0 +1,54 @@
+name: Deploy MCP To Hugging Face Space
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "mcp_99bugsincode/**"
+      - ".github/workflows/deploy-mcp-huggingface.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_SPACE: ${{ secrets.HF_SPACE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Hugging Face secrets
+        shell: bash
+        run: |
+          test -n "${HF_TOKEN}" || (echo "HF_TOKEN secret is missing." && exit 1)
+          test -n "${HF_SPACE}" || (echo "HF_SPACE secret is missing. Use owner/space-name." && exit 1)
+
+      - name: Clone Space
+        shell: bash
+        run: git clone "https://user:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" hf-space
+
+      - name: Sync MCP source
+        shell: bash
+        run: |
+          rsync -a --delete \
+            --exclude ".env" \
+            --exclude ".venv" \
+            --exclude "__pycache__" \
+            --exclude "*.pyc" \
+            mcp_99bugsincode/ hf-space/
+
+      - name: Push Space
+        shell: bash
+        working-directory: hf-space
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --cached --quiet; then
+            echo "No MCP changes to deploy."
+            exit 0
+          fi
+          git commit -m "Deploy MCP server from ${GITHUB_SHA}"
+          git push

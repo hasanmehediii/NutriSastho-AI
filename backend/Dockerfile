@@ -13,7 +13,7 @@ RUN uv sync --frozen --no-dev --no-cache --no-install-project
 
 COPY . .
 
-EXPOSE 8080
+EXPOSE 8000
 
 RUN uv sync --frozen --no-dev
 

@@ -181,15 +181,20 @@ export async function callBackendProfileUpdate(
 // ── MCP Server Integration ──
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 const MCP_SERVER_URL = process.env.MCP_SERVER_URL || "http://localhost:7860";
+
+function getMcpUrl() {
+  const baseUrl = MCP_SERVER_URL.replace(/\/$/, "");
+  return new URL(baseUrl.endsWith("/mcp") ? baseUrl : `${baseUrl}/mcp`);
+}
 
 export async function callMcpTool(
   toolName: string,
   args: Record<string, unknown>,
 ) {
-  const transport = new SSEClientTransport(new URL(`${MCP_SERVER_URL}/sse`));
+  const transport = new StreamableHTTPClientTransport(getMcpUrl());
   const client = new Client(
     { name: "nutrishastho-nextjs", version: "1.0.0" },
     { capabilities: {} }
