@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Shield, MapPin, FileText, Salad } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/providers/LanguageProvider";
@@ -13,6 +14,11 @@ export function LandingPage() {
   const { language } = useLanguage();
   const { nav } = t;
   const { landing: copy } = t;
+
+  useEffect(() => {
+    // Wake up the free tier backends (FastAPI and MCP) on Render
+    fetch("/api/wakeup").catch(() => {});
+  }, []);
 
   return (
     <div
