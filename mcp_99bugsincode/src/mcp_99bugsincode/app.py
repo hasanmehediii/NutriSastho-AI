@@ -19,6 +19,78 @@ mcp = FastMCP(
 )
 
 # ---------------------------------------------------------------------------
+# CUSTOM ROUTES (Web Endpoints)
+# ---------------------------------------------------------------------------
+from starlette.requests import Request
+from starlette.responses import HTMLResponse
+
+@mcp.custom_route("/", methods=["GET"])
+async def root_handler(request: Request) -> HTMLResponse:
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NutriSastho MCP Server</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
+            body {
+                margin: 0; padding: 0;
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                color: #e2e8f0;
+                display: flex; justify-content: center; align-items: center;
+                height: 100vh; overflow: hidden;
+            }
+            .container {
+                text-align: center; background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(10px); padding: 3rem 4rem;
+                border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                animation: fade-in-up 0.8s ease-out;
+            }
+            .status-indicator {
+                display: inline-block; width: 12px; height: 12px;
+                background-color: #10b981; border-radius: 50%;
+                box-shadow: 0 0 15px #10b981; margin-right: 10px;
+                animation: pulse 2s infinite;
+            }
+            h1 { font-size: 2.5rem; margin: 0 0 10px 0; color: #f8fafc; }
+            p { font-size: 1.1rem; color: #94a3b8; max-width: 400px; margin: 0 auto; line-height: 1.6; }
+            .badge {
+                margin-top: 2rem; display: inline-block; padding: 0.5rem 1.2rem;
+                background: rgba(16, 185, 129, 0.1); color: #10b981;
+                border-radius: 20px; font-size: 0.9rem; font-weight: 500;
+                border: 1px solid rgba(16, 185, 129, 0.3);
+            }
+            @keyframes fade-in-up {
+                0% { opacity: 0; transform: translateY(20px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+                70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 style="display: flex; align-items: center; justify-content: center;">
+                <span class="status-indicator"></span>
+                System Online
+            </h1>
+            <p>The <strong>NutriSastho-AI</strong> MCP Server is actively running and ready to serve AI tools and context.</p>
+            <div class="badge">Streamable HTTP Transport Active on /mcp</div>
+        </div>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
+
+
+# ---------------------------------------------------------------------------
 # RESOURCES (Context for the AI)
 # ---------------------------------------------------------------------------
 @mcp.resource("health://bengali-diet")
