@@ -20,6 +20,23 @@ export default function DocumentationHome() {
       summary="This public documentation explains what the project does, how users interact with it, how the services are connected, which AI features are used, and how the system can be deployed."
     >
       <div className="space-y-10">
+        <div className="rounded-2xl border-2 border-yellow-500/50 bg-yellow-500/10 p-5 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-yellow-500/20 text-yellow-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-[color:var(--foreground)] uppercase tracking-wide">
+                Judge / Reviewer Notice: Free Tier Deployment
+              </h3>
+              <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
+                The backend and MCP server are deployed on Render's free tier. 
+                They spin down after 15 minutes of inactivity. <strong>When you first open the app, it may take up to 60 seconds for the servers to wake up.</strong> Please be patient on the first request!
+              </p>
+            </div>
+          </div>
+        </div>
+
         <section className="grid gap-4 md:grid-cols-2">
           {documentationOverview.map((item) => {
             const Icon = item.icon;
