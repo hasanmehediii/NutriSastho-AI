@@ -263,7 +263,7 @@ function buildRulesDietPlan(
   });
 
   return {
-    source: "rules-local-fallback",
+    source: "rules",
     budget: budget
       ? {
           monthly_budget_bdt: budget.monthly_budget_bdt,
