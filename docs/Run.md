@@ -91,12 +91,12 @@ python -m venv venv
 pip install -e .
 ```
 
-5. Start the MCP server using the `sse` transport:
+5. Start the MCP server using the `streamable-http` transport:
 ```powershell
-$env:PYTHONIOENCODING="utf-8"; fastmcp run src/mcp_99bugsincode/app.py --transport sse --port 7860
+$env:PYTHONIOENCODING="utf-8"; fastmcp run src/mcp_99bugsincode/app.py --transport streamable-http --port 7860
 ```
 
-*Server will be available at `http://localhost:7860/sse`*
+*Server will be available at `http://localhost:7860/mcp`*
 
 ---
 

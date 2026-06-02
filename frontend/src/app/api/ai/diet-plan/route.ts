@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
+  callMcpTool,
   callBackendBudgetLatest,
   callBackendHealthProfile,
   callBackendFoodItems,
@@ -42,6 +43,18 @@ function jsonResponse(data: DietPlanResponse) {
   return NextResponse.json(data);
 }
 
+function isDietPlanResponse(value: unknown): value is DietPlanResponse {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Partial<DietPlanResponse>;
+  return Boolean(
+    v.days &&
+    Array.isArray(v.days) &&
+    v.days.length === 7 &&
+    v.conditionWarning &&
+    Array.isArray(v.nutrition)
+  );
+}
+
 function getConditionWarning(profile: HealthProfile | null): DietPlanResponse["conditionWarning"] {
   const conditions = profile?.conditions ?? [];
   if (conditions.includes("Hypertension") || (profile?.bp_systolic ?? 0) >= 140) {
@@ -74,11 +87,8 @@ function getConditionWarning(profile: HealthProfile | null): DietPlanResponse["c
   };
 }
 
-// ── Dynamic price helpers ──
-
 function parsePriceBdt(priceStr: string): number {
-  // Parse "15-20 ৳" → average 17.5, or "15 ৳" → 15
-  const nums = priceStr.match(/\d+/g);
+  const nums = String(priceStr || "").match(/\d+/g);
   if (!nums || nums.length === 0) return 0;
   const values = nums.map(Number);
   return values.reduce((a, b) => a + b, 0) / values.length;
@@ -90,19 +100,24 @@ function pickFoodsByCategory(
   budget: "low" | "mid" | "high",
   avoided: string[],
   count: number,
+  excludeTags: string[] = [],
 ): FoodItemFromBackend[] {
   const avoidLower = avoided.map((a) => a.toLowerCase());
   const filtered = foodItems
     .filter((f) => f.category === category)
-    .filter((f) => !avoidLower.some((bad) => f.name_en.toLowerCase().includes(bad)))
+    .filter((f) => !avoidLower.some((bad) => (f.name_en || "").toLowerCase().includes(bad)))
+    .filter((f) => !((f.tags || []).some((t) => excludeTags.includes(t))))
     .sort((a, b) => parsePriceBdt(a.price_bdt) - parsePriceBdt(b.price_bdt));
 
+  const n = filtered.length;
   if (budget === "low") return filtered.slice(0, count);
   if (budget === "mid") {
-    const mid = Math.floor(filtered.length / 3);
-    return filtered.slice(mid, mid + count);
+    const start = Math.max(0, Math.floor(n / 4));
+    return filtered.slice(start, start + count);
   }
-  return filtered.slice(-count);
+  // High budget: pick upper-middle quality, not the absolute most expensive
+  const start = Math.max(0, Math.min(Math.floor(n * 2 / 3), n - count));
+  return filtered.slice(start, start + count);
 }
 
 function removeAvoided(items: string[], avoided: string[]) {
@@ -114,6 +129,7 @@ function meal(name: Meal["name"], items: string[], cost: number, calories: numbe
   return { name, items, cost, calories };
 }
 
+// Minimal local fallback if MCP fails completely
 function buildRulesDietPlan(
   profile: HealthProfile | null,
   budget: BudgetPlan | null,
@@ -136,32 +152,31 @@ function buildRulesDietPlan(
   const diabetic = conditionWarning.type === "diabetes";
   const weightFocused = conditionWarning.type === "weight";
 
-  // Dynamically pick proteins from the live food database sorted by price
   const proteins = pickFoodsByCategory(foodItems, "fish_meat", budgetTier, avoided, 5);
   const grains = pickFoodsByCategory(foodItems, "rice_grains", budgetTier, avoided, 4);
-  const dals = pickFoodsByCategory(foodItems, "dal_pulses", budgetTier, avoided, 3);
+  // Exclude premium-snack items (almonds/cashews) from dal selection — they inflate meal costs
+  const dals = pickFoodsByCategory(foodItems, "dal_pulses", budgetTier, avoided, 3, ["premium-snack"]);
   const vegs = pickFoodsByCategory(foodItems, "vegetables", budgetTier, avoided, 5);
   const fruits = pickFoodsByCategory(foodItems, "fruits", budgetTier, avoided, 3);
 
-  // If preferred foods are specified, push them to front
   const preferredLower = preferred.map((p) => p.toLowerCase());
   const sortByPreferred = (items: FoodItemFromBackend[]) => {
     return items.sort((a, b) => {
-      const aMatch = preferredLower.some((p) => a.name_en.toLowerCase().includes(p)) ? -1 : 0;
-      const bMatch = preferredLower.some((p) => b.name_en.toLowerCase().includes(p)) ? -1 : 0;
+      const aMatch = preferredLower.some((p) => (a.name_en || "").toLowerCase().includes(p)) ? -1 : 0;
+      const bMatch = preferredLower.some((p) => (b.name_en || "").toLowerCase().includes(p)) ? -1 : 0;
       return aMatch - bMatch;
     });
   };
   sortByPreferred(proteins);
 
   const dayPlans = DAYS.map((day, index) => {
-    const protein = proteins[index % proteins.length];
-    const secondProtein = proteins[(index + 2) % proteins.length];
-    const grain = grains[index % grains.length];
-    const dal = dals[index % dals.length];
-    const veg = vegs[index % vegs.length];
-    const veg2 = vegs[(index + 1) % vegs.length];
-    const fruit = fruits[index % fruits.length];
+    const protein = proteins[index % (proteins.length || 1)];
+    const secondProtein = proteins[(index + 2) % (proteins.length || 1)];
+    const grain = grains[index % (grains.length || 1)];
+    const dal = dals[index % (dals.length || 1)];
+    const veg = vegs[index % (vegs.length || 1)];
+    const veg2 = vegs[(index + 1) % (vegs.length || 1)];
+    const fruit = fruits[index % (fruits.length || 1)];
 
     const proteinName = protein?.name_en ?? "Egg";
     const secondProteinName = secondProtein?.name_en ?? "Dal";
@@ -177,7 +192,6 @@ function buildRulesDietPlan(
       ? ["Guava", "Roasted chickpeas"]
       : [fruitName, monthlyBudget < 5000 ? "Muri" : "Yogurt"];
 
-    // Calculate cost from live prices
     const breakfastCost = Math.round(
       (parsePriceBdt(grain?.price_bdt ?? "8") + parsePriceBdt(protein?.price_bdt ?? "12")) * 0.6
     );
@@ -194,7 +208,13 @@ function buildRulesDietPlan(
       parsePriceBdt(veg2?.price_bdt ?? "5")
     );
 
-    const plan: DayPlan = {
+    // Cap each meal to budget ceiling
+    const bCost = Math.min(breakfastCost || Math.round(dailyBudgetPerPerson * 0.22), Math.round(dailyBudgetPerPerson * 0.30));
+    const lCost = Math.min(lunchCost || Math.round(dailyBudgetPerPerson * 0.38), Math.round(dailyBudgetPerPerson * 0.45));
+    const sCost = Math.min(snackCost || Math.round(dailyBudgetPerPerson * 0.12), Math.round(dailyBudgetPerPerson * 0.15));
+    const dCost = Math.min(dinnerCost || Math.round(dailyBudgetPerPerson * 0.28), Math.round(dailyBudgetPerPerson * 0.35));
+
+    const plan = {
       breakfast: meal(
         "Breakfast",
         removeAvoided(
@@ -205,7 +225,7 @@ function buildRulesDietPlan(
           ],
           avoided,
         ),
-        breakfastCost || Math.round(dailyBudgetPerPerson * 0.22),
+        bCost,
         diabetic ? 320 : 380,
       ),
       lunch: meal(
@@ -214,13 +234,13 @@ function buildRulesDietPlan(
           [ricePortion, dalName, `${proteinName} curry (${saltNote})`, veg2Name],
           avoided,
         ),
-        lunchCost || Math.round(dailyBudgetPerPerson * 0.38),
+        lCost,
         diabetic || weightFocused ? 520 : 620,
       ),
       snack: meal(
         "Snack",
         removeAvoided(snackItems, avoided),
-        snackCost || Math.round(dailyBudgetPerPerson * 0.12),
+        sCost,
         diabetic ? 130 : 170,
       ),
       dinner: meal(
@@ -234,7 +254,7 @@ function buildRulesDietPlan(
           ],
           avoided,
         ),
-        dinnerCost || Math.round(dailyBudgetPerPerson * 0.28),
+        dCost,
         weightFocused ? 430 : 520,
       ),
     };
@@ -243,7 +263,7 @@ function buildRulesDietPlan(
   });
 
   return {
-    source: "rules",
+    source: "rules-local-fallback",
     budget: budget
       ? {
           monthly_budget_bdt: budget.monthly_budget_bdt,
@@ -264,118 +284,29 @@ function buildRulesDietPlan(
   };
 }
 
-function extractJson(text: string) {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
-  const candidate = fenced ?? text.match(/\{[\s\S]*\}/)?.[0];
-  if (!candidate) return null;
-  try {
-    return JSON.parse(candidate) as Partial<DietPlanResponse>;
-  } catch {
-    return null;
-  }
-}
-
-function isDietPlanResponse(value: Partial<DietPlanResponse> | null): value is DietPlanResponse {
-  return Boolean(
-    value &&
-      Array.isArray(value.days) &&
-      value.days.length === 7 &&
-      value.conditionWarning &&
-      Array.isArray(value.nutrition),
-  );
-}
-
-function buildFoodContext(foodItems: FoodItemFromBackend[]) {
-  // Build a compact table of food items with live prices for the LLM
-  const rows = foodItems.map(
-    (f) => `${f.name_en} (${f.name_bn}) | ${f.category} | ${f.serving} | ${f.price_bdt} | ${f.calories}kcal | P:${f.protein_g}g C:${f.carbs_g}g F:${f.fat_g}g | tags: ${f.tags.join(",")}`
-  );
-  return rows.join("\n");
-}
-
-function buildPrompt(
-  profile: HealthProfile | null,
-  budget: BudgetPlan | null,
-  foodItems: FoodItemFromBackend[],
-) {
-  return [
-    "Generate a budget-aware Bangladeshi weekly diet plan as strict JSON only.",
-    "Do not include markdown. Do not include medical diagnosis.",
-    "Shape: {source,budget,conditionWarning,days,nutrition}.",
-    "Each days item: {key,label,plan:{breakfast,lunch,snack,dinner}}.",
-    "Each meal: {name,items,cost,calories}. Costs are BDT per person per day.",
-    "Use the LIVE MARKET PRICES below to calculate realistic costs.",
-    "Respect allergies/foods_to_avoid and stay within the user's budget.",
-    "",
-    "=== LIVE FOOD PRICES (scraped from Bangladeshi market) ===",
-    "Format: Name (Bengali) | Category | Serving | Price BDT | Calories | Macros | Tags",
-    buildFoodContext(foodItems),
-    "=== END FOOD PRICES ===",
-    "",
-    `Budget: ${JSON.stringify(budget)}`,
-    `Health profile: ${JSON.stringify(profile)}`,
-  ].join("\n");
-}
-
-async function callGroq(prompt: string) {
-  const key = process.env.GROQ_API_KEY;
-  if (!key) return null;
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-      response_format: { type: "json_object" },
-    }),
-  });
-
-  if (!response.ok) return null;
-  const data = (await response.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  return data.choices?.[0]?.message?.content ?? null;
-}
-
-async function callGemini(prompt: string) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return null;
-
-  const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.3,
-          responseMimeType: "application/json",
-        },
-      }),
-    },
-  );
-
-  if (!response.ok) return null;
-  const data = (await response.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
-  };
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
-}
-
 export async function POST() {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // Fetch health, budget, and live food items in parallel
+  try {
+    // 1. Try fetching from MCP tool first
+    const mcpResult = await callMcpTool("generate_weekly_diet_plan", {
+      user_id: session.user.id,
+    });
+
+    if (mcpResult && typeof mcpResult === "object" && "data" in mcpResult) {
+      if (isDietPlanResponse(mcpResult.data)) {
+        return jsonResponse(mcpResult.data);
+      }
+    }
+  } catch (err) {
+    console.error("MCP Diet Plan tool failed:", err);
+  }
+
+  // 2. Local Fallback if MCP is totally down (also fixes the tags.join bug)
+  console.log("Using local Next.js rule-based fallback");
   const [profileResult, budgetResult, foodResult] = await Promise.all([
     callBackendHealthProfile(session.access_token),
     callBackendBudgetLatest(session.access_token),
@@ -387,23 +318,5 @@ export async function POST() {
   const foodItems: FoodItemFromBackend[] = "items" in foodResult ? (foodResult.items ?? []) : [];
 
   const fallback = buildRulesDietPlan(profile, budget, foodItems);
-  const prompt = buildPrompt(profile, budget, foodItems);
-
-  try {
-    const groqText = await callGroq(prompt);
-    const groqJson = extractJson(groqText ?? "");
-    if (isDietPlanResponse(groqJson)) {
-      return jsonResponse({ ...groqJson, source: "groq", budget: fallback.budget });
-    }
-
-    const geminiText = await callGemini(prompt);
-    const geminiJson = extractJson(geminiText ?? "");
-    if (isDietPlanResponse(geminiJson)) {
-      return jsonResponse({ ...geminiJson, source: "gemini", budget: fallback.budget });
-    }
-  } catch {
-    return jsonResponse(fallback);
-  }
-
   return jsonResponse(fallback);
 }

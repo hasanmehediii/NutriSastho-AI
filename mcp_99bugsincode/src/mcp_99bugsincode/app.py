@@ -3,15 +3,17 @@ from mcp_99bugsincode.logger import logger
 from mcp_99bugsincode.schemas import (
     BMICalculatorInput, DailyCaloriesInput, FoodSearchInput, 
     HospitalSearchInput, MealPlanInput, DiabetesRiskInput, UserProfileInput,
-    MedicalReportInput, FoodScrapeInput
+    FoodScrapeInput
 )
 from mcp_99bugsincode.backend_integration import (
-    search_foods, search_clinics, fetch_health_profile, fetch_budget_plan
+    search_foods, search_clinics, fetch_health_profile, fetch_budget_plan,
+    fetch_raw_health_profile, fetch_raw_budget_plan, fetch_all_foods
 )
-from mcp_99bugsincode.meal_plan import generate_bengali_meal_plan
+from mcp_99bugsincode.meal_plan import generate_bengali_meal_plan, generate_weekly_diet_plan_json
 from mcp_99bugsincode.health_risk import assess_diabetes_risk
 from mcp_99bugsincode.resources import get_diet_guidelines
 from mcp_99bugsincode.prompts import get_clinical_assessment_prompt
+from mcp_99bugsincode.rag import log_meal, generate_activity_insights
 
 mcp = FastMCP(
     name="NutriSastho-AI-MCP",
@@ -146,6 +148,19 @@ def get_meal_plan(input: MealPlanInput) -> str:
     return generate_bengali_meal_plan(input.target_calories, input.preference)
 
 @mcp.tool()
+async def generate_weekly_diet_plan(user_id: str) -> dict:
+    """Generate a full 7-day budget-aware diet plan.
+
+    Args:
+        user_id: The UUID of the user
+    """
+    logger.info(f"Executing tool: generate_weekly_diet_plan for user {user_id}")
+    profile = fetch_raw_health_profile(user_id)
+    budget = fetch_raw_budget_plan(user_id)
+    foods = fetch_all_foods()
+    return await generate_weekly_diet_plan_json(profile, budget, foods)
+
+@mcp.tool()
 def get_diabetes_risk(input: DiabetesRiskInput) -> str:
     """Assess basic risk for type-2 diabetes based on clinical inputs."""
     logger.info("Executing tool: get_diabetes_risk")
@@ -178,11 +193,16 @@ def get_user_budget_plan(input: UserProfileInput) -> str:
     return fetch_budget_plan(input.user_id)
 
 @mcp.tool()
-def analyze_medical_report(input: MedicalReportInput) -> str:
-    """Analyze a medical lab report based on the user's health profile."""
-    logger.info(f"Executing tool: analyze_medical_report for user {input.user_id}")
-    profile_data = fetch_health_profile(input.user_id)
-    return f"Patient Context:\n{profile_data}\n\nLab Report Text:\n{input.report_text}\n\nExplain any out-of-range values in simple terms."
+def analyze_medical_report(user_id: str, report_text: str) -> str:
+    """Analyze a medical lab report based on the user's health profile.
+
+    Args:
+        user_id: The UUID of the user
+        report_text: The raw text of the medical lab report
+    """
+    logger.info(f"Executing tool: analyze_medical_report for user {user_id}")
+    profile_data = fetch_health_profile(user_id)
+    return f"Patient Context:\n{profile_data}\n\nLab Report Text:\n{report_text}\n\nExplain any out-of-range values in simple terms."
 
 @mcp.tool()
 def scrape_live_food_price(input: FoodScrapeInput) -> str:
@@ -212,3 +232,23 @@ def scrape_live_food_price(input: FoodScrapeInput) -> str:
         return f"Could not determine exact live price for {input.food_name}."
     except Exception as e:
         return f"Error scraping live price: {str(e)}"
+
+@mcp.tool()
+def analyze_meal_text(meal_text: str) -> str:
+    """Analyze a natural language meal description and return nutrition data.
+
+    Args:
+        meal_text: Natural language description of the meal (e.g. '1 cup rice and an egg')
+    """
+    logger.info(f"Executing tool: analyze_meal_text for '{meal_text}'")
+    return log_meal(meal_text)
+
+@mcp.tool()
+def get_activity_insights(user_id: str) -> str:
+    """Generate dynamic activity logs and insights based on user history.
+
+    Args:
+        user_id: The UUID of the user
+    """
+    logger.info(f"Executing tool: get_activity_insights for user {user_id}")
+    return generate_activity_insights(user_id)

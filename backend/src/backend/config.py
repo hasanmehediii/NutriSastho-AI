@@ -62,6 +62,14 @@ def get_database_url() -> str:
     return _normalize_database_url(database_url.strip())
 
 
+def get_mongo_uri() -> str:
+    load_env_files()
+    mongo_uri = os.getenv("MONGO_URI")
+    if not mongo_uri:
+        raise ValueError("MONGO_URI is not set in .env")
+    return mongo_uri.strip()
+
+
 def get_cors_origins() -> list[str]:
     load_env_files()
 

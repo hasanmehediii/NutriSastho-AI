@@ -29,8 +29,8 @@ function computeRisk(profile: HealthProfile | null): RiskAnalysisResponse {
     };
   }
 
-  if ((profile.bp_systolic ?? 0) >= 140) {
-    const weight = (profile.bp_systolic ?? 0) >= 180 ? 40 : 30;
+  if ((profile.bp_systolic ?? 0) >= 140 || (profile.bp_diastolic ?? 0) >= 90) {
+    const weight = ((profile.bp_systolic ?? 0) >= 180 || (profile.bp_diastolic ?? 0) >= 120) ? 40 : 30;
     factors.push({
       factor: `Blood pressure ${profile.bp_systolic}/${profile.bp_diastolic} mmHg`,
       weight,
@@ -96,7 +96,7 @@ function computeRisk(profile: HealthProfile | null): RiskAnalysisResponse {
       : ["Your submitted vital signs are within the current rule thresholds."];
 
   const recommendations: RiskAnalysisResponse["recommendations"] = [];
-  if ((profile.bp_systolic ?? 0) >= 140) {
+  if ((profile.bp_systolic ?? 0) >= 140 || (profile.bp_diastolic ?? 0) >= 90) {
     recommendations.push({ type: "test", text: "Recheck blood pressure within 24 hours." });
     recommendations.push({ type: "doctor", text: "Consult a general physician if BP remains high." });
     recommendations.push({ type: "action", text: "Reduce salt and avoid packaged high-sodium foods." });
@@ -196,39 +196,10 @@ export async function POST() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // ── 1. Try MCP server (AI + RAG) ──
-  try {
-    const mcpResult = await callMcpTool("analyze_risk", {
-      user_id: session.user.id,
-    });
-    if ("data" in mcpResult && isRiskAnalysis(mcpResult.data)) {
-      return NextResponse.json(mcpResult.data);
-    }
-  } catch {
-    // MCP unreachable — fall through to direct LLM calls
-  }
-
-  // ── 2. Fallback: direct Groq → Gemini → rules ──
+  // Purely Rule-Based to save API costs
   const profileResult = await callBackendHealthProfile(session.access_token);
   const profile = "profile" in profileResult ? (profileResult.profile as HealthProfile | null) : null;
   const fallback = computeRisk(profile);
-  const prompt = buildPrompt(profile, fallback);
-
-  try {
-    const groqText = await callGroq(prompt);
-    const groqJson = extractJson(groqText ?? "");
-    if (isRiskAnalysis(groqJson)) {
-      return NextResponse.json({ ...groqJson, source: "groq" });
-    }
-
-    const geminiText = await callGemini(prompt);
-    const geminiJson = extractJson(geminiText ?? "");
-    if (isRiskAnalysis(geminiJson)) {
-      return NextResponse.json({ ...geminiJson, source: "gemini" });
-    }
-  } catch {
-    return NextResponse.json(fallback);
-  }
-
+  
   return NextResponse.json(fallback);
 }

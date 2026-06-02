@@ -15,6 +15,7 @@ import {
   ChevronDown,
   BookOpen,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 
 /* ── Food Database — Static Bangladeshi food entries ── */
@@ -62,6 +63,36 @@ export default function FoodDatabasePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<"name" | "calories" | "protein" | "price">("name");
   const [expandedFood, setExpandedFood] = useState<string | null>(null);
+
+  // Substitution AI State
+  const [substituteQuery, setSubstituteQuery] = useState("");
+  const [substituteLoading, setSubstituteLoading] = useState(false);
+  const [substituteResult, setSubstituteResult] = useState<{
+    original: string;
+    substitute_name: string;
+    match_reason: string;
+    price_estimate: string;
+    macros_comparison: string;
+  } | null>(null);
+
+  async function handleSubstitute() {
+    if (!substituteQuery.trim()) return;
+    setSubstituteLoading(true);
+    try {
+      const res = await fetch("/api/ai/substitute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ food: substituteQuery }),
+      });
+      if (res.ok) {
+        setSubstituteResult(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubstituteLoading(false);
+    }
+  }
 
   useEffect(() => {
     async function fetchFoods() {
@@ -144,6 +175,53 @@ export default function FoodDatabasePage() {
         <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-center">
           <p className="text-2xl font-black text-emerald-500">{stats.avgProtein}g</p>
           <p className="text-[11px] text-[color:var(--muted)]">Avg Protein</p>
+        </div>
+      </div>
+
+      {/* AI Smart Substitute Widget */}
+      <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/5 p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <Sparkles className="shrink-0 text-indigo-500 mt-1" size={20} />
+          <div className="flex-1 space-y-3">
+            <div>
+              <h3 className="font-bold text-indigo-700 dark:text-indigo-400">AI Smart Substitutions</h3>
+              <p className="text-xs text-[color:var(--muted)]">Type an expensive or foreign food (like Salmon, Quinoa, Almonds) to find affordable local Bangladeshi alternatives.</p>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={substituteQuery}
+                onChange={(e) => setSubstituteQuery(e.target.value)}
+                placeholder="e.g. Salmon fish..."
+                onKeyDown={(e) => e.key === 'Enter' && handleSubstitute()}
+                className="flex-1 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-3 py-2 text-sm focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20"
+              />
+              <button
+                onClick={handleSubstitute}
+                disabled={substituteLoading || !substituteQuery.trim()}
+                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                {substituteLoading ? <Loader2 size={16} className="animate-spin" /> : "Find Substitute"}
+              </button>
+            </div>
+            
+            {substituteResult && (
+              <div className="mt-4 space-y-2 rounded-xl bg-[color:var(--surface)] p-4 border border-[color:var(--border)] shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-red-500 line-through">{substituteResult.original}</span>
+                    <span className="text-[color:var(--muted)]">→</span>
+                    <span className="text-base font-bold text-emerald-500">{substituteResult.substitute_name}</span>
+                  </div>
+                  <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600">
+                    Est. {substituteResult.price_estimate}
+                  </span>
+                </div>
+                <p className="text-sm text-[color:var(--foreground)]">{substituteResult.match_reason}</p>
+                <p className="text-xs font-medium text-indigo-500">Macros: {substituteResult.macros_comparison}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
