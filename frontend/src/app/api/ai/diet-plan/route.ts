@@ -225,6 +225,8 @@ function buildRulesDietPlan(
       bItems.push("Unsweetened tea");
     }
 
+    const saltNote = lowSalt ? "low-salt" : "home-cooked";
+
     const lItems: string[] = [];
     let lCals = 0;
     const riceQty = (diabetic || weightFocused) ? 120 : 200;
@@ -272,8 +274,6 @@ function buildRulesDietPlan(
     dItems.push(d3); dCals += dC3;
     dItems.push("Cucumber salad (100g)");
     dCals += 15;
-
-    const saltNote = lowSalt ? "low-salt" : "home-cooked";
 
     const breakfastCost = Math.round(
       (parsePriceBdt(grain?.price_bdt ?? "8") + parsePriceBdt(protein?.price_bdt ?? "12")) * 0.6
