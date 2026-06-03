@@ -146,14 +146,17 @@ export async function POST(request: Request) {
   const prompt = buildPrompt(profile, fallback);
   
   let aiText = await callGroq(prompt);
+  let sourceType: "groq" | "gemini" = "groq";
+  
   if (!aiText) {
     aiText = await callGemini(prompt);
+    sourceType = "gemini";
   }
   
   if (aiText) {
     const parsed = extractJson(aiText);
     if (parsed && isRiskAnalysis(parsed)) {
-      parsed.source = "ai";
+      parsed.source = sourceType;
       return NextResponse.json(parsed);
     }
   }
