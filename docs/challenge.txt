@@ -1,0 +1,9 @@
+Nutrition AI Engine
+Scored
+A personalized AI system that provides nutrition guidance and diet recommendations.
+
+Details
+
+This challenge focuses on creating a nutrition-focused AI assistant that can offer relevant food and diet recommendations based on user needs or contexts.
+The solution should be practical, easy to use, and ideally adapted for Bangladesh’s local food habits and nutrition realities.
+Strong solutions will demonstrate localized thinking, practical usability, and meaningful health support through intelligent recommendations.

@@ -12,13 +12,8 @@ import { useAuth } from "@/providers/AuthProvider";
 import { getHealthProfile } from "@/services/health.service";
 import type { HealthProfile } from "@/types/user";
 
-const recentActivity = [
-  { time: "Today 9:15 AM", text: "Logged vitals: BP 150/96, Temp 98.6°F", type: "health" as const },
-  { time: "Today 8:30 AM", text: "Diet plan generated for this week", type: "diet" as const },
-  { time: "Yesterday", text: "Risk score updated: 58/100 (Medium)", type: "risk" as const },
-  { time: "May 7", text: "Budget updated: ৳6,000/month", type: "budget" as const },
-  { time: "May 6", text: "Family member added: Fatima (Mother)", type: "family" as const },
-];
+type ActivityLog = { time: string; text: string; type: "health" | "diet" | "risk" | "budget" | "family" | "system" };
+type ActivityData = { activities: ActivityLog[]; insights: string[] };
 
 const activityBadge: Record<string, { variant: "green" | "yellow" | "red" | "blue" | "default"; label: string }> = {
   health: { variant: "red", label: "Health" },
@@ -26,6 +21,7 @@ const activityBadge: Record<string, { variant: "green" | "yellow" | "red" | "blu
   risk: { variant: "yellow", label: "Risk" },
   budget: { variant: "blue", label: "Budget" },
   family: { variant: "default", label: "Family" },
+  system: { variant: "default", label: "System" },
 };
 
 function buildVitals(profile: HealthProfile | null) {
@@ -111,6 +107,7 @@ function getGreeting() {
 export default function DashboardPage() {
   const { user } = useAuth();
   const [healthProfile, setHealthProfile] = useState<HealthProfile | null>(null);
+  const [activityData, setActivityData] = useState<ActivityData>({ activities: [], insights: [] });
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -120,9 +117,19 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    getHealthProfile()
-      .then(setHealthProfile)
-      .catch(() => {});
+    let alive = true;
+    Promise.all([
+      getHealthProfile(),
+      fetch("/api/activity").then((res) => res.json())
+    ]).then(([profile, actData]) => {
+      if (alive) {
+        setHealthProfile(profile);
+        if (actData && actData.activities) {
+          setActivityData(actData);
+        }
+      }
+    }).catch(() => {});
+    return () => { alive = false; };
   }, []);
 
   const displayName = user?.full_name || user?.email?.split("@")[0] || "User";
@@ -132,7 +139,7 @@ export default function DashboardPage() {
   let riskScore = 0;
   const riskFactors: string[] = [];
   if (healthProfile) {
-    if (healthProfile.bp_systolic && healthProfile.bp_systolic >= 140) {
+    if (healthProfile.bp_systolic && healthProfile.bp_diastolic && (healthProfile.bp_systolic >= 140 || healthProfile.bp_diastolic >= 90)) {
       riskScore += 30;
       riskFactors.push(`Blood pressure ${healthProfile.bp_systolic}/${healthProfile.bp_diastolic} mmHg — above normal`);
     }
@@ -240,25 +247,47 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Recent activity */}
-      <Card>
-        <CardTitle>Recent Activity</CardTitle>
-        <div className="mt-4 space-y-3">
-          {recentActivity.map((a, i) => {
-            const badge = activityBadge[a.type];
-            return (
-              <div
-                key={i}
-                className="flex items-center gap-3 rounded-xl border border-[color:var(--border)]/60 bg-[color:var(--surface-soft)]/50 px-4 py-3"
-              >
-                <Badge variant={badge.variant}>{badge.label}</Badge>
-                <p className="flex-1 text-sm text-[color:var(--foreground)]">{a.text}</p>
-                <span className="shrink-0 text-[11px] text-[color:var(--muted)]">{a.time}</span>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
+      {/* Activity and Insights Row */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Recent activity */}
+        <Card>
+          <CardTitle>Recent Activity</CardTitle>
+          <div className="mt-4 space-y-3">
+            {activityData.activities.map((a, i) => {
+              const badge = activityBadge[a.type] || activityBadge.system;
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-xl border border-[color:var(--border)]/60 bg-[color:var(--surface-soft)]/50 px-4 py-3"
+                >
+                  <Badge variant={badge.variant}>{badge.label}</Badge>
+                  <p className="flex-1 text-sm text-[color:var(--foreground)]">{a.text}</p>
+                  <span className="shrink-0 text-[11px] text-[color:var(--muted)]">{a.time}</span>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        {/* AI Health Insights */}
+        <Card>
+          <CardTitle>AI Health Insights</CardTitle>
+          <div className="mt-4 space-y-3">
+            {activityData.insights.length > 0 ? (
+              activityData.insights.map((insight, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-xl border border-[color:var(--border)]/60 bg-[color:var(--primary)]/5 px-4 py-3">
+                  <div className="mt-0.5 text-[color:var(--primary)]">
+                    <Activity size={16} />
+                  </div>
+                  <p className="text-sm text-[color:var(--foreground)]">{insight}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-[color:var(--muted)]">Log more data to see personalized insights.</p>
+            )}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

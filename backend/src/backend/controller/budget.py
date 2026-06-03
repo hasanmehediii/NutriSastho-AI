@@ -35,6 +35,17 @@ def get_my_latest_budget(
     return _plan_to_dict(plan)
 
 
+def get_budget_by_user_id(
+    user_id: str,
+    session: Session = Depends(get_session),
+):
+    svc = BudgetService(session)
+    plan = svc.get_latest(user_id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Not found")
+    return _plan_to_dict(plan)
+
+
 def submit_budget_plan(
     data: BudgetPlanCreate,
     current_user: UserModel = Depends(get_current_user),

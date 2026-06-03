@@ -1,0 +1,2807 @@
+[
+  {
+    "name_en": "White Rice",
+    "name_bn": "সাদা ভাত",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 260,
+    "protein_g": 5.4,
+    "carbs_g": 56,
+    "fat_g": 0.6,
+    "fiber_g": 0.6,
+    "price_bdt": "8-10 ৳",
+    "tags": [
+      "staple"
+    ]
+  },
+  {
+    "name_en": "Brown Rice",
+    "name_bn": "লাল চালের ভাত",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 248,
+    "protein_g": 5.5,
+    "carbs_g": 52,
+    "fat_g": 2.0,
+    "fiber_g": 3.5,
+    "price_bdt": "15-20 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Miniket Rice",
+    "name_bn": "মিনিকেট চালের ভাত",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 250,
+    "protein_g": 5.0,
+    "carbs_g": 55,
+    "fat_g": 0.5,
+    "fiber_g": 0.5,
+    "price_bdt": "10-12 ৳",
+    "tags": [
+      "staple"
+    ]
+  },
+  {
+    "name_en": "Nazirshail Rice",
+    "name_bn": "নাজিরশাইল চালের ভাত",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 255,
+    "protein_g": 5.2,
+    "carbs_g": 56,
+    "fat_g": 0.6,
+    "fiber_g": 0.6,
+    "price_bdt": "12-15 ৳",
+    "tags": [
+      "staple"
+    ]
+  },
+  {
+    "name_en": "Basmati Rice",
+    "name_bn": "বাসমতি চালের ভাত",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 210,
+    "protein_g": 4.4,
+    "carbs_g": 45,
+    "fat_g": 0.5,
+    "fiber_g": 0.8,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "premium"
+    ]
+  },
+  {
+    "name_en": "Polao",
+    "name_bn": "পোলাও",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 350,
+    "protein_g": 6.0,
+    "carbs_g": 45,
+    "fat_g": 15.0,
+    "fiber_g": 1.0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "festive"
+    ]
+  },
+  {
+    "name_en": "Biryani (Chicken)",
+    "name_bn": "চিকেন বিরিয়ানি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 450,
+    "protein_g": 20.0,
+    "carbs_g": 50,
+    "fat_g": 18.0,
+    "fiber_g": 2.0,
+    "price_bdt": "150-200 ৳",
+    "tags": [
+      "festive"
+    ]
+  },
+  {
+    "name_en": "Biryani (Beef)",
+    "name_bn": "বিফ বিরিয়ানি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 550,
+    "protein_g": 25.0,
+    "carbs_g": 45,
+    "fat_g": 25.0,
+    "fiber_g": 2.0,
+    "price_bdt": "180-250 ৳",
+    "tags": [
+      "festive"
+    ]
+  },
+  {
+    "name_en": "Biryani (Mutton)",
+    "name_bn": "মাটন বিরিয়ানি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 580,
+    "protein_g": 22.0,
+    "carbs_g": 45,
+    "fat_g": 28.0,
+    "fiber_g": 2.0,
+    "price_bdt": "200-300 ৳",
+    "tags": [
+      "festive"
+    ]
+  },
+  {
+    "name_en": "Tehari (Beef)",
+    "name_bn": "বিফ তেহারি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 480,
+    "protein_g": 20.0,
+    "carbs_g": 48,
+    "fat_g": 22.0,
+    "fiber_g": 1.5,
+    "price_bdt": "120-180 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Khichuri (Plain)",
+    "name_bn": "খুদে খিচুড়ি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 215,
+    "protein_g": 7.0,
+    "carbs_g": 38,
+    "fat_g": 4.5,
+    "fiber_g": 2.5,
+    "price_bdt": "15-20 ৳",
+    "tags": [
+      "comfort-food"
+    ]
+  },
+  {
+    "name_en": "Khichuri (Bhuna)",
+    "name_bn": "ভুনা খিচুড়ি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 320,
+    "protein_g": 9.0,
+    "carbs_g": 42,
+    "fat_g": 12.0,
+    "fiber_g": 3.0,
+    "price_bdt": "40-60 ৳",
+    "tags": [
+      "rich"
+    ]
+  },
+  {
+    "name_en": "Panta Bhat",
+    "name_bn": "পান্তা ভাত",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 180,
+    "protein_g": 3.5,
+    "carbs_g": 40,
+    "fat_g": 0.4,
+    "fiber_g": 1.0,
+    "price_bdt": "5-8 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Roti / Chapati",
+    "name_bn": "রুটি / চাপাতি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 104,
+    "protein_g": 3.0,
+    "carbs_g": 18,
+    "fat_g": 2.5,
+    "fiber_g": 1.3,
+    "price_bdt": "5-8 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Naan Bread",
+    "name_bn": "নান রুটি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 260,
+    "protein_g": 8.0,
+    "carbs_g": 42,
+    "fat_g": 6.0,
+    "fiber_g": 2.0,
+    "price_bdt": "20-40 ৳",
+    "tags": [
+      "restaurant"
+    ]
+  },
+  {
+    "name_en": "Garlic Naan",
+    "name_bn": "গার্লিক নান",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 280,
+    "protein_g": 8.5,
+    "carbs_g": 43,
+    "fat_g": 8.0,
+    "fiber_g": 2.0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "restaurant"
+    ]
+  },
+  {
+    "name_en": "Paratha",
+    "name_bn": "পরাটা",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 260,
+    "protein_g": 5.0,
+    "carbs_g": 30,
+    "fat_g": 13.0,
+    "fiber_g": 1.5,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "fried"
+    ]
+  },
+  {
+    "name_en": "Luchi",
+    "name_bn": "লুচি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 150,
+    "protein_g": 3.0,
+    "carbs_g": 15,
+    "fat_g": 8.0,
+    "fiber_g": 0.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "fried"
+    ]
+  },
+  {
+    "name_en": "Pauruti (Bread)",
+    "name_bn": "পাউরুটি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 150,
+    "protein_g": 5.0,
+    "carbs_g": 28,
+    "fat_g": 1.5,
+    "fiber_g": 1.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "breakfast"
+    ]
+  },
+  {
+    "name_en": "Brown Bread",
+    "name_bn": "লাল পাউরুটি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 140,
+    "protein_g": 6.0,
+    "carbs_g": 25,
+    "fat_g": 1.5,
+    "fiber_g": 4.0,
+    "price_bdt": "8-12 ৳",
+    "tags": [
+      "breakfast"
+    ]
+  },
+  {
+    "name_en": "Bun (Ruti)",
+    "name_bn": "বন রুটি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 180,
+    "protein_g": 4.0,
+    "carbs_g": 32,
+    "fat_g": 4.0,
+    "fiber_g": 1.0,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Chira (Flattened Rice)",
+    "name_bn": "চিঁড়া",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 175,
+    "protein_g": 3.5,
+    "carbs_g": 39,
+    "fat_g": 0.5,
+    "fiber_g": 0.8,
+    "price_bdt": "8-10 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Muri (Puffed Rice)",
+    "name_bn": "মুড়ি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 110,
+    "protein_g": 2.0,
+    "carbs_g": 25,
+    "fat_g": 0.3,
+    "fiber_g": 0.5,
+    "price_bdt": "3-5 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Khoi (Popped Rice)",
+    "name_bn": "খৈ",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 100,
+    "protein_g": 2.2,
+    "carbs_g": 22,
+    "fat_g": 0.2,
+    "fiber_g": 0.6,
+    "price_bdt": "5-8 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Oats (cooked)",
+    "name_bn": "ওটস",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 150,
+    "protein_g": 5.0,
+    "carbs_g": 27,
+    "fat_g": 2.5,
+    "fiber_g": 4.0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "healthy"
+    ]
+  },
+  {
+    "name_en": "Noodles (Instant)",
+    "name_bn": "নুডলস",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 380,
+    "protein_g": 8.0,
+    "carbs_g": 55,
+    "fat_g": 14.0,
+    "fiber_g": 2.0,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "fast-food"
+    ]
+  },
+  {
+    "name_en": "Pasta (cooked)",
+    "name_bn": "পাস্তা",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 220,
+    "protein_g": 8.0,
+    "carbs_g": 43,
+    "fat_g": 1.3,
+    "fiber_g": 2.5,
+    "price_bdt": "40-80 ৳",
+    "tags": [
+      "western"
+    ]
+  },
+  {
+    "name_en": "Semai (Vermicelli)",
+    "name_bn": "সেমাই",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 210,
+    "protein_g": 4.0,
+    "carbs_g": 45,
+    "fat_g": 1.0,
+    "fiber_g": 1.5,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "dessert-base"
+    ]
+  },
+  {
+    "name_en": "Suji (Semolina)",
+    "name_bn": "সুজি",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 180,
+    "protein_g": 5.0,
+    "carbs_g": 36,
+    "fat_g": 0.5,
+    "fiber_g": 1.0,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "dessert-base"
+    ]
+  },
+  {
+    "name_en": "Atta (Wheat Flour)",
+    "name_bn": "আটা",
+    "category": "rice_grains",
+    "serving": "1 serving",
+    "calories": 340,
+    "protein_g": 12.0,
+    "carbs_g": 72,
+    "fat_g": 1.7,
+    "fiber_g": 10.0,
+    "price_bdt": "40-50 ৳",
+    "tags": [
+      "ingredient"
+    ]
+  },
+  {
+    "name_en": "Masoor Dal",
+    "name_bn": "মসুর ডাল",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 230,
+    "protein_g": 18.0,
+    "carbs_g": 40,
+    "fat_g": 0.7,
+    "fiber_g": 8.0,
+    "price_bdt": "20-25 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Mung Dal",
+    "name_bn": "মুগ ডাল",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 212,
+    "protein_g": 14.2,
+    "carbs_g": 38,
+    "fat_g": 0.8,
+    "fiber_g": 7.5,
+    "price_bdt": "22-28 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Cholar Dal",
+    "name_bn": "ছোলার ডাল",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 269,
+    "protein_g": 15.0,
+    "carbs_g": 45,
+    "fat_g": 4.2,
+    "fiber_g": 8.0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Motor Dal",
+    "name_bn": "মটর ডাল",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 231,
+    "protein_g": 16.3,
+    "carbs_g": 41,
+    "fat_g": 1.0,
+    "fiber_g": 8.3,
+    "price_bdt": "18-22 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Chhola (Chickpeas)",
+    "name_bn": "ছোলা",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 269,
+    "protein_g": 14.5,
+    "carbs_g": 45,
+    "fat_g": 4.2,
+    "fiber_g": 12.5,
+    "price_bdt": "25-30 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Khesari Dal",
+    "name_bn": "খেসারি ডাল",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 210,
+    "protein_g": 16.0,
+    "carbs_g": 36,
+    "fat_g": 0.6,
+    "fiber_g": 6.0,
+    "price_bdt": "12-15 ৳",
+    "tags": [
+      "budget"
+    ]
+  },
+  {
+    "name_en": "Mashkalai Dal",
+    "name_bn": "মাষকলাই ডাল",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 220,
+    "protein_g": 16.5,
+    "carbs_g": 38,
+    "fat_g": 1.2,
+    "fiber_g": 7.0,
+    "price_bdt": "25-35 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Arhar Dal",
+    "name_bn": "অড়হর ডাল",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 215,
+    "protein_g": 15.5,
+    "carbs_g": 39,
+    "fat_g": 1.0,
+    "fiber_g": 7.5,
+    "price_bdt": "25-30 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Rajma (Kidney Beans)",
+    "name_bn": "রাজমা",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 225,
+    "protein_g": 15.0,
+    "carbs_g": 40,
+    "fat_g": 0.8,
+    "fiber_g": 11.0,
+    "price_bdt": "30-40 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Dabli (Yellow Peas)",
+    "name_bn": "ডাবলি",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 220,
+    "protein_g": 14.0,
+    "carbs_g": 40,
+    "fat_g": 1.0,
+    "fiber_g": 8.0,
+    "price_bdt": "15-20 ৳",
+    "tags": [
+      "street-food-base"
+    ]
+  },
+  {
+    "name_en": "Peanut (Badam)",
+    "name_bn": "চিনাবাদাম",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 567,
+    "protein_g": 25.8,
+    "carbs_g": 16,
+    "fat_g": 49.2,
+    "fiber_g": 8.5,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Cashew Nut",
+    "name_bn": "কাজুবাদাম",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 553,
+    "protein_g": 18.2,
+    "carbs_g": 30,
+    "fat_g": 43.8,
+    "fiber_g": 3.3,
+    "price_bdt": "100-150 ৳",
+    "tags": [
+      "premium-snack"
+    ]
+  },
+  {
+    "name_en": "Almond",
+    "name_bn": "কাঠবাদাম",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 579,
+    "protein_g": 21.1,
+    "carbs_g": 21,
+    "fat_g": 49.9,
+    "fiber_g": 12.5,
+    "price_bdt": "150-200 ৳",
+    "tags": [
+      "premium-snack"
+    ]
+  },
+  {
+    "name_en": "Pistachio",
+    "name_bn": "পেস্তাবাদাম",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 562,
+    "protein_g": 20.2,
+    "carbs_g": 27,
+    "fat_g": 45.3,
+    "fiber_g": 10.6,
+    "price_bdt": "200-250 ৳",
+    "tags": [
+      "premium-snack"
+    ]
+  },
+  {
+    "name_en": "Walnut",
+    "name_bn": "আখরোট",
+    "category": "dal_pulses",
+    "serving": "1 serving",
+    "calories": 654,
+    "protein_g": 15.2,
+    "carbs_g": 13,
+    "fat_g": 65.2,
+    "fiber_g": 6.7,
+    "price_bdt": "250-300 ৳",
+    "tags": [
+      "premium-snack"
+    ]
+  },
+  {
+    "name_en": "Hilsha (Ilish)",
+    "name_bn": "ইলিশ",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 273,
+    "protein_g": 22.0,
+    "carbs_g": 0,
+    "fat_g": 20.0,
+    "fiber_g": 0,
+    "price_bdt": "150-300 ৳",
+    "tags": [
+      "omega-3"
+    ]
+  },
+  {
+    "name_en": "Rohu (Rui)",
+    "name_bn": "রুই",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 97,
+    "protein_g": 17.0,
+    "carbs_g": 0,
+    "fat_g": 3.0,
+    "fiber_g": 0,
+    "price_bdt": "40-60 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Katla",
+    "name_bn": "কাতলা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 105,
+    "protein_g": 18.0,
+    "carbs_g": 0,
+    "fat_g": 3.2,
+    "fiber_g": 0,
+    "price_bdt": "45-65 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Mrigal",
+    "name_bn": "মৃগেল",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 95,
+    "protein_g": 17.5,
+    "carbs_g": 0,
+    "fat_g": 2.5,
+    "fiber_g": 0,
+    "price_bdt": "35-50 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Tilapia",
+    "name_bn": "তেলাপিয়া",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 96,
+    "protein_g": 20.0,
+    "carbs_g": 0,
+    "fat_g": 1.7,
+    "fiber_g": 0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "budget"
+    ]
+  },
+  {
+    "name_en": "Pangas",
+    "name_bn": "পাঙ্গাশ",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 90,
+    "protein_g": 15.0,
+    "carbs_g": 0,
+    "fat_g": 3.5,
+    "fiber_g": 0,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "budget"
+    ]
+  },
+  {
+    "name_en": "Koi",
+    "name_bn": "কৈ",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 110,
+    "protein_g": 16.0,
+    "carbs_g": 0,
+    "fat_g": 4.5,
+    "fiber_g": 0,
+    "price_bdt": "50-80 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Magur",
+    "name_bn": "মাগুর",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 105,
+    "protein_g": 15.5,
+    "carbs_g": 0,
+    "fat_g": 4.0,
+    "fiber_g": 0,
+    "price_bdt": "60-90 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Shing",
+    "name_bn": "শিং",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 95,
+    "protein_g": 16.5,
+    "carbs_g": 0,
+    "fat_g": 2.8,
+    "fiber_g": 0,
+    "price_bdt": "70-100 ৳",
+    "tags": [
+      "healthy"
+    ]
+  },
+  {
+    "name_en": "Tengra",
+    "name_bn": "টেংরা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 115,
+    "protein_g": 14.0,
+    "carbs_g": 0,
+    "fat_g": 6.0,
+    "fiber_g": 0,
+    "price_bdt": "40-70 ৳",
+    "tags": [
+      "tasty"
+    ]
+  },
+  {
+    "name_en": "Puti",
+    "name_bn": "পুঁটি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 120,
+    "protein_g": 15.0,
+    "carbs_g": 0,
+    "fat_g": 6.5,
+    "fiber_g": 0,
+    "price_bdt": "20-40 ৳",
+    "tags": [
+      "budget"
+    ]
+  },
+  {
+    "name_en": "Mola",
+    "name_bn": "মলা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 100,
+    "protein_g": 14.5,
+    "carbs_g": 0,
+    "fat_g": 4.5,
+    "fiber_g": 0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "calcium"
+    ]
+  },
+  {
+    "name_en": "Kachki",
+    "name_bn": "কাচকি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 95,
+    "protein_g": 15.0,
+    "carbs_g": 0,
+    "fat_g": 3.5,
+    "fiber_g": 0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "calcium"
+    ]
+  },
+  {
+    "name_en": "Boal",
+    "name_bn": "বোয়াল",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 125,
+    "protein_g": 16.0,
+    "carbs_g": 0,
+    "fat_g": 6.5,
+    "fiber_g": 0,
+    "price_bdt": "60-100 ৳",
+    "tags": [
+      "premium"
+    ]
+  },
+  {
+    "name_en": "Aair",
+    "name_bn": "আইড়",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 110,
+    "protein_g": 17.0,
+    "carbs_g": 0,
+    "fat_g": 4.2,
+    "fiber_g": 0,
+    "price_bdt": "70-120 ৳",
+    "tags": [
+      "premium"
+    ]
+  },
+  {
+    "name_en": "Chital",
+    "name_bn": "চিতল",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 130,
+    "protein_g": 18.0,
+    "carbs_g": 0,
+    "fat_g": 5.5,
+    "fiber_g": 0,
+    "price_bdt": "80-150 ৳",
+    "tags": [
+      "premium"
+    ]
+  },
+  {
+    "name_en": "Pabda",
+    "name_bn": "পাবদা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 105,
+    "protein_g": 16.5,
+    "carbs_g": 0,
+    "fat_g": 4.0,
+    "fiber_g": 0,
+    "price_bdt": "60-100 ৳",
+    "tags": [
+      "tasty"
+    ]
+  },
+  {
+    "name_en": "Bhetki / Koral",
+    "name_bn": "ভেটকি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 115,
+    "protein_g": 19.0,
+    "carbs_g": 0,
+    "fat_g": 3.8,
+    "fiber_g": 0,
+    "price_bdt": "80-150 ৳",
+    "tags": [
+      "premium"
+    ]
+  },
+  {
+    "name_en": "Rupchanda",
+    "name_bn": "রূপচাঁদা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 140,
+    "protein_g": 17.5,
+    "carbs_g": 0,
+    "fat_g": 7.5,
+    "fiber_g": 0,
+    "price_bdt": "100-200 ৳",
+    "tags": [
+      "sea-fish"
+    ]
+  },
+  {
+    "name_en": "Loitta",
+    "name_bn": "লইট্যা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 85,
+    "protein_g": 14.0,
+    "carbs_g": 0,
+    "fat_g": 2.5,
+    "fiber_g": 0,
+    "price_bdt": "20-40 ৳",
+    "tags": [
+      "sea-fish"
+    ]
+  },
+  {
+    "name_en": "Koral",
+    "name_bn": "কোরাল",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 120,
+    "protein_g": 18.5,
+    "carbs_g": 0,
+    "fat_g": 4.5,
+    "fiber_g": 0,
+    "price_bdt": "90-160 ৳",
+    "tags": [
+      "sea-fish"
+    ]
+  },
+  {
+    "name_en": "Tuna",
+    "name_bn": "টুনা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 130,
+    "protein_g": 28.0,
+    "carbs_g": 0,
+    "fat_g": 1.0,
+    "fiber_g": 0,
+    "price_bdt": "100-200 ৳",
+    "tags": [
+      "sea-fish"
+    ]
+  },
+  {
+    "name_en": "Shrimp (Chingri)",
+    "name_bn": "চিংড়ি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 99,
+    "protein_g": 24.0,
+    "carbs_g": 0.2,
+    "fat_g": 0.3,
+    "fiber_g": 0,
+    "price_bdt": "60-150 ৳",
+    "tags": [
+      "seafood"
+    ]
+  },
+  {
+    "name_en": "Prawn (Golda)",
+    "name_bn": "গলদা চিংড়ি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 110,
+    "protein_g": 22.0,
+    "carbs_g": 0,
+    "fat_g": 1.5,
+    "fiber_g": 0,
+    "price_bdt": "150-300 ৳",
+    "tags": [
+      "seafood"
+    ]
+  },
+  {
+    "name_en": "Crab",
+    "name_bn": "কাঁকড়া",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 85,
+    "protein_g": 18.0,
+    "carbs_g": 0,
+    "fat_g": 1.2,
+    "fiber_g": 0,
+    "price_bdt": "80-150 ৳",
+    "tags": [
+      "seafood"
+    ]
+  },
+  {
+    "name_en": "Shutki (Loitta)",
+    "name_bn": "লইট্যা শুটকি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 160,
+    "protein_g": 32.0,
+    "carbs_g": 0,
+    "fat_g": 3.5,
+    "fiber_g": 0,
+    "price_bdt": "30-60 ৳",
+    "tags": [
+      "dried-fish"
+    ]
+  },
+  {
+    "name_en": "Shutki (Chepa)",
+    "name_bn": "চ্যাপা শুটকি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 170,
+    "protein_g": 30.0,
+    "carbs_g": 0,
+    "fat_g": 4.5,
+    "fiber_g": 0,
+    "price_bdt": "40-70 ৳",
+    "tags": [
+      "dried-fish"
+    ]
+  },
+  {
+    "name_en": "Chicken (Broiler)",
+    "name_bn": "ব্রয়লার মুরগি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 165,
+    "protein_g": 31.0,
+    "carbs_g": 0,
+    "fat_g": 3.6,
+    "fiber_g": 0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "lean"
+    ]
+  },
+  {
+    "name_en": "Chicken (Deshi)",
+    "name_bn": "দেশি মুরগি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 185,
+    "protein_g": 28.0,
+    "carbs_g": 0,
+    "fat_g": 7.0,
+    "fiber_g": 0,
+    "price_bdt": "50-80 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Chicken Breast",
+    "name_bn": "মুরগির বুকের মাংস",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 120,
+    "protein_g": 26.0,
+    "carbs_g": 0,
+    "fat_g": 1.5,
+    "fiber_g": 0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "lean-protein"
+    ]
+  },
+  {
+    "name_en": "Chicken Curry",
+    "name_bn": "মুরগির তরকারি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 185,
+    "protein_g": 25.0,
+    "carbs_g": 2,
+    "fat_g": 8.5,
+    "fiber_g": 0,
+    "price_bdt": "40-60 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Beef (curry)",
+    "name_bn": "গরুর মাংসের তরকারি",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 250,
+    "protein_g": 26.0,
+    "carbs_g": 3,
+    "fat_g": 15.0,
+    "fiber_g": 0,
+    "price_bdt": "70-100 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Beef (Kala Bhuna)",
+    "name_bn": "গরুর কালা ভুনা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 320,
+    "protein_g": 28.0,
+    "carbs_g": 5,
+    "fat_g": 22.0,
+    "fiber_g": 0,
+    "price_bdt": "100-150 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Mutton (curry)",
+    "name_bn": "খাসির মাংস",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 295,
+    "protein_g": 25.0,
+    "carbs_g": 0,
+    "fat_g": 21.0,
+    "fiber_g": 0,
+    "price_bdt": "100-150 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Mutton (Rezala)",
+    "name_bn": "খাসির রেজালা",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 340,
+    "protein_g": 22.0,
+    "carbs_g": 8,
+    "fat_g": 25.0,
+    "fiber_g": 0,
+    "price_bdt": "150-200 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Duck (curry)",
+    "name_bn": "হাঁসের মাংস",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 337,
+    "protein_g": 19.0,
+    "carbs_g": 0,
+    "fat_g": 28.0,
+    "fiber_g": 0,
+    "price_bdt": "80-120 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Pigeon",
+    "name_bn": "কবুতর",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 142,
+    "protein_g": 17.5,
+    "carbs_g": 0,
+    "fat_g": 7.5,
+    "fiber_g": 0,
+    "price_bdt": "60-100 ৳",
+    "tags": [
+      "protein"
+    ]
+  },
+  {
+    "name_en": "Egg (Chicken)",
+    "name_bn": "মুরগির ডিম",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 78,
+    "protein_g": 6.3,
+    "carbs_g": 0.6,
+    "fat_g": 5.3,
+    "fiber_g": 0,
+    "price_bdt": "12-15 ৳",
+    "tags": [
+      "budget"
+    ]
+  },
+  {
+    "name_en": "Egg (Duck)",
+    "name_bn": "হাঁসের ডিম",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 130,
+    "protein_g": 9.0,
+    "carbs_g": 1.0,
+    "fat_g": 9.6,
+    "fiber_g": 0,
+    "price_bdt": "15-20 ৳",
+    "tags": [
+      "rich"
+    ]
+  },
+  {
+    "name_en": "Egg (Quail)",
+    "name_bn": "কোয়েলের ডিম",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 14,
+    "protein_g": 1.2,
+    "carbs_g": 0.1,
+    "fat_g": 1.0,
+    "fiber_g": 0,
+    "price_bdt": "3-5 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Omelet",
+    "name_bn": "ডিম ভাজি / অমলেট",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 154,
+    "protein_g": 11.0,
+    "carbs_g": 1.0,
+    "fat_g": 12.0,
+    "fiber_g": 0,
+    "price_bdt": "15-20 ৳",
+    "tags": [
+      "breakfast"
+    ]
+  },
+  {
+    "name_en": "Poached Egg",
+    "name_bn": "ডিম পোচ",
+    "category": "fish_meat",
+    "serving": "1 serving",
+    "calories": 72,
+    "protein_g": 6.0,
+    "carbs_g": 0.4,
+    "fat_g": 4.8,
+    "fiber_g": 0,
+    "price_bdt": "15-20 ৳",
+    "tags": [
+      "breakfast"
+    ]
+  },
+  {
+    "name_en": "Potato",
+    "name_bn": "আলু",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 130,
+    "protein_g": 3.0,
+    "carbs_g": 30,
+    "fat_g": 0.2,
+    "fiber_g": 3.6,
+    "price_bdt": "5-8 ৳",
+    "tags": [
+      "staple"
+    ]
+  },
+  {
+    "name_en": "Aloo Bhorta",
+    "name_bn": "আলু ভর্তা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 120,
+    "protein_g": 2.5,
+    "carbs_g": 18,
+    "fat_g": 5.0,
+    "fiber_g": 2.0,
+    "price_bdt": "8-12 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Eggplant (Begun)",
+    "name_bn": "বেগুন",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 25,
+    "protein_g": 1.0,
+    "carbs_g": 6,
+    "fat_g": 0.2,
+    "fiber_g": 3.0,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Begun Bhorta",
+    "name_bn": "বেগুন ভর্তা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 90,
+    "protein_g": 1.5,
+    "carbs_g": 8,
+    "fat_g": 6.0,
+    "fiber_g": 3.0,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Begun Bhaji",
+    "name_bn": "বেগুন ভাজি",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 140,
+    "protein_g": 2.0,
+    "carbs_g": 12,
+    "fat_g": 10.0,
+    "fiber_g": 3.0,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "fried"
+    ]
+  },
+  {
+    "name_en": "Tomato",
+    "name_bn": "টমেটো",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 18,
+    "protein_g": 0.9,
+    "carbs_g": 3.9,
+    "fat_g": 0.2,
+    "fiber_g": 1.2,
+    "price_bdt": "3-6 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Onion",
+    "name_bn": "পেঁয়াজ",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 40,
+    "protein_g": 1.1,
+    "carbs_g": 9.3,
+    "fat_g": 0.1,
+    "fiber_g": 1.7,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "base"
+    ]
+  },
+  {
+    "name_en": "Garlic",
+    "name_bn": "রসুন",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 149,
+    "protein_g": 6.4,
+    "carbs_g": 33,
+    "fat_g": 0.5,
+    "fiber_g": 2.1,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "base"
+    ]
+  },
+  {
+    "name_en": "Ginger",
+    "name_bn": "আদা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 80,
+    "protein_g": 1.8,
+    "carbs_g": 18,
+    "fat_g": 0.7,
+    "fiber_g": 2.0,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "base"
+    ]
+  },
+  {
+    "name_en": "Green Chili",
+    "name_bn": "কাঁচা মরিচ",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 40,
+    "protein_g": 2.0,
+    "carbs_g": 9.0,
+    "fat_g": 0.2,
+    "fiber_g": 1.5,
+    "price_bdt": "2-5 ৳",
+    "tags": [
+      "spice"
+    ]
+  },
+  {
+    "name_en": "Cabbage (Badhakopi)",
+    "name_bn": "বাঁধাকপি",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 25,
+    "protein_g": 1.3,
+    "carbs_g": 5.8,
+    "fat_g": 0.1,
+    "fiber_g": 2.5,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Cauliflower (Fulkopi)",
+    "name_bn": "ফুলকপি",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 25,
+    "protein_g": 1.9,
+    "carbs_g": 5.0,
+    "fat_g": 0.3,
+    "fiber_g": 2.0,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Carrot (Gajor)",
+    "name_bn": "গাজর",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 41,
+    "protein_g": 0.9,
+    "carbs_g": 9.6,
+    "fat_g": 0.2,
+    "fiber_g": 2.8,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "vitamin-a"
+    ]
+  },
+  {
+    "name_en": "Radish (Mula)",
+    "name_bn": "মুলা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 16,
+    "protein_g": 0.7,
+    "carbs_g": 3.4,
+    "fat_g": 0.1,
+    "fiber_g": 1.6,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "low-calorie"
+    ]
+  },
+  {
+    "name_en": "Pumpkin (Misti Kumra)",
+    "name_bn": "মিষ্টি কুমড়া",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 26,
+    "protein_g": 1.0,
+    "carbs_g": 6.5,
+    "fat_g": 0.1,
+    "fiber_g": 0.5,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "vitamin-a"
+    ]
+  },
+  {
+    "name_en": "Bottle Gourd (Lau)",
+    "name_bn": "লাউ",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 14,
+    "protein_g": 0.6,
+    "carbs_g": 3.4,
+    "fat_g": 0.1,
+    "fiber_g": 0.5,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "hydrating"
+    ]
+  },
+  {
+    "name_en": "Ash Gourd (Chal Kumra)",
+    "name_bn": "চাল কুমড়া",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 13,
+    "protein_g": 0.4,
+    "carbs_g": 3.0,
+    "fat_g": 0.2,
+    "fiber_g": 2.9,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "hydrating"
+    ]
+  },
+  {
+    "name_en": "Pointed Gourd (Potol)",
+    "name_bn": "পটল",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 20,
+    "protein_g": 2.0,
+    "carbs_g": 3.5,
+    "fat_g": 0.3,
+    "fiber_g": 1.5,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "healthy"
+    ]
+  },
+  {
+    "name_en": "Ridge Gourd (Jhinga)",
+    "name_bn": "ঝিঙ্গা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 15,
+    "protein_g": 0.5,
+    "carbs_g": 3.3,
+    "fat_g": 0.1,
+    "fiber_g": 1.2,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "healthy"
+    ]
+  },
+  {
+    "name_en": "Sponge Gourd (Dhundul)",
+    "name_bn": "ধুনদুল",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 18,
+    "protein_g": 1.0,
+    "carbs_g": 3.5,
+    "fat_g": 0.2,
+    "fiber_g": 1.5,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "healthy"
+    ]
+  },
+  {
+    "name_en": "Snake Gourd (Chichinga)",
+    "name_bn": "চিচিঙ্গা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 18,
+    "protein_g": 0.8,
+    "carbs_g": 3.8,
+    "fat_g": 0.2,
+    "fiber_g": 1.2,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "healthy"
+    ]
+  },
+  {
+    "name_en": "Bitter Gourd (Korola)",
+    "name_bn": "করলা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 17,
+    "protein_g": 1.0,
+    "carbs_g": 3.7,
+    "fat_g": 0.2,
+    "fiber_g": 2.8,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "diabetes-friendly"
+    ]
+  },
+  {
+    "name_en": "Okra (Dheros)",
+    "name_bn": "ঢেঁড়স",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 33,
+    "protein_g": 2.0,
+    "carbs_g": 7.5,
+    "fat_g": 0.2,
+    "fiber_g": 3.2,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Cucumber (Shosha)",
+    "name_bn": "শসা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 15,
+    "protein_g": 0.6,
+    "carbs_g": 3.6,
+    "fat_g": 0.1,
+    "fiber_g": 0.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "hydrating"
+    ]
+  },
+  {
+    "name_en": "Papaya Green (Kacha Pepe)",
+    "name_bn": "কাঁচা পেঁপে",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 43,
+    "protein_g": 1.5,
+    "carbs_g": 10.0,
+    "fat_g": 0.1,
+    "fiber_g": 1.7,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "digestion"
+    ]
+  },
+  {
+    "name_en": "Plantain (Kacha Kola)",
+    "name_bn": "কাঁচা কলা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 89,
+    "protein_g": 1.3,
+    "carbs_g": 23.0,
+    "fat_g": 0.3,
+    "fiber_g": 2.3,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "iron"
+    ]
+  },
+  {
+    "name_en": "Taro Root (Kochur Mukhi)",
+    "name_bn": "কচুর মুখি",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 142,
+    "protein_g": 1.5,
+    "carbs_g": 34.6,
+    "fat_g": 0.1,
+    "fiber_g": 4.1,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Taro Lobe (Kochur Loti)",
+    "name_bn": "কচুর লতি",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 60,
+    "protein_g": 2.0,
+    "carbs_g": 13.0,
+    "fat_g": 0.2,
+    "fiber_g": 3.0,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "iron"
+    ]
+  },
+  {
+    "name_en": "Spinach (Palong Shak)",
+    "name_bn": "পালং শাক",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 23,
+    "protein_g": 2.9,
+    "carbs_g": 3.6,
+    "fat_g": 0.4,
+    "fiber_g": 2.2,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "iron"
+    ]
+  },
+  {
+    "name_en": "Red Amaranth (Lal Shak)",
+    "name_bn": "লাল শাক",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 23,
+    "protein_g": 2.5,
+    "carbs_g": 4.0,
+    "fat_g": 0.1,
+    "fiber_g": 1.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "iron"
+    ]
+  },
+  {
+    "name_en": "Malabar Spinach (Pui Shak)",
+    "name_bn": "পুঁই শাক",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 20,
+    "protein_g": 2.0,
+    "carbs_g": 3.5,
+    "fat_g": 0.1,
+    "fiber_g": 1.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Stem Amaranth (Data Shak)",
+    "name_bn": "ডাটা শাক",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 25,
+    "protein_g": 2.2,
+    "carbs_g": 4.5,
+    "fat_g": 0.2,
+    "fiber_g": 1.8,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Water Spinach (Kolmi Shak)",
+    "name_bn": "কলমি শাক",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 19,
+    "protein_g": 2.6,
+    "carbs_g": 3.1,
+    "fat_g": 0.2,
+    "fiber_g": 2.1,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "healthy"
+    ]
+  },
+  {
+    "name_en": "Jute Leaves (Pat Shak)",
+    "name_bn": "পাট শাক",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 40,
+    "protein_g": 4.5,
+    "carbs_g": 6.0,
+    "fat_g": 0.5,
+    "fiber_g": 2.0,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Bottle Gourd Leaves (Lau Shak)",
+    "name_bn": "লাউ শাক",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 25,
+    "protein_g": 3.0,
+    "carbs_g": 4.0,
+    "fat_g": 0.2,
+    "fiber_g": 2.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Coriander Leaves (Dhone Pata)",
+    "name_bn": "ধনে পাতা",
+    "category": "vegetables",
+    "serving": "1 serving",
+    "calories": 23,
+    "protein_g": 2.1,
+    "carbs_g": 3.7,
+    "fat_g": 0.5,
+    "fiber_g": 2.8,
+    "price_bdt": "2-5 ৳",
+    "tags": [
+      "herb"
+    ]
+  },
+  {
+    "name_en": "Banana (Kola)",
+    "name_bn": "কলা",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 105,
+    "protein_g": 1.3,
+    "carbs_g": 27,
+    "fat_g": 0.4,
+    "fiber_g": 3.1,
+    "price_bdt": "5-8 ৳",
+    "tags": [
+      "potassium"
+    ]
+  },
+  {
+    "name_en": "Mango (Aam)",
+    "name_bn": "আম",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 99,
+    "protein_g": 1.4,
+    "carbs_g": 25,
+    "fat_g": 0.6,
+    "fiber_g": 2.6,
+    "price_bdt": "15-30 ৳",
+    "tags": [
+      "vitamin-a"
+    ]
+  },
+  {
+    "name_en": "Jackfruit (Kathal)",
+    "name_bn": "কাঁঠাল",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 155,
+    "protein_g": 2.8,
+    "carbs_g": 40,
+    "fat_g": 1.0,
+    "fiber_g": 2.5,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "energy"
+    ]
+  },
+  {
+    "name_en": "Papaya (Ripe)",
+    "name_bn": "পাকা পেঁপে",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 62,
+    "protein_g": 0.7,
+    "carbs_g": 16,
+    "fat_g": 0.4,
+    "fiber_g": 2.5,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "digestion"
+    ]
+  },
+  {
+    "name_en": "Guava (Peyara)",
+    "name_bn": "পেয়ারা",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 68,
+    "protein_g": 2.6,
+    "carbs_g": 14,
+    "fat_g": 1.0,
+    "fiber_g": 5.4,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Green Coconut Water (Dab)",
+    "name_bn": "ডাবের পানি",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 57,
+    "protein_g": 0.7,
+    "carbs_g": 12,
+    "fat_g": 0.5,
+    "fiber_g": 0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "electrolyte"
+    ]
+  },
+  {
+    "name_en": "Litchi",
+    "name_bn": "লিচু",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 66,
+    "protein_g": 0.8,
+    "carbs_g": 17,
+    "fat_g": 0.4,
+    "fiber_g": 1.3,
+    "price_bdt": "15-30 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Watermelon (Tormuj)",
+    "name_bn": "তরমুজ",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 46,
+    "protein_g": 0.9,
+    "carbs_g": 12,
+    "fat_g": 0.2,
+    "fiber_g": 0.6,
+    "price_bdt": "5-8 ৳",
+    "tags": [
+      "hydrating"
+    ]
+  },
+  {
+    "name_en": "Pineapple (Anarosh)",
+    "name_bn": "আনারস",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 82,
+    "protein_g": 0.9,
+    "carbs_g": 22,
+    "fat_g": 0.2,
+    "fiber_g": 2.3,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Orange (Komola)",
+    "name_bn": "কমলা",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 62,
+    "protein_g": 1.2,
+    "carbs_g": 15,
+    "fat_g": 0.2,
+    "fiber_g": 3.1,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Malta",
+    "name_bn": "মাল্টা",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 60,
+    "protein_g": 1.0,
+    "carbs_g": 14,
+    "fat_g": 0.2,
+    "fiber_g": 2.5,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Apple",
+    "name_bn": "আপেল",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 95,
+    "protein_g": 0.5,
+    "carbs_g": 25,
+    "fat_g": 0.3,
+    "fiber_g": 4.4,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Pomegranate (Dalim)",
+    "name_bn": "ডালিম",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 144,
+    "protein_g": 2.0,
+    "carbs_g": 33,
+    "fat_g": 1.5,
+    "fiber_g": 7.0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "iron"
+    ]
+  },
+  {
+    "name_en": "Grapes (Angur)",
+    "name_bn": "আঙ্গুর",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 104,
+    "protein_g": 1.1,
+    "carbs_g": 27,
+    "fat_g": 0.2,
+    "fiber_g": 1.4,
+    "price_bdt": "20-40 ৳",
+    "tags": [
+      "antioxidant"
+    ]
+  },
+  {
+    "name_en": "Date (Khejur)",
+    "name_bn": "খেজুর",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 282,
+    "protein_g": 2.5,
+    "carbs_g": 75,
+    "fat_g": 0.4,
+    "fiber_g": 8.0,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "energy"
+    ]
+  },
+  {
+    "name_en": "Plum (Boroi)",
+    "name_bn": "বরই",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 46,
+    "protein_g": 0.7,
+    "carbs_g": 11,
+    "fat_g": 0.3,
+    "fiber_g": 1.4,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Hog Plum (Amra)",
+    "name_bn": "আমড়া",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 45,
+    "protein_g": 1.0,
+    "carbs_g": 10,
+    "fat_g": 0.2,
+    "fiber_g": 2.0,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Star Apple (Jamrul)",
+    "name_bn": "জামরুল",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 25,
+    "protein_g": 0.5,
+    "carbs_g": 6,
+    "fat_g": 0.1,
+    "fiber_g": 1.0,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "hydrating"
+    ]
+  },
+  {
+    "name_en": "Blackberry (Jaam)",
+    "name_bn": "কালো জাম",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 60,
+    "protein_g": 1.0,
+    "carbs_g": 14,
+    "fat_g": 0.2,
+    "fiber_g": 1.5,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "iron"
+    ]
+  },
+  {
+    "name_en": "Bael (Wood Apple)",
+    "name_bn": "বেল",
+    "category": "fruits",
+    "serving": "1 serving",
+    "calories": 137,
+    "protein_g": 1.8,
+    "carbs_g": 32,
+    "fat_g": 0.3,
+    "fiber_g": 2.9,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "digestion"
+    ]
+  },
+  {
+    "name_en": "Fuchka",
+    "name_bn": "ফুচকা",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 280,
+    "protein_g": 5.0,
+    "carbs_g": 45,
+    "fat_g": 9.0,
+    "fiber_g": 3.0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "high-sodium"
+    ]
+  },
+  {
+    "name_en": "Chotpoti",
+    "name_bn": "চটপটি",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 310,
+    "protein_g": 8.0,
+    "carbs_g": 48,
+    "fat_g": 10.0,
+    "fiber_g": 5.0,
+    "price_bdt": "40-60 ৳",
+    "tags": [
+      "fiber"
+    ]
+  },
+  {
+    "name_en": "Jhalmuri",
+    "name_bn": "ঝালমুড়ি",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 180,
+    "protein_g": 3.5,
+    "carbs_g": 30,
+    "fat_g": 6.0,
+    "fiber_g": 2.0,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Singara",
+    "name_bn": "সিঙ্গারা",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 290,
+    "protein_g": 4.5,
+    "carbs_g": 30,
+    "fat_g": 17.0,
+    "fiber_g": 2.5,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "fried"
+    ]
+  },
+  {
+    "name_en": "Samosa",
+    "name_bn": "সমুচা",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 260,
+    "protein_g": 5.0,
+    "carbs_g": 28,
+    "fat_g": 15.0,
+    "fiber_g": 2.0,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "fried"
+    ]
+  },
+  {
+    "name_en": "Peyaju",
+    "name_bn": "পেঁয়াজু",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 180,
+    "protein_g": 5.0,
+    "carbs_g": 18,
+    "fat_g": 10.0,
+    "fiber_g": 2.0,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "fried"
+    ]
+  },
+  {
+    "name_en": "Beguni",
+    "name_bn": "বেগুনি",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 150,
+    "protein_g": 2.0,
+    "carbs_g": 15,
+    "fat_g": 9.0,
+    "fiber_g": 1.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "fried"
+    ]
+  },
+  {
+    "name_en": "Alur Chop",
+    "name_bn": "আলুর চপ",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 200,
+    "protein_g": 3.0,
+    "carbs_g": 20,
+    "fat_g": 12.0,
+    "fiber_g": 2.0,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "fried"
+    ]
+  },
+  {
+    "name_en": "Mughlai Paratha",
+    "name_bn": "মোগলাই পরাটা",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 520,
+    "protein_g": 16.0,
+    "carbs_g": 45,
+    "fat_g": 30.0,
+    "fiber_g": 2.0,
+    "price_bdt": "50-80 ৳",
+    "tags": [
+      "high-calorie"
+    ]
+  },
+  {
+    "name_en": "Haleem",
+    "name_bn": "হালিম",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 350,
+    "protein_g": 20.0,
+    "carbs_g": 35,
+    "fat_g": 15.0,
+    "fiber_g": 4.0,
+    "price_bdt": "60-100 ৳",
+    "tags": [
+      "rich"
+    ]
+  },
+  {
+    "name_en": "Chicken Roll",
+    "name_bn": "চিকেন রোল",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 300,
+    "protein_g": 12.0,
+    "carbs_g": 30,
+    "fat_g": 15.0,
+    "fiber_g": 1.5,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Vegetable Roll",
+    "name_bn": "সবজি রোল",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 220,
+    "protein_g": 5.0,
+    "carbs_g": 35,
+    "fat_g": 8.0,
+    "fiber_g": 3.0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Burger (Beef)",
+    "name_bn": "বিফ বার্গার",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 450,
+    "protein_g": 20.0,
+    "carbs_g": 40,
+    "fat_g": 22.0,
+    "fiber_g": 2.0,
+    "price_bdt": "80-150 ৳",
+    "tags": [
+      "fast-food"
+    ]
+  },
+  {
+    "name_en": "Burger (Chicken)",
+    "name_bn": "চিকেন বার্গার",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 400,
+    "protein_g": 18.0,
+    "carbs_g": 40,
+    "fat_g": 18.0,
+    "fiber_g": 2.0,
+    "price_bdt": "70-130 ৳",
+    "tags": [
+      "fast-food"
+    ]
+  },
+  {
+    "name_en": "Pizza (Slice)",
+    "name_bn": "পিৎজা",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 285,
+    "protein_g": 12.0,
+    "carbs_g": 35,
+    "fat_g": 10.0,
+    "fiber_g": 2.5,
+    "price_bdt": "80-150 ৳",
+    "tags": [
+      "fast-food"
+    ]
+  },
+  {
+    "name_en": "Biscuit (Toast)",
+    "name_bn": "টোস্ট বিস্কুট",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 120,
+    "protein_g": 2.0,
+    "carbs_g": 20,
+    "fat_g": 3.0,
+    "fiber_g": 0.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Biscuit (Sweet)",
+    "name_bn": "মিষ্টি বিস্কুট",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 150,
+    "protein_g": 2.0,
+    "carbs_g": 22,
+    "fat_g": 6.0,
+    "fiber_g": 0.5,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Chanachur",
+    "name_bn": "চানাচুর",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 250,
+    "protein_g": 6.0,
+    "carbs_g": 20,
+    "fat_g": 16.0,
+    "fiber_g": 3.0,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "snack"
+    ]
+  },
+  {
+    "name_en": "Bakharkhani",
+    "name_bn": "বখরখানি",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 300,
+    "protein_g": 5.0,
+    "carbs_g": 40,
+    "fat_g": 14.0,
+    "fiber_g": 1.0,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Pitha (Bhapa)",
+    "name_bn": "ভাপা পিঠা",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 180,
+    "protein_g": 2.5,
+    "carbs_g": 35,
+    "fat_g": 3.0,
+    "fiber_g": 1.0,
+    "price_bdt": "10-20 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Pitha (Chitoi)",
+    "name_bn": "চিতই পিঠা",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 150,
+    "protein_g": 3.0,
+    "carbs_g": 32,
+    "fat_g": 1.0,
+    "fiber_g": 1.5,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Pitha (Puli)",
+    "name_bn": "পুলি পিঠা",
+    "category": "street_food",
+    "serving": "1 serving",
+    "calories": 220,
+    "protein_g": 3.5,
+    "carbs_g": 38,
+    "fat_g": 5.0,
+    "fiber_g": 1.5,
+    "price_bdt": "15-25 ৳",
+    "tags": [
+      "traditional"
+    ]
+  },
+  {
+    "name_en": "Mishti Doi",
+    "name_bn": "মিষ্টি দই",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 180,
+    "protein_g": 5.0,
+    "carbs_g": 30,
+    "fat_g": 5.0,
+    "fiber_g": 0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "probiotic"
+    ]
+  },
+  {
+    "name_en": "Roshogolla",
+    "name_bn": "রসগোল্লা",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 186,
+    "protein_g": 5.0,
+    "carbs_g": 35,
+    "fat_g": 3.5,
+    "fiber_g": 0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "sugar"
+    ]
+  },
+  {
+    "name_en": "Golab Jamun",
+    "name_bn": "গোলাপ জাম",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 220,
+    "protein_g": 4.0,
+    "carbs_g": 40,
+    "fat_g": 5.0,
+    "fiber_g": 0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "sugar"
+    ]
+  },
+  {
+    "name_en": "Kalo Jam",
+    "name_bn": "কালো জাম",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 250,
+    "protein_g": 4.5,
+    "carbs_g": 45,
+    "fat_g": 6.0,
+    "fiber_g": 0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "sugar"
+    ]
+  },
+  {
+    "name_en": "Shandesh",
+    "name_bn": "সন্দেশ",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 200,
+    "protein_g": 6.0,
+    "carbs_g": 30,
+    "fat_g": 7.0,
+    "fiber_g": 0,
+    "price_bdt": "25-40 ৳",
+    "tags": [
+      "calcium"
+    ]
+  },
+  {
+    "name_en": "Chamcham",
+    "name_bn": "চমচম",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 210,
+    "protein_g": 5.0,
+    "carbs_g": 38,
+    "fat_g": 4.0,
+    "fiber_g": 0,
+    "price_bdt": "25-40 ৳",
+    "tags": [
+      "sugar"
+    ]
+  },
+  {
+    "name_en": "Payesh",
+    "name_bn": "পায়েশ",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 270,
+    "protein_g": 7.0,
+    "carbs_g": 45,
+    "fat_g": 8.0,
+    "fiber_g": 0.5,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "comfort-food"
+    ]
+  },
+  {
+    "name_en": "Jilapi",
+    "name_bn": "জিলাপি",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 380,
+    "protein_g": 2.0,
+    "carbs_g": 60,
+    "fat_g": 15.0,
+    "fiber_g": 0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "sugar"
+    ]
+  },
+  {
+    "name_en": "Firni",
+    "name_bn": "ফিরনি",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 250,
+    "protein_g": 6.0,
+    "carbs_g": 40,
+    "fat_g": 7.0,
+    "fiber_g": 0.5,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "comfort-food"
+    ]
+  },
+  {
+    "name_en": "Falooda",
+    "name_bn": "ফালুদা",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 320,
+    "protein_g": 8.0,
+    "carbs_g": 55,
+    "fat_g": 8.0,
+    "fiber_g": 2.0,
+    "price_bdt": "80-150 ৳",
+    "tags": [
+      "dessert"
+    ]
+  },
+  {
+    "name_en": "Ice Cream",
+    "name_bn": "আইসক্রিম",
+    "category": "sweets",
+    "serving": "1 serving",
+    "calories": 207,
+    "protein_g": 3.5,
+    "carbs_g": 24,
+    "fat_g": 11.0,
+    "fiber_g": 0,
+    "price_bdt": "30-80 ৳",
+    "tags": [
+      "sugar"
+    ]
+  },
+  {
+    "name_en": "Milk (Dudh)",
+    "name_bn": "দুধ",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 122,
+    "protein_g": 8.0,
+    "carbs_g": 12,
+    "fat_g": 5.0,
+    "fiber_g": 0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "calcium"
+    ]
+  },
+  {
+    "name_en": "Tea (Milk)",
+    "name_bn": "দুধ চা",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 60,
+    "protein_g": 1.5,
+    "carbs_g": 10,
+    "fat_g": 1.5,
+    "fiber_g": 0,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "caffeine"
+    ]
+  },
+  {
+    "name_en": "Tea (Black/Raw)",
+    "name_bn": "রং চা",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 5,
+    "protein_g": 0.1,
+    "carbs_g": 1.0,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "price_bdt": "5-10 ৳",
+    "tags": [
+      "caffeine"
+    ]
+  },
+  {
+    "name_en": "Coffee (Milk)",
+    "name_bn": "কফি",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 80,
+    "protein_g": 2.0,
+    "carbs_g": 12,
+    "fat_g": 2.5,
+    "fiber_g": 0,
+    "price_bdt": "20-40 ৳",
+    "tags": [
+      "caffeine"
+    ]
+  },
+  {
+    "name_en": "Lassi",
+    "name_bn": "লাচ্ছি",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 165,
+    "protein_g": 6.0,
+    "carbs_g": 28,
+    "fat_g": 3.5,
+    "fiber_g": 0,
+    "price_bdt": "40-60 ৳",
+    "tags": [
+      "probiotic"
+    ]
+  },
+  {
+    "name_en": "Borhani",
+    "name_bn": "বোরহানী",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 80,
+    "protein_g": 3.0,
+    "carbs_g": 12,
+    "fat_g": 2.0,
+    "fiber_g": 0,
+    "price_bdt": "30-50 ৳",
+    "tags": [
+      "digestive"
+    ]
+  },
+  {
+    "name_en": "Sugarcane Juice",
+    "name_bn": "আখের রস",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 180,
+    "protein_g": 0.3,
+    "carbs_g": 45,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "price_bdt": "20-30 ৳",
+    "tags": [
+      "energy"
+    ]
+  },
+  {
+    "name_en": "Lemon Water",
+    "name_bn": "লেবুর শরবত",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 45,
+    "protein_g": 0.2,
+    "carbs_g": 12,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "price_bdt": "10-15 ৳",
+    "tags": [
+      "vitamin-c"
+    ]
+  },
+  {
+    "name_en": "Green Coconut Water",
+    "name_bn": "ডাবের পানি",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 57,
+    "protein_g": 0.7,
+    "carbs_g": 12,
+    "fat_g": 0.5,
+    "fiber_g": 0,
+    "price_bdt": "40-60 ৳",
+    "tags": [
+      "hydrating"
+    ]
+  },
+  {
+    "name_en": "Mango Juice",
+    "name_bn": "আমের জুস",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 120,
+    "protein_g": 1.0,
+    "carbs_g": 28,
+    "fat_g": 0.5,
+    "fiber_g": 1.0,
+    "price_bdt": "30-60 ৳",
+    "tags": [
+      "sugar"
+    ]
+  },
+  {
+    "name_en": "Soft Drink (Cola)",
+    "name_bn": "কোমল পানীয়",
+    "category": "beverages",
+    "serving": "1 serving",
+    "calories": 140,
+    "protein_g": 0,
+    "carbs_g": 39,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "price_bdt": "25-35 ৳",
+    "tags": [
+      "sugar"
+    ]
+  }
+]

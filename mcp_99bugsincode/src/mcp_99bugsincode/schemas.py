@@ -39,4 +39,8 @@ class MedicalReportInput(BaseModel):
 class FoodScrapeInput(BaseModel):
     food_name: str = Field(..., description="The name of the food ingredient to scrape the live price for")
 
+class LogMealInput(BaseModel):
+    meal_text: str = Field(..., description="Natural language description of the meal (e.g. '1 cup rice and an egg')")
 
+class ActivityInsightsInput(BaseModel):
+    user_id: str = Field(..., description="The UUID of the user")

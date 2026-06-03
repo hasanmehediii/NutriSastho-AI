@@ -145,82 +145,46 @@ export async function POST(request: NextRequest) {
   }
 
   // Parse request body
-  let body: { image: string; mimeType?: string };
+  let body: { text: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (!body.image) {
-    return NextResponse.json({ error: "No image provided" }, { status: 400 });
+  if (!body.text) {
+    return NextResponse.json({ error: "No meal description provided" }, { status: 400 });
   }
 
-  // Remove data URL prefix if present
-  let base64Data = body.image;
-  let mimeType = body.mimeType || "image/jpeg";
-  if (base64Data.startsWith("data:")) {
-    const match = base64Data.match(/^data:([^;]+);base64,(.+)$/);
-    if (match) {
-      mimeType = match[1];
-      base64Data = match[2];
-    }
-  }
-
-  // Get user health profile for context-aware analysis
-  let healthContext = "";
   try {
-    const profileResult = await callBackendHealthProfile(session.access_token);
-    if ("profile" in profileResult && profileResult.profile) {
-      const p = profileResult.profile as Record<string, unknown>;
-      const conditions = (p.conditions as string[]) || [];
-      const allergies = (p.allergies as string) || "";
-      const parts: string[] = [];
-
-      if (conditions.length > 0) parts.push(`User has: ${conditions.join(", ")}.`);
-      if (p.bp_systolic && (p.bp_systolic as number) >= 140) parts.push("User has high blood pressure — flag high-sodium foods.");
-      if (p.blood_sugar && (p.blood_sugar as number) > 140) parts.push("User has elevated blood sugar — flag high-GI and sugary foods.");
-      if (p.bmi && (p.bmi as number) >= 25) parts.push("User is overweight — suggest lower-calorie alternatives.");
-      if (p.bmi && (p.bmi as number) < 18.5) parts.push("User is underweight — suggest calorie-dense nutritious foods.");
-      if (allergies) parts.push(`Allergies: ${allergies}.`);
-      if (p.pregnancy_status === "yes") parts.push("User is pregnant — flag unsafe foods and suggest prenatal nutrition.");
-
-      if (parts.length > 0) {
-        healthContext = `USER HEALTH CONTEXT:\n${parts.join("\n")}`;
+    // Import here to avoid top-level issues if mcp client is not ready
+    const { callMcpTool } = await import("../../health/_backend");
+    const mcpResult = await callMcpTool("analyze_meal_text", {
+      meal_text: body.text,
+    });
+    
+    if (mcpResult && "data" in mcpResult) {
+      let parsed = mcpResult.data;
+      // If callMcpTool couldn't parse the JSON, it returns a raw string
+      if (typeof parsed === 'string') {
+          parsed = extractJson(parsed);
+      }
+      if (parsed && typeof parsed === 'object' && !("error" in parsed)) {
+          return NextResponse.json({ ...parsed, source: "mcp_local" });
+      } else if (parsed && typeof parsed === 'object' && "error" in parsed) {
+          return NextResponse.json({ error: (parsed as { error: string }).error }, { status: 422 });
       }
     }
-  } catch {
-    // Continue without health context
-  }
-
-  // Check Gemini API key
-  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json(
-      { error: "Meal scanner requires Gemini API key. Please configure GEMINI_API_KEY." },
+      { error: "Could not analyze the meal. Please try again." },
+      { status: 422 },
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to connect to local AI server." },
       { status: 503 },
     );
   }
-
-  // Call Gemini Vision
-  const resultText = await callGeminiVision(base64Data, mimeType, healthContext);
-  const parsed = extractJson(resultText);
-
-  if (!parsed) {
-    return NextResponse.json(
-      {
-        error: "Could not analyze the food image. Please try again with a clearer photo.",
-      },
-      { status: 422 },
-    );
-  }
-
-  // Check if Gemini returned an error
-  if (parsed.error) {
-    return NextResponse.json({ error: parsed.error }, { status: 422 });
-  }
-
-  return NextResponse.json({
-    source: "gemini",
-    ...parsed,
-  });
 }
+
+

@@ -57,6 +57,17 @@ def get_my_health_profile(
     return _profile_to_dict(profile)
 
 
+def get_health_profile_by_user_id(
+    user_id: str,
+    session: Session = Depends(get_session),
+):
+    svc = HealthProfileService(session)
+    profile = svc.get_latest(user_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Not found")
+    return _profile_to_dict(profile)
+
+
 def get_my_health_history(
     current_user: UserModel = Depends(get_current_user),
     session: Session = Depends(get_session),

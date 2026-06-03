@@ -41,17 +41,19 @@ function computeRisk(profile: HealthProfile | null) {
 
   if (!profile) return { score: 0, factors, level: "low" as const };
 
-  if (profile.bp_systolic && profile.bp_systolic >= 140) {
-    const w = profile.bp_systolic >= 180 ? 40 : 30;
-    factors.push({
-      factor: `Blood Pressure (${profile.bp_systolic}/${profile.bp_diastolic} mmHg)`,
-      weight: w,
-      level: w >= 35 ? "high" : "medium",
-    });
-    score += w;
-  } else if (profile.bp_systolic && profile.bp_systolic >= 120) {
-    factors.push({ factor: `Elevated BP (${profile.bp_systolic}/${profile.bp_diastolic} mmHg)`, weight: 10, level: "low" });
-    score += 10;
+  if (profile.bp_systolic && profile.bp_diastolic) {
+    if (profile.bp_systolic >= 140 || profile.bp_diastolic >= 90) {
+      const w = (profile.bp_systolic >= 180 || profile.bp_diastolic >= 120) ? 40 : 30;
+      factors.push({
+        factor: `Blood Pressure (${profile.bp_systolic}/${profile.bp_diastolic} mmHg)`,
+        weight: w,
+        level: w >= 35 ? "high" : "medium",
+      });
+      score += w;
+    } else if (profile.bp_systolic >= 120 || profile.bp_diastolic >= 80) {
+      factors.push({ factor: `Elevated BP (${profile.bp_systolic}/${profile.bp_diastolic} mmHg)`, weight: 10, level: "low" });
+      score += 10;
+    }
   }
 
   if (profile.temperature_f && profile.temperature_f >= 100.4) {
@@ -107,14 +109,14 @@ function generateExplanations(profile: HealthProfile | null) {
   if (!profile) return ["No health data submitted yet. Submit your vitals in Health Input to receive a detailed risk analysis."];
   const exps: string[] = [];
 
-  if (profile.bp_systolic && profile.bp_systolic >= 140) {
-    exps.push(`Your systolic blood pressure (${profile.bp_systolic} mmHg) is above the normal range of 120 mmHg. Combined with your diastolic reading (${profile.bp_diastolic} mmHg), this indicates Stage ${profile.bp_systolic >= 180 ? '2' : '1'} hypertension.`);
+  if (profile.bp_systolic && profile.bp_diastolic && (profile.bp_systolic >= 140 || profile.bp_diastolic >= 90)) {
+    exps.push(`Your blood pressure (${profile.bp_systolic}/${profile.bp_diastolic} mmHg) is above the normal range. This indicates Stage ${(profile.bp_systolic >= 180 || profile.bp_diastolic >= 120) ? '2 (Crisis)' : '1'} hypertension.`);
   }
   if (profile.conditions && profile.conditions.length > 0) {
     exps.push(`Your existing conditions (${profile.conditions.join(", ")}) increase the significance of any abnormal vital readings.`);
   }
   if (profile.symptoms && profile.symptoms.length > 0) {
-    exps.push(`You are currently experiencing ${profile.symptoms.join(", ")}. These symptoms ${profile.bp_systolic && profile.bp_systolic >= 140 ? "may be related to your elevated blood pressure" : "should be monitored closely"}.`);
+    exps.push(`You are currently experiencing ${profile.symptoms.join(", ")}. These symptoms ${profile.bp_systolic && (profile.bp_systolic >= 140 || (profile.bp_diastolic && profile.bp_diastolic >= 90)) ? "may be related to your elevated blood pressure" : "should be monitored closely"}.`);
   }
   if (profile.bmi && profile.bmi >= 25) {
     exps.push(`Your BMI of ${profile.bmi} indicates ${profile.bmi >= 30 ? "obesity" : "overweight status"}, which can contribute to cardiovascular risk and other health issues.`);
@@ -132,7 +134,7 @@ function generateRecommendations(profile: HealthProfile | null) {
   if (!profile) return [];
   const recs: { type: string; text: string; icon: typeof TestTube }[] = [];
 
-  if (profile.bp_systolic && profile.bp_systolic >= 140) {
+  if (profile.bp_systolic && profile.bp_diastolic && (profile.bp_systolic >= 140 || profile.bp_diastolic >= 90)) {
     recs.push({ type: "test", text: "Blood pressure recheck in 24 hours", icon: TestTube });
     recs.push({ type: "doctor", text: "Consult General Physician within 48h", icon: Stethoscope });
     recs.push({ type: "action", text: "Reduce salt intake and avoid processed foods", icon: ArrowRight });
@@ -220,15 +222,12 @@ export default function RiskAnalysisPage() {
   }, []);
 
   const { score: riskScore, factors: riskFactors, level: riskLevel } = computeRisk(profile);
-  const displayScore = aiAnalysis?.score ?? riskScore;
-  const displayFactors = aiAnalysis?.factors ?? riskFactors;
-  const displayLevel = aiAnalysis?.level ?? riskLevel;
+  const displayScore = riskScore;
+  const displayFactors = riskFactors;
+  const displayLevel = riskLevel;
   const config = levelConfig[displayLevel];
-  const explanations = aiAnalysis?.explanations ?? generateExplanations(profile);
-  const recommendations = aiAnalysis?.recommendations.map((rec) => ({
-    ...rec,
-    icon: rec.type === "test" ? TestTube : rec.type === "doctor" ? Stethoscope : ArrowRight,
-  })) ?? generateRecommendations(profile);
+  const explanations = generateExplanations(profile);
+  const recommendations = generateRecommendations(profile);
 
   // Build trend data from history
   const trendData = history

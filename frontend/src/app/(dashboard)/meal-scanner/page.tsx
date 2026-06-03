@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import {
   Camera,
-  Upload,
   Loader2,
   Utensils,
   Flame,
@@ -16,12 +15,12 @@ import {
   Lightbulb,
   Star,
   RotateCcw,
-  ImageIcon,
-  X,
+  Edit3
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { Input } from "@/components/ui/Input";
 
 type FoodItem = {
   name_en: string;
@@ -59,46 +58,16 @@ type ScanResult = {
 };
 
 export default function MealScannerPage() {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [mealText, setMealText] = useState("");
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImageSelect = useCallback((file: File) => {
-    if (!file.type.startsWith("image/")) {
-      setError("Please select an image file");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      setError("Image too large. Please use an image under 10MB.");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImagePreview(e.target?.result as string);
-      setResult(null);
-      setError(null);
-    };
-    reader.readAsDataURL(file);
-  }, []);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleImageSelect(file);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleImageSelect(file);
-  };
 
   const handleScan = async () => {
-    if (!imagePreview) return;
+    if (!mealText.trim()) {
+      setError("Please describe your meal first.");
+      return;
+    }
     setScanning(true);
     setError(null);
 
@@ -106,7 +75,7 @@ export default function MealScannerPage() {
       const res = await fetch("/api/ai/meal-scanner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: imagePreview }),
+        body: JSON.stringify({ text: mealText }),
       });
 
       const data = await res.json();
@@ -123,11 +92,9 @@ export default function MealScannerPage() {
   };
 
   const handleReset = () => {
-    setImagePreview(null);
+    setMealText("");
     setResult(null);
     setError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    if (cameraInputRef.current) cameraInputRef.current.value = "";
   };
 
   const scoreColor = (score: number) => {
@@ -142,109 +109,43 @@ export default function MealScannerPage() {
       <div>
         <div className="flex items-center gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
-            <Camera size={20} />
+            <Edit3 size={20} />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-[color:var(--foreground)]">
-              AI Meal Scanner
+              Smart Meal Logger
             </h1>
             <p className="text-sm text-[color:var(--muted)]">
-              Snap a photo of your food → Get instant Bangladeshi nutrition analysis
+              Describe what you ate → Get instant Bangladeshi nutrition analysis
             </p>
           </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Left: Image capture area */}
+        {/* Left: Input area */}
         <div className="space-y-4">
-          {!imagePreview ? (
-            /* Upload / Camera area */
-            <Card
-              className={`relative transition-all duration-300 ${
-                dragOver
-                  ? "ring-2 ring-[color:var(--primary)] bg-[color:var(--primary)]/5"
-                  : ""
-              }`}
-            >
-              <div
-                className="flex flex-col items-center justify-center py-12 text-center"
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={handleDrop}
-              >
-                <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-600/20">
-                  <ImageIcon
-                    size={32}
-                    className="text-emerald-600 dark:text-emerald-400"
-                  />
-                </div>
-                <h3 className="text-lg font-bold text-[color:var(--foreground)]">
-                  Upload Your Meal Photo
-                </h3>
-                <p className="mt-1 text-sm text-[color:var(--muted)] max-w-xs">
-                  Take a photo of your plate or upload an existing image to get instant nutrition breakdown
-                </p>
+          <Card>
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-[color:var(--foreground)]">
+                Log Your Meal
+              </h3>
+              <p className="mt-1 text-sm text-[color:var(--muted)]">
+                Type what you had for your meal (e.g., "1 cup rice, 2 pieces Rui fish, and spinach")
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <Input
+                id="mealInput"
+                label=""
+                placeholder="e.g., 2 ruti and dim bhaji"
+                value={mealText}
+                onChange={(e) => setMealText(e.target.value)}
+                disabled={scanning}
+              />
 
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  {/* Camera button */}
-                  <Button
-                    variant="primary"
-                    icon={<Camera size={16} />}
-                    onClick={() => cameraInputRef.current?.click()}
-                  >
-                    Take Photo
-                  </Button>
-                  <input
-                    ref={cameraInputRef}
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-
-                  {/* Upload button */}
-                  <Button
-                    variant="secondary"
-                    icon={<Upload size={16} />}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    Upload Image
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </div>
-
-                <p className="mt-4 text-[11px] text-[color:var(--muted)]">
-                  Supports JPG, PNG, WebP · Max 10MB · Drag and drop also works
-                </p>
-              </div>
-            </Card>
-          ) : (
-            /* Image preview + actions */
-            <Card padding={false} className="overflow-hidden">
-              <div className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imagePreview}
-                  alt="Meal to analyze"
-                  className="w-full h-[320px] object-cover"
-                />
-                {/* Remove button */}
-                <button
-                  onClick={handleReset}
-                  className="absolute top-3 right-3 grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm hover:bg-black/70 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="p-4 flex gap-3">
+              <div className="flex gap-3">
                 <Button
                   variant="primary"
                   icon={
@@ -256,21 +157,23 @@ export default function MealScannerPage() {
                   }
                   className="flex-1"
                   onClick={handleScan}
-                  disabled={scanning}
+                  disabled={scanning || !mealText}
                 >
                   {scanning ? "Analyzing your meal..." : "Analyze Nutrition"}
                 </Button>
-                <Button
-                  variant="secondary"
-                  icon={<RotateCcw size={16} />}
-                  onClick={handleReset}
-                  disabled={scanning}
-                >
-                  Reset
-                </Button>
+                {result && (
+                  <Button
+                    variant="secondary"
+                    icon={<RotateCcw size={16} />}
+                    onClick={handleReset}
+                    disabled={scanning}
+                  >
+                    Reset
+                  </Button>
+                )}
               </div>
-            </Card>
-          )}
+            </div>
+          </Card>
 
           {/* Error */}
           {error && (
@@ -288,10 +191,10 @@ export default function MealScannerPage() {
               </h3>
               <div className="space-y-3">
                 {[
-                  { step: "1", text: "Take a photo of your food plate or upload an existing image" },
-                  { step: "2", text: "AI identifies Bangladeshi dishes and estimates portions" },
-                  { step: "3", text: "Get calories, macros, health warnings based on your profile" },
-                  { step: "4", text: "See healthier Bangladeshi food swaps personalized for you" },
+                  { step: "1", text: "Type out the foods you ate naturally" },
+                  { step: "2", text: "AI matches it to local Bangladeshi ingredients" },
+                  { step: "3", text: "Get accurate calories, macros, and health tips instantly" },
+                  { step: "4", text: "100% private, runs locally without expensive APIs" },
                 ].map((item) => (
                   <div key={item.step} className="flex items-start gap-3">
                     <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-[10px] font-bold text-white">
@@ -516,8 +419,8 @@ export default function MealScannerPage() {
                   Your nutrition analysis will appear here
                 </h3>
                 <p className="mt-1 text-[11px] text-[color:var(--muted)] max-w-xs">
-                  Upload or capture a photo of your meal to see detailed calorie breakdown,
-                  health warnings, and healthier Bangladeshi food alternatives
+                  Describe what you ate to see detailed calorie breakdown and
+                  health tips tailored for you.
                 </p>
               </div>
             </Card>

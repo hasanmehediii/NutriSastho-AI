@@ -94,14 +94,14 @@ export default function DietPlanPage() {
   const selectedDay = planData?.days.find((day) => day.key === activeDay) ?? planData?.days[0];
   const meals = selectedDay
     ? [
-        selectedDay.plan.breakfast,
-        selectedDay.plan.lunch,
-        selectedDay.plan.snack,
-        selectedDay.plan.dinner,
-      ]
+        selectedDay.plan?.breakfast,
+        selectedDay.plan?.lunch,
+        selectedDay.plan?.snack,
+        selectedDay.plan?.dinner,
+      ].filter((m) => m && typeof m === 'object') // Remove any undefined/null meals
     : [];
-  const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
-  const totalCost = meals.reduce((sum, meal) => sum + meal.cost, 0);
+  const totalCalories = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+  const totalCost = meals.reduce((sum, meal) => sum + (meal.cost || 0), 0);
   const monthlyEstimate = totalCost * 30 * (planData?.budget?.family_size ?? 1);
 
   return (
@@ -204,26 +204,26 @@ export default function DietPlanPage() {
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {meals.map((meal) => (
-              <Card key={meal.name} className="transition-shadow hover:shadow-md">
+            {meals.map((meal, idx) => (
+              <Card key={`${meal.name || 'meal'}-${idx}`} className="transition-shadow hover:shadow-md">
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div
                       className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: mealColors[meal.name] }}
+                      style={{ backgroundColor: mealColors[meal.name || "Snack"] || "#94a3b8" }}
                     />
                     <h3 className="text-sm font-bold text-[color:var(--foreground)]">
-                      {meal.name}
+                      {meal.name || "Unknown Meal"}
                     </h3>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="green">{meal.calories} kcal</Badge>
-                    <Badge>BDT {meal.cost}</Badge>
+                    <Badge variant="green">{meal.calories || 0} kcal</Badge>
+                    <Badge>BDT {meal.cost || 0}</Badge>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  {meal.items.length > 0 ? (
+                  {meal.items && meal.items.length > 0 ? (
                     meal.items.map((item) => (
                       <div key={item} className="flex items-center gap-2 text-sm text-[color:var(--muted)]">
                         <Utensils size={12} strokeWidth={2} className="shrink-0 text-[color:var(--primary)]" />
@@ -281,18 +281,20 @@ export default function DietPlanPage() {
             <CardDescription>Daily intake vs recommended targets</CardDescription>
 
             <div className="mt-4 space-y-3">
-              {planData.nutrition.map((nutrient) => {
-                const pct = Math.min(100, Math.round((nutrient.value / nutrient.target) * 100));
+              {planData.nutrition.map((nutrient, idx) => {
+                const val = nutrient.value || 0;
+                const tgt = nutrient.target || 1; // Prevent division by zero
+                const pct = Math.min(100, Math.round((val / tgt) * 100));
                 return (
-                  <div key={nutrient.nutrient}>
+                  <div key={nutrient.nutrient || `nutrient-${idx}`}>
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-medium text-[color:var(--foreground)]">
-                        {nutrient.nutrient}
+                        {nutrient.nutrient || "Unknown"}
                       </span>
                       <span className="text-[color:var(--muted)]">
-                        {nutrient.value}
-                        {nutrient.unit} / {nutrient.target}
-                        {nutrient.unit}
+                        {val}
+                        {nutrient.unit || ""} / {nutrient.target || 0}
+                        {nutrient.unit || ""}
                       </span>
                     </div>
                     <div className="mt-1 h-2 overflow-hidden rounded-full bg-[color:var(--surface-muted)]">
