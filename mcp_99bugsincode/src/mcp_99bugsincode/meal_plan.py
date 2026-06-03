@@ -157,30 +157,124 @@ def build_rules_diet_plan(profile: dict, budget: dict, food_items: list) -> dict
         s_cost = min(s_cost or round(daily_budget_per_person * 0.12), round(daily_budget_per_person * 0.15))
         d_cost = min(d_cost or round(daily_budget_per_person * 0.28), round(daily_budget_per_person * 0.35))
         
+        # Helper to construct item string and calculate exact calories
+        def prepare_item(food_item, default_name, weight_g, suffix=""):
+            if not food_item:
+                return f"{default_name} {suffix}".strip(), 0
+            
+            # Simple scaling (database calories are per 100g or 1 serving, we assume serving=100g for base calcs)
+            base_cals = float(food_item.get("calories", 0))
+            actual_cals = round(base_cals * (weight_g / 100.0))
+            name = food_item.get("name_en", default_name)
+            return f"{name} ({weight_g}g) {suffix}".strip(), actual_cals
+            
+        b_items = []
+        b_cals = 0
+        if idx % 2 == 0:
+            name, c = prepare_item(grain, "Roti", 100, "(2 pcs)")
+        else:
+            name, c = prepare_item(grain, grain_name, 150)
+        b_items.append(name)
+        b_cals += c
+        
+        if "Egg" in protein_name:
+            name, c = prepare_item(protein, "Egg", 50, "(Boiled)")
+        else:
+            name, c = prepare_item(veg, veg_name, 100, "bhaji")
+        b_items.append(name)
+        b_cals += c
+        
+        if not diabetic:
+            name, c = prepare_item(fruit, fruit_name, 100)
+            b_items.append(name)
+            b_cals += c
+        else:
+            b_items.append("Unsweetened tea")
+            
+        b_items = remove_avoided(b_items, avoided)
+
+        l_items = []
+        l_cals = 0
+        rice_qty = 120 if (diabetic or weight_focused) else 200
+        name, c = prepare_item(grain, grain_name, rice_qty)
+        l_items.append(name)
+        l_cals += c
+        
+        name, c = prepare_item(dal, dal_name, 150)
+        l_items.append(name)
+        l_cals += c
+        
+        name, c = prepare_item(protein, protein_name, 120, f"curry ({salt_note})")
+        l_items.append(name)
+        l_cals += c
+        
+        name, c = prepare_item(veg2, veg2_name, 100)
+        l_items.append(name)
+        l_cals += c
+        l_items = remove_avoided(l_items, avoided)
+
+        s_items = []
+        s_cals = 0
+        if diabetic:
+            s_items.extend(["Guava (100g)", "Roasted chickpeas (50g)"])
+            s_cals += 130
+        else:
+            name, c = prepare_item(fruit, fruit_name, 100)
+            s_items.append(name)
+            s_cals += c
+            if monthly_budget < 5000:
+                s_items.append("Muri (50g)")
+                s_cals += 55
+            else:
+                s_items.append("Yogurt (100g)")
+                s_cals += 61
+        s_items = remove_avoided(s_items, avoided)
+
+        d_items = []
+        d_cals = 0
+        if weight_focused:
+            name, c = prepare_item(grain, "Roti", 100, "(2 pcs)")
+        else:
+            name, c = prepare_item(grain, grain_name, 120, "(small)")
+        d_items.append(name)
+        d_cals += c
+        
+        name, c = prepare_item(second_protein, second_protein_name, 120, "curry")
+        d_items.append(name)
+        d_cals += c
+        
+        name, c = prepare_item(veg, veg_name, 100)
+        d_items.append(name)
+        d_cals += c
+        
+        d_items.append("Cucumber salad (100g)")
+        d_cals += 15
+        d_items = remove_avoided(d_items, avoided)
+        
         plan = {
             "breakfast": {
                 "name": "Breakfast",
-                "items": remove_avoided(["Roti (2)" if idx % 2 == 0 else grain_name, "Boiled egg" if "Egg" in protein_name else f"{veg_name} bhaji", "Unsweetened tea" if diabetic else fruit_name], avoided),
+                "items": b_items,
                 "cost": b_cost or round(daily_budget_per_person * 0.22),
-                "calories": 320 if diabetic else 380
+                "calories": b_cals
             },
             "lunch": {
                 "name": "Lunch",
-                "items": remove_avoided([rice_portion, dal_name, f"{protein_name} curry ({salt_note})", veg2_name], avoided),
+                "items": l_items,
                 "cost": l_cost or round(daily_budget_per_person * 0.38),
-                "calories": 520 if (diabetic or weight_focused) else 620
+                "calories": l_cals
             },
             "snack": {
                 "name": "Snack",
-                "items": remove_avoided(snack_items, avoided),
+                "items": s_items,
                 "cost": s_cost or round(daily_budget_per_person * 0.12),
-                "calories": 130 if diabetic else 170
+                "calories": s_cals
             },
             "dinner": {
                 "name": "Dinner",
-                "items": remove_avoided(["Roti (2)" if weight_focused else f"{grain_name} (small)", f"{second_protein_name} curry", veg_name, "Cucumber salad"], avoided),
+                "items": d_items,
                 "cost": d_cost or round(daily_budget_per_person * 0.28),
-                "calories": 430 if weight_focused else 520
+                "calories": d_cals
             }
         }
         day_plans.append({"key": day["key"], "label": day["label"], "plan": plan})
@@ -209,7 +303,7 @@ async def call_groq_llm(profile: dict, budget: dict, food_items: list) -> dict:
     
     prompt = f"""Generate a budget-aware Bangladeshi weekly diet plan as strict JSON only.
 Do not include markdown.
-Shape: {{"source":"groq-mcp", "budget":{{...}}, "conditionWarning":{{...}}, "days":[{{"key":"sat","label":"Sat","plan":{{"breakfast":{{"name":"","items":[],"cost":0,"calories":0}}, ...}} }}], "nutrition":[{{"nutrient":"Protein","value":60,"target":65,"unit":"g"}}]}}
+Shape: {{"source":"groq-mcp", "budget":{{...}}, "conditionWarning":{{...}}, "days":[{{"key":"sat","label":"Sat","plan":{{"breakfast":{{"name":"","items":["string format: item name (portion)"],"cost":0,"calories":0}}, ...}} }}], "nutrition":[{{"nutrient":"Protein","value":60,"target":65,"unit":"g"}}]}}
 Costs are BDT per person per day. Use the LIVE MARKET PRICES below to calculate realistic costs.
 Respect allergies and stay within budget.
 

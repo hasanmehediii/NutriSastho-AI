@@ -38,6 +38,8 @@ export default function DietPlanPage() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
 
+  const getTodayKey = () => ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][new Date().getDay()];
+
   async function loadPlan(isRegenerate = false) {
     setError("");
     if (isRegenerate) {
@@ -49,7 +51,7 @@ export default function DietPlanPage() {
     try {
       const nextPlan = await generateDietPlan();
       setPlanData(nextPlan);
-      setActiveDay(nextPlan.days[0]?.key ?? "sat");
+      setActiveDay(nextPlan.days.find(d => d.key === getTodayKey())?.key ?? nextPlan.days[0]?.key ?? "sat");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate diet plan.");
     } finally {
@@ -65,7 +67,7 @@ export default function DietPlanPage() {
       .then((nextPlan) => {
         if (!alive) return;
         setPlanData(nextPlan);
-        setActiveDay(nextPlan.days[0]?.key ?? "sat");
+        setActiveDay(nextPlan.days.find(d => d.key === getTodayKey())?.key ?? nextPlan.days[0]?.key ?? "sat");
       })
       .catch((err) => {
         if (!alive) return;
@@ -158,7 +160,27 @@ export default function DietPlanPage() {
                 onClick={async () => {
                   setSyncing(true);
                   try {
-                    const res = await fetch("/api/food/sync-prices", { method: "POST" });
+                    // Collect all food items currently visible across all days
+                    const currentItems = new Set<string>();
+                    planData?.days.forEach(day => {
+                      const meals = [day.plan.breakfast, day.plan.lunch, day.plan.snack, day.plan.dinner];
+                      meals.forEach(m => {
+                        if (m?.items) {
+                          m.items.forEach(item => {
+                            const str = typeof item === 'object' ? (item as any).name || "" : item;
+                            // Clean up portion sizes like (150g) or (small) from the string to get the base food name
+                            const cleanName = str.replace(/\([^)]*\)/g, '').trim();
+                            if (cleanName) currentItems.add(cleanName);
+                          });
+                        }
+                      });
+                    });
+
+                    const res = await fetch("/api/food/sync-prices", { 
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ items: Array.from(currentItems) })
+                    });
                     if (!res.ok) throw new Error("Failed to sync");
                     await loadPlan(true); // reload plan with new prices
                   } catch (e) {
@@ -224,12 +246,16 @@ export default function DietPlanPage() {
 
                 <div className="space-y-1.5">
                   {meal.items && meal.items.length > 0 ? (
-                    meal.items.map((item) => (
-                      <div key={item} className="flex items-center gap-2 text-sm text-[color:var(--muted)]">
-                        <Utensils size={12} strokeWidth={2} className="shrink-0 text-[color:var(--primary)]" />
-                        {item}
-                      </div>
-                    ))
+                    meal.items.map((item, i) => {
+                      // Safety fallback: if LLM returns an object instead of string
+                      const itemStr = typeof item === 'object' ? (item as any).name || JSON.stringify(item) : item;
+                      return (
+                        <div key={`${itemStr}-${i}`} className="flex items-center gap-2 text-sm text-[color:var(--muted)]">
+                          <Utensils size={12} strokeWidth={2} className="shrink-0 text-[color:var(--primary)]" />
+                          {itemStr}
+                        </div>
+                      );
+                    })
                   ) : (
                     <p className="text-sm text-[color:var(--muted)]">
                       All suggested items were filtered by your avoid/allergy list.

@@ -319,10 +319,12 @@ export async function callBackendFoodItems() {
   return { items: data as FoodItemFromBackend[], status: 200 };
 }
 
-export async function callBackendSyncPrices() {
+export async function callBackendSyncPrices(items: string[] = []) {
   const response = await fetch(getBackendUrl("/food/sync-prices"), {
     method: "POST",
     cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items }),
   });
 
   let data: unknown = null;

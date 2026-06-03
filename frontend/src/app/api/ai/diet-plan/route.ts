@@ -186,11 +186,94 @@ function buildRulesDietPlan(
     const veg2Name = veg2?.name_en ?? "Leafy vegetables";
     const fruitName = fruit?.name_en ?? "Banana";
 
-    const ricePortion = diabetic || weightFocused ? `${grainName} (small portion)` : grainName;
+    // Helper to construct item string and calculate exact calories
+    const prepareItem = (foodItem: FoodItemFromBackend | undefined, defaultName: string, weightG: number, suffix: string = ""): { name: string, cals: number } => {
+      if (!foodItem) return { name: `${defaultName} ${suffix}`.trim(), cals: 0 };
+      const baseCals = Number(foodItem.calories || 0);
+      const actualCals = Math.round(baseCals * (weightG / 100.0));
+      const name = foodItem.name_en || defaultName;
+      return { name: `${name} (${weightG}g) ${suffix}`.trim(), cals: actualCals };
+    };
+
+    const bItems: string[] = [];
+    let bCals = 0;
+    if (index % 2 === 0) {
+      const { name, cals } = prepareItem(grain, "Roti", 100, "(2 pcs)");
+      bItems.push(name);
+      bCals += cals;
+    } else {
+      const { name, cals } = prepareItem(grain, grainName, 150);
+      bItems.push(name);
+      bCals += cals;
+    }
+
+    if (proteinName.includes("Egg")) {
+      const { name, cals } = prepareItem(protein, "Egg", 50, "(Boiled)");
+      bItems.push(name);
+      bCals += cals;
+    } else {
+      const { name, cals } = prepareItem(veg, vegName, 100, "bhaji");
+      bItems.push(name);
+      bCals += cals;
+    }
+
+    if (!diabetic) {
+      const { name, cals } = prepareItem(fruit, fruitName, 100);
+      bItems.push(name);
+      bCals += cals;
+    } else {
+      bItems.push("Unsweetened tea");
+    }
+
+    const lItems: string[] = [];
+    let lCals = 0;
+    const riceQty = (diabetic || weightFocused) ? 120 : 200;
+    const { name: l1, cals: c1 } = prepareItem(grain, grainName, riceQty);
+    lItems.push(l1); lCals += c1;
+    const { name: l2, cals: c2 } = prepareItem(dal, dalName, 150);
+    lItems.push(l2); lCals += c2;
+    const { name: l3, cals: c3 } = prepareItem(protein, proteinName, 120, `curry (${saltNote})`);
+    lItems.push(l3); lCals += c3;
+    const { name: l4, cals: c4 } = prepareItem(veg2, veg2Name, 100);
+    lItems.push(l4); lCals += c4;
+
+    const sItems: string[] = [];
+    let sCals = 0;
+    if (diabetic) {
+      sItems.push("Guava (100g)", "Roasted chickpeas (50g)");
+      sCals += 130;
+    } else {
+      const { name, cals } = prepareItem(fruit, fruitName, 100);
+      sItems.push(name);
+      sCals += cals;
+      if (monthlyBudget < 5000) {
+        sItems.push("Muri (50g)");
+        sCals += 55;
+      } else {
+        sItems.push("Yogurt (100g)");
+        sCals += 61;
+      }
+    }
+
+    const dItems: string[] = [];
+    let dCals = 0;
+    if (weightFocused) {
+      const { name, cals } = prepareItem(grain, "Roti", 100, "(2 pcs)");
+      dItems.push(name);
+      dCals += cals;
+    } else {
+      const { name, cals } = prepareItem(grain, grainName, 120, "(small)");
+      dItems.push(name);
+      dCals += cals;
+    }
+    const { name: d2, cals: dC2 } = prepareItem(secondProtein, secondProteinName, 120, "curry");
+    dItems.push(d2); dCals += dC2;
+    const { name: d3, cals: dC3 } = prepareItem(veg, vegName, 100);
+    dItems.push(d3); dCals += dC3;
+    dItems.push("Cucumber salad (100g)");
+    dCals += 15;
+
     const saltNote = lowSalt ? "low-salt" : "home-cooked";
-    const snackItems = diabetic
-      ? ["Guava", "Roasted chickpeas"]
-      : [fruitName, monthlyBudget < 5000 ? "Muri" : "Yogurt"];
 
     const breakfastCost = Math.round(
       (parsePriceBdt(grain?.price_bdt ?? "8") + parsePriceBdt(protein?.price_bdt ?? "12")) * 0.6
@@ -217,45 +300,27 @@ function buildRulesDietPlan(
     const plan = {
       breakfast: meal(
         "Breakfast",
-        removeAvoided(
-          [
-            index % 2 === 0 ? "Roti (2)" : `${grainName}`,
-            proteinName.includes("Egg") ? "Boiled egg" : `${vegName} bhaji`,
-            diabetic ? "Unsweetened tea" : fruitName,
-          ],
-          avoided,
-        ),
-        bCost,
-        diabetic ? 320 : 380,
+        removeAvoided(bItems, avoided),
+        bCost || Math.round(dailyBudgetPerPerson * 0.22),
+        bCals,
       ),
       lunch: meal(
         "Lunch",
-        removeAvoided(
-          [ricePortion, dalName, `${proteinName} curry (${saltNote})`, veg2Name],
-          avoided,
-        ),
-        lCost,
-        diabetic || weightFocused ? 520 : 620,
+        removeAvoided(lItems, avoided),
+        lCost || Math.round(dailyBudgetPerPerson * 0.38),
+        lCals,
       ),
       snack: meal(
         "Snack",
-        removeAvoided(snackItems, avoided),
-        sCost,
-        diabetic ? 130 : 170,
+        removeAvoided(sItems, avoided),
+        sCost || Math.round(dailyBudgetPerPerson * 0.12),
+        sCals,
       ),
       dinner: meal(
         "Dinner",
-        removeAvoided(
-          [
-            weightFocused ? "Roti (2)" : `${grainName} (small)`,
-            `${secondProteinName} curry`,
-            vegName,
-            "Cucumber salad",
-          ],
-          avoided,
-        ),
-        dCost,
-        weightFocused ? 430 : 520,
+        removeAvoided(dItems, avoided),
+        dCost || Math.round(dailyBudgetPerPerson * 0.28),
+        dCals,
       ),
     };
 
