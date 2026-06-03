@@ -14,106 +14,6 @@ type HealthProfile = {
   conditions?: string[] | null;
 };
 
-function computeRisk(profile: HealthProfile | null): RiskAnalysisResponse {
-  let score = 0;
-  const factors: RiskAnalysisResponse["factors"] = [];
-
-  if (!profile) {
-    return {
-      source: "rules",
-      score: 0,
-      level: "low",
-      factors,
-      explanations: ["No health data submitted yet. Submit your vitals for personalized risk analysis."],
-      recommendations: [{ type: "action", text: "Add your latest vitals and symptoms." }],
-    };
-  }
-
-  if ((profile.bp_systolic ?? 0) >= 140 || (profile.bp_diastolic ?? 0) >= 90) {
-    const weight = ((profile.bp_systolic ?? 0) >= 180 || (profile.bp_diastolic ?? 0) >= 120) ? 40 : 30;
-    factors.push({
-      factor: `Blood pressure ${profile.bp_systolic}/${profile.bp_diastolic} mmHg`,
-      weight,
-      level: weight >= 35 ? "high" : "medium",
-    });
-    score += weight;
-  }
-  if ((profile.temperature_f ?? 0) >= 100.4) {
-    const weight = (profile.temperature_f ?? 0) >= 103 ? 25 : 15;
-    factors.push({
-      factor: `Fever ${profile.temperature_f}°F`,
-      weight,
-      level: weight >= 20 ? "high" : "medium",
-    });
-    score += weight;
-  }
-  if ((profile.blood_sugar ?? 0) > 140) {
-    const weight = (profile.blood_sugar ?? 0) > 200 ? 20 : 10;
-    factors.push({
-      factor: `Elevated blood sugar ${profile.blood_sugar} mg/dL`,
-      weight,
-      level: weight >= 20 ? "high" : "medium",
-    });
-    score += weight;
-  }
-  if (profile.bmi) {
-    if (profile.bmi >= 30) {
-      factors.push({ factor: `BMI ${profile.bmi} - obese range`, weight: 15, level: "medium" });
-      score += 15;
-    } else if (profile.bmi >= 25) {
-      factors.push({ factor: `BMI ${profile.bmi} - overweight range`, weight: 8, level: "low" });
-      score += 8;
-    } else if (profile.bmi < 18.5) {
-      factors.push({ factor: `BMI ${profile.bmi} - underweight range`, weight: 10, level: "medium" });
-      score += 10;
-    }
-  }
-  if (profile.conditions?.length) {
-    const weight = Math.min(profile.conditions.length * 10, 25);
-    factors.push({
-      factor: `Existing conditions: ${profile.conditions.join(", ")}`,
-      weight,
-      level: weight >= 20 ? "medium" : "low",
-    });
-    score += weight;
-  }
-  if (profile.symptoms?.length) {
-    const weight = Math.min(profile.symptoms.length * 5, 20);
-    factors.push({
-      factor: `Active symptoms: ${profile.symptoms.join(", ")}`,
-      weight,
-      level: weight >= 15 ? "medium" : "low",
-    });
-    score += weight;
-  }
-
-  score = Math.min(score, 100);
-  const level = score <= 30 ? "low" : score <= 65 ? "medium" : "high";
-
-  const explanations =
-    factors.length > 0
-      ? factors.map((f) => `${f.factor} contributed ${f.weight} points to the ${level} risk score.`)
-      : ["Your submitted vital signs are within the current rule thresholds."];
-
-  const recommendations: RiskAnalysisResponse["recommendations"] = [];
-  if ((profile.bp_systolic ?? 0) >= 140 || (profile.bp_diastolic ?? 0) >= 90) {
-    recommendations.push({ type: "test", text: "Recheck blood pressure within 24 hours." });
-    recommendations.push({ type: "doctor", text: "Consult a general physician if BP remains high." });
-    recommendations.push({ type: "action", text: "Reduce salt and avoid packaged high-sodium foods." });
-  }
-  if ((profile.blood_sugar ?? 0) > 140) {
-    recommendations.push({ type: "test", text: "Consider fasting blood glucose and HbA1c tests." });
-  }
-  if ((profile.bmi ?? 0) >= 25) {
-    recommendations.push({ type: "action", text: "Do 30 minutes of moderate walking 5 days per week." });
-  }
-  if (recommendations.length === 0) {
-    recommendations.push({ type: "action", text: "Maintain regular sleep, hydration, balanced meals, and periodic checkups." });
-  }
-
-  return { source: "rules", score, level, factors, explanations, recommendations };
-}
-
 function extractJson(text: string) {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
   const candidate = fenced ?? text.match(/\{[\s\S]*\}/)?.[0];
@@ -190,16 +90,76 @@ async function callGemini(prompt: string) {
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? null;
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  // Purely Rule-Based to save API costs
+  let useAi = false;
+  try {
+    const body = await request.json();
+    useAi = Boolean(body.useAi);
+  } catch {
+    // ignore
+  }
+
+  // 1. Call MCP server for advanced rule-based risk analysis
+  let fallback: RiskAnalysisResponse;
+  try {
+    const mcpResult = await callMcpTool("analyze_health_risk", {
+      user_id: session.user.id,
+    });
+    
+    if (mcpResult.error) {
+      throw new Error(`MCP Error: ${mcpResult.error}`);
+    }
+
+    if (mcpResult.data && typeof mcpResult.data === "object") {
+      fallback = mcpResult.data as RiskAnalysisResponse;
+    } else if (typeof mcpResult.data === "string") {
+      fallback = JSON.parse(mcpResult.data) as RiskAnalysisResponse;
+    } else {
+      throw new Error("Invalid MCP response");
+    }
+  } catch (error) {
+    console.error("MCP analyze_health_risk failed:", error);
+    // Ultimate fallback if MCP is down
+    fallback = {
+      source: "rules",
+      score: 0,
+      level: "low",
+      factors: [],
+      explanations: ["Health risk analysis is temporarily unavailable."],
+      recommendations: [],
+    };
+  }
+
+  if (!useAi) {
+    return NextResponse.json(fallback);
+  }
+
+  // 2. If AI is requested, call Groq or Gemini
   const profileResult = await callBackendHealthProfile(session.access_token);
   const profile = "profile" in profileResult ? (profileResult.profile as HealthProfile | null) : null;
-  const fallback = computeRisk(profile);
+  
+  const prompt = buildPrompt(profile, fallback);
+  
+  let aiText = await callGroq(prompt);
+  let sourceType: "groq" | "gemini" = "groq";
+  
+  if (!aiText) {
+    aiText = await callGemini(prompt);
+    sourceType = "gemini";
+  }
+  
+  if (aiText) {
+    const parsed = extractJson(aiText);
+    if (parsed && isRiskAnalysis(parsed)) {
+      parsed.source = sourceType;
+      return NextResponse.json(parsed);
+    }
+  }
   
   return NextResponse.json(fallback);
 }

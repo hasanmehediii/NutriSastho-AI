@@ -10,7 +10,7 @@ from mcp_99bugsincode.backend_integration import (
     fetch_raw_health_profile, fetch_raw_budget_plan, fetch_all_foods
 )
 from mcp_99bugsincode.meal_plan import generate_bengali_meal_plan, generate_weekly_diet_plan_json
-from mcp_99bugsincode.health_risk import assess_diabetes_risk
+from mcp_99bugsincode.health_risk import assess_diabetes_risk, compute_advanced_risk
 from mcp_99bugsincode.resources import get_diet_guidelines
 from mcp_99bugsincode.prompts import get_clinical_assessment_prompt
 from mcp_99bugsincode.rag import log_meal, generate_activity_insights
@@ -165,6 +165,13 @@ def get_diabetes_risk(input: DiabetesRiskInput) -> str:
     """Assess basic risk for type-2 diabetes based on clinical inputs."""
     logger.info("Executing tool: get_diabetes_risk")
     return assess_diabetes_risk(input.age, input.bmi, input.fasting_blood_sugar_mg_dl)
+
+@mcp.tool()
+def analyze_health_risk(user_id: str) -> str:
+    """Perform advanced health risk analysis (rules-based) based on the full user profile."""
+    logger.info(f"Executing tool: analyze_health_risk for {user_id}")
+    profile = fetch_raw_health_profile(user_id)
+    return compute_advanced_risk(profile)
 
 # --- BACKEND API INTEGRATIONS ---
 

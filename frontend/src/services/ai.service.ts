@@ -25,10 +25,11 @@ export async function generateDietPlan(): Promise<DietPlanResponse> {
   return (await response.json()) as DietPlanResponse;
 }
 
-export async function generateRiskAnalysis(): Promise<RiskAnalysisResponse> {
+export async function generateRiskAnalysis(useAi: boolean = false): Promise<RiskAnalysisResponse> {
   const response = await fetch("/api/ai/risk-analysis", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ useAi }),
   });
 
   if (!response.ok) {

@@ -109,25 +109,79 @@ class FoodItemService:
 
         return new_item
 
-    async def sync_realtime_prices(self) -> dict:
-        """Sync prices for top staples using lazy scraping."""
+    async def sync_realtime_prices(self, target_items: list[str] = None) -> dict:
+        """Sync prices using live web scraping for targeted items from the dashboard."""
         if self._mongo_available():
+            import httpx
+            from bs4 import BeautifulSoup
+            import re
+            
             try:
-                staples = list(self.collection.aggregate([{"$sample": {"size": 20}}]))
+                # If frontend sent specific items, find those in DB. Otherwise fall back to random.
+                if target_items and len(target_items) > 0:
+                    # Build regex patterns to match food names from the dashboard
+                    patterns = [re.compile(re.escape(name.strip()), re.IGNORECASE) for name in target_items if name.strip()]
+                    query = {"name_en": {"$regex": "|".join(re.escape(n.strip()) for n in target_items if n.strip()), "$options": "i"}}
+                    staples = list(self.collection.find(query).limit(10))
+                    print(f"Targeted sync: found {len(staples)} items matching dashboard foods.")
+                else:
+                    staples = list(self.collection.aggregate([{"$sample": {"size": 10}}]))
+                    print("No target items provided, using random sample.")
+                
                 updated = 0
-                for item in staples:
-                    import re
-                    m = re.search(r'(\d+)', item.get("price_bdt", "0"))
-                    if m:
-                        base = int(m.group(1))
-                        new_price = max(1, base + random.randint(-10, 10))
-                        self.collection.update_one(
-                            {"_id": item["_id"]},
-                            {"$set": {"price_bdt": f"{new_price} ৳"}}
-                        )
-                        updated += 1
-                return {"status": "success", "message": f"Updated {updated} items.", "source": "MongoDB Lazy Sync"}
+                live_scraped = 0
+                
+                # Live scrape the first 3 targeted items for real prices
+                async with httpx.AsyncClient() as client:
+                    for i, item in enumerate(staples):
+                        new_price_str = None
+                        
+                        if i < 3:
+                            # Live Scrape via DuckDuckGo
+                            food_name = item.get("name_en", "")
+                            try:
+                                headers = {
+                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                                }
+                                query = f"price of {food_name} per kg in bangladesh bdt"
+                                url = f"https://html.duckduckgo.com/html/?q={httpx.utils.quote(query)}"
+                                resp = await client.get(url, headers=headers, timeout=5.0)
+                                if resp.status_code == 200:
+                                    soup = BeautifulSoup(resp.text, 'html.parser')
+                                    snippets = [a.text for a in soup.find_all('a', class_='result__snippet')]
+                                    text = " ".join(snippets)
+                                    matches = re.findall(r'(?:BDT|Tk\.?|৳|Taka)\s*(\d{2,4})', text, re.IGNORECASE)
+                                    if not matches:
+                                        matches = re.findall(r'(\d{2,4})\s*(?:BDT|Tk\.?|৳|Taka)', text, re.IGNORECASE)
+                                    if matches:
+                                        new_price_str = f"{matches[0]} ৳"
+                                        live_scraped += 1
+                                        print(f"✅ Live scraped {food_name}: {new_price_str}")
+                            except Exception as e:
+                                print(f"⚠️ Live scrape failed for {food_name}, falling back to lazy sync.")
+                        
+                        # Lazy Sync Fallback
+                        if not new_price_str:
+                            m = re.search(r'(\d+)', item.get("price_bdt", "0"))
+                            if m:
+                                base = int(m.group(1))
+                                new_price = max(1, base + random.randint(-10, 10))
+                                new_price_str = f"{new_price} ৳"
+                        
+                        if new_price_str:
+                            self.collection.update_one(
+                                {"_id": item["_id"]},
+                                {"$set": {"price_bdt": new_price_str}}
+                            )
+                            updated += 1
+                            
+                return {
+                    "status": "success", 
+                    "message": f"Updated {updated} items ({live_scraped} via live web scraping).", 
+                    "source": "MongoDB Hybrid Sync (Targeted)"
+                }
             except Exception as e:
+                print(f"Sync failed: {e}")
                 pass
 
         return {"status": "skipped", "message": "MongoDB unavailable — using static prices.", "source": "Fallback"}
