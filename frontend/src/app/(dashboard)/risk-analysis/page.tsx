@@ -209,9 +209,11 @@ export default function RiskAnalysisPage() {
   const [history, setHistory] = useState<HealthProfile[]>([]);
   const [aiAnalysis, setAiAnalysis] = useState<RiskAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [useAi, setUseAi] = useState(false);
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
 
   useEffect(() => {
-    Promise.allSettled([getHealthProfile(), getHealthHistory(), generateRiskAnalysis()])
+    Promise.allSettled([getHealthProfile(), getHealthHistory(), generateRiskAnalysis(false)])
       .then(([profileResult, historyResult, aiResult]) => {
         if (profileResult.status === "fulfilled") setProfile(profileResult.value);
         if (historyResult.status === "fulfilled") setHistory(historyResult.value);
@@ -221,13 +223,26 @@ export default function RiskAnalysisPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const { score: riskScore, factors: riskFactors, level: riskLevel } = computeRisk(profile);
-  const displayScore = riskScore;
-  const displayFactors = riskFactors;
-  const displayLevel = riskLevel;
+  const handleToggleAi = async (checked: boolean) => {
+    setUseAi(checked);
+    setIsAnalysisLoading(true);
+    try {
+      const result = await generateRiskAnalysis(checked);
+      setAiAnalysis(result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsAnalysisLoading(false);
+    }
+  };
+
+  const fallbackRisk = computeRisk(profile);
+  const displayScore = aiAnalysis?.score ?? fallbackRisk.score;
+  const displayFactors = aiAnalysis?.factors ?? fallbackRisk.factors;
+  const displayLevel = aiAnalysis?.level ?? fallbackRisk.level;
   const config = levelConfig[displayLevel];
-  const explanations = generateExplanations(profile);
-  const recommendations = generateRecommendations(profile);
+  const explanations = aiAnalysis?.explanations ?? generateExplanations(profile);
+  const recommendations = aiAnalysis?.recommendations ?? generateRecommendations(profile);
 
   // Build trend data from history
   const trendData = history
@@ -277,6 +292,28 @@ export default function RiskAnalysisPage() {
           <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
             No health data submitted yet. Go to <span className="font-bold">Health Input</span> to submit your vitals for a personalized risk analysis.
           </p>
+        </div>
+      )}
+
+      {/* AI Toggle Bar */}
+      {profile && (
+        <div className="flex items-center justify-between rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className={`grid h-10 w-10 place-items-center rounded-xl ${useAi ? 'bg-indigo-500/12' : 'bg-slate-500/12'}`}>
+              <Brain size={20} strokeWidth={2} className={useAi ? 'text-indigo-500' : 'text-slate-500'} />
+            </div>
+            <div>
+              <h3 className="font-semibold text-[color:var(--foreground)] text-sm">Hybrid AI Analysis</h3>
+              <p className="text-xs text-[color:var(--muted)]">Combine rule-based safety with AI personalization</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {isAnalysisLoading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-500/30 border-t-indigo-500" />}
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input type="checkbox" className="peer sr-only" checked={useAi} onChange={(e) => handleToggleAi(e.target.checked)} disabled={isAnalysisLoading} />
+              <div className="peer h-6 w-11 rounded-full bg-[color:var(--border)] after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-indigo-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:border-gray-600 dark:bg-gray-700"></div>
+            </label>
+          </div>
         </div>
       )}
 
@@ -356,7 +393,13 @@ export default function RiskAnalysisPage() {
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {recommendations.map((r, i) => {
-              const Icon = r.icon;
+              // The API returns type and text, but no icon component. We must map type to icon here.
+              let Icon = (r as any).icon;
+              if (!Icon) {
+                if (r.type === "test") Icon = TestTube;
+                else if (r.type === "doctor") Icon = Stethoscope;
+                else Icon = ArrowRight;
+              }
               return (
                 <div
                   key={i}
