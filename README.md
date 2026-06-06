@@ -6,26 +6,6 @@ The project is designed as decision support, not a doctor replacement. Rule-base
 
 ![Banner](docs/nutrisasthobanner.png)
 
-## Current Status
-
-Implemented in this repo:
-
-- Next.js app with landing page, authentication screens, dashboard shell, health input, budget planner, diet plan, risk analysis, nearby care, reports, family, and settings pages.
-- English/Bengali language provider and theme provider.
-- Cookie-backed frontend session handling.
-- Backend-backed registration, login, logout, refresh token, current user, and profile update flows.
-- Backend-backed health profile submission, latest health profile, health history, budget submission, and latest budget plan.
-- AI diet-plan and risk-analysis API routes with deterministic rule fallback and optional Groq/Gemini generation.
-- PostgreSQL models and Alembic migrations for users, health profiles, budget plans, and exercise plans.
-- Sample Bangladesh hospital/clinic data under `data/`.
-- A FastMCP AI server in `mcp_99bugsincode/` for MCP-powered risk analysis, exercise planning, and RAG-backed health guidance over SSE.
-
-Still in progress:
-
-- `/api/clinics` and `/api/reports` currently return `501` placeholders.
-- Some frontend feature modules are scaffolds for future shared logic.
-- Setup scripts in `backend/setup.sh` and `backend/setup.bat` are placeholders.
-
 ## Features
 
 **User and Session Management**
@@ -117,81 +97,7 @@ Still in progress:
 
 NutriShastho AI is organized as a frontend-first web app with a separate FastAPI backend for persistent user, health, and budget data, plus a FastMCP server for AI tool orchestration. The Next.js app owns the user experience, session cookie, dashboard pages, and AI-facing API routes. The Python backend owns authentication tokens, database writes, and core persisted records. The MCP server reads the same PostgreSQL data and exposes health intelligence tools over SSE.
 
-```text
-Browser
-  |
-  |  pages, forms, dashboard actions
-  v
-Next.js Frontend
-  |-- App Router pages
-  |-- React components
-  |-- client services
-  |-- session cookie utilities
-  |
-  |  /api/auth, /api/health, /api/budget
-  v
-Next.js API Routes
-  |-- validate session cookie
-  |-- proxy authenticated requests to backend
-  |-- run AI diet/risk orchestration
-  |
-  |  bearer token requests
-  v
-FastAPI Backend
-  |-- auth router
-  |-- health router
-  |-- budget router
-  |-- controllers and services
-  |-- SQLAlchemy models
-  |
-  v
-PostgreSQL Database
-  ^
-  |
-FastMCP Server
-  |-- /sse transport on port 7860
-  |-- analyze_risk tool
-  |-- generate_exercise_plan tool
-  |-- ChromaDB in-memory RAG context
-  |-- Groq/Gemini provider calls when keys exist
-```
-
-MCP-powered AI flow:
-
-```text
-Saved user + health profile + budget plan
-  |
-  v
-Next.js API route
-  |-- connect to MCP_SERVER_URL/sse
-  |-- call MCP tool such as analyze_risk or generate_exercise_plan
-  |
-  v
-FastMCP Server
-  |-- read PostgreSQL context
-  |-- query local RAG knowledge when relevant
-  |-- call Groq/Gemini when keys are configured
-  |-- return structured result
-  |
-  v
-Next.js route validates result or falls back to local rules
-```
-
-Provider fallback flow:
-
-```text
-Saved health profile + saved budget plan
-  |
-  v
-Next.js AI route
-  |-- build deterministic fallback result
-  |-- build provider prompt
-  |-- call Groq if GROQ_API_KEY exists
-  |-- call Gemini if Gemini fallback is configured
-  |-- validate returned JSON shape
-  v
-Diet plan or risk explanation response
-```
+![System Architecture](docs/arch.png)
 
 The AI routes are intentionally defensive. If a provider key is missing, the network fails, or the model response is not valid JSON, the app returns the local rule-based result instead.
 
@@ -266,19 +172,6 @@ The AI routes are intentionally defensive. If a provider key is missing, the net
 3. AI can rewrite or enrich the explanation, but the route keeps the expected response shape.
 4. The frontend displays score, level, risk factors, explanations, and recommended next actions.
 
-## Repository Structure
-
-```text
-.
-|-- backend/                 # FastAPI backend, SQLAlchemy models, Alembic migrations
-|-- data/                    # Seed/sample Bangladesh hospital data
-|-- docs/                    # Product plan and TODO notes
-|-- frontend/                # Next.js application
-|-- mcp_99bugsincode/        # FastMCP AI server / Hugging Face Space submodule
-|-- package.json             # Root npm workspace scripts for frontend
-|-- vercel.json              # Vercel config for frontend deployment
-`-- README.md
-```
 
 ## Application Routes
 
@@ -330,7 +223,6 @@ Main Next.js API routes:
 ```bash
 git clone https://github.com/hasanmehediii/99BugsInCode.git
 cd 99BugsInCode
-git submodule update --init --recursive
 ```
 
 ## Environment Variables
@@ -448,7 +340,7 @@ docker start nutrishastho-db
 ```powershell
 cd backend
 .\venv\Scripts\activate
-$env:PYTHONIOENCODING="utf-8"; fastapi dev src/backend/app.py --port 8000
+fastapi dev src/backend/app.py --port 8000
 ```
 
 3. FastMCP AI server:
@@ -456,7 +348,7 @@ $env:PYTHONIOENCODING="utf-8"; fastapi dev src/backend/app.py --port 8000
 ```powershell
 cd mcp_99bugsincode
 .\venv\Scripts\activate
-$env:PYTHONIOENCODING="utf-8"; fastmcp run src/mcp_99bugsincode/app.py --transport sse --port 7860
+fastmcp run src/mcp_99bugsincode/app.py --transport streamable-http --port 7860
 ```
 
 4. Next.js frontend:
@@ -596,69 +488,6 @@ Detailed flow:
 8. **Risk analysis:** The app checks submitted vitals and symptoms against safety thresholds, then returns a low, medium, or high risk result with reasoning.
 9. **Recommended action:** The user receives practical next steps such as self-monitoring, reducing salt, rechecking blood pressure, considering common tests, or consulting a general physician.
 10. **Care navigation:** Nearby care and report pages are present in the dashboard experience and are planned to connect clinic search and doctor-visit summaries more deeply.
-
-## Feature Map
-
-```text
-Authentication
-  -> register, login, refresh, logout, current user, profile update
-
-Health Monitoring
-  -> submit health profile, latest profile, history, BMI/vital UI cards
-
-Budget Planning
-  -> monthly food budget, family size, meal count, market area, preferences
-
-Diet Planning
-  -> rule fallback, optional AI generation, nutrition summary, meal table
-
-Risk Analysis
-  -> deterministic scoring, optional AI explanation, risk factors, recommendations
-
-MCP + RAG
-  -> ChromaDB in-memory knowledge search, DB-aware AI prompts, direct knowledge query tool
-
-Localization and UX
-  -> English/Bengali language provider, theme provider, responsive dashboard
-
-Care Support
-  -> nearby care page, sample hospital data, report page scaffold
-```
-
-## Data Model Overview
-
-The current backend persistence layer is centered around four main model groups:
-
-```text
-User
-  -> account identity
-  -> email and password hash
-  -> full name, phone, blood group, location
-  -> auth/profile ownership
-
-HealthProfile
-  -> user-linked health snapshots
-  -> height, weight, BMI (computed column)
-  -> blood pressure, temperature, blood sugar
-  -> symptoms, conditions, allergies (JSON arrays)
-  -> activity level and pregnancy status
-
-BudgetPlan
-  -> user-linked food budget plans
-  -> monthly budget in BDT
-  -> family size and meals per day
-  -> market area
-  -> preferred foods and foods to avoid (JSON arrays)
-  -> category breakdown and weekly spend (JSON, for UI charts)
-
-ExercisePlan
-  -> user-linked exercise plans
-  -> plan_data (JSON, full weekly exercise schedule)
-  -> risk_level and source (rules or ai)
-  -> generated by MCP or fallback rules
-```
-
-Alembic migrations in `backend/migrations/versions/` create and evolve these tables.
 
 ## Key Design Decisions
 
