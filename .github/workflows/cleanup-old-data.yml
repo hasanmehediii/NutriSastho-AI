@@ -9,6 +9,8 @@ jobs:
   cleanup:
     if: ${{ secrets.DATABASE_URL != '' || secrets.DATABASE_URL_REMOTE != '' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: backend
